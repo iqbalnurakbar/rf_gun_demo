@@ -32,7 +32,7 @@
                     </VBox>
                 </Panel>
                 <Label id="itemLabel" text="Item" labelFor="itemInput" visible="false"/>
-                <Input id="itemInput" placeholder="Enter Item" required="true" showValueHelp="true" valueHelpRequest=".onPlantValueHelp" change=".onInputChange" maxLength="4" width="96%" visible="false"/>
+                <Input id="itemInput" placeholder="Enter Item" required="true" showValueHelp="true" valueHelpRequest=".onItemValueHelp" maxLength="4" width="96%" visible="false"/>
                 <VBox class="sapUiMediumMarginTop" alignItems="Center">
                     <Text id="instructionText" text="PLEASE SELECT COUNTING METHOD" class="sapUiLargeText sapThemeHighlight-asColor" visible="false"/>
                 </VBox>

@@ -88,6 +88,39 @@ sap.ui.define(
         this._openWarehouseTypeSelectDialog();
       },
 
+      onItemValueHelp: function () {
+        this._openItemSelectDialog();
+      },
+
+      _openItemSelectDialog: function () {
+        if (!this._oItemSelectDialog) {
+          this._oItemSelectDialog = new SelectDialog({
+            noDataText: "No plants available",
+            title: "Select Plant",
+            items: {
+              path: "/ZC_EWM_PLANT",
+              template: new StandardListItem({
+                title: "{Plant}",
+                description: "{PlantName}",
+              }),
+            },
+            confirm: (oEvent) => {
+              const oSelectedItem = oEvent.getParameter("selectedItem");
+              if (oSelectedItem) {
+                console.log("HITITEM");
+                this.byId("itemInput").setValue(oSelectedItem.getTitle());
+                this._checkInputsAndShowButton();
+              } else {
+                MessageToast.show("No plant selected");
+              }
+            },
+          });
+        }
+
+        this.getView().addDependent(this._oItemSelectDialog);
+        this._oItemSelectDialog.open();
+      },
+
       _openPlantSelectDialog: function () {
         if (!this._oSelectPlantDialog) {
           this._oSelectPlantDialog = new SelectDialog({
@@ -129,6 +162,7 @@ sap.ui.define(
               }),
             },
             confirm: (oEvent) => {
+              console.log("Hit warehouse");
               const oSelectedItem = oEvent.getParameter("selectedItem");
               if (oSelectedItem) {
                 this.byId("warehouseTypeInput").setValue(
