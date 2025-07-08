@@ -14,9 +14,9 @@
         <footer>
             <Toolbar design="Solid">
                 <ToolbarSpacer />
-                <Button text="Back (F3)"/>
+                <Button text="Back (F3)" press=".onPressBack"/>
                 <ToolbarSpacer />
-                <Button text="Enter (F4)"/>
+                <Button text="Enter (F4)" press=".onPressEnter"/>
                 <ToolbarSpacer />
             </Toolbar>
         </footer>

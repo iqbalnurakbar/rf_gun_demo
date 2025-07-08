@@ -2,4 +2,15 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:f="sap.ui.layout.form">
+    <Page title="Detail Page">
+        <footer>
+            <Toolbar design="Solid">
+                <ToolbarSpacer />
+                <Button text="Back (F3)" press=".onPressBack"/>
+                <ToolbarSpacer />
+                <Button text="Save (F8)" press=""/>
+                <ToolbarSpacer />
+            </Toolbar>
+        </footer>
+    </Page>
 </mvc:View>
