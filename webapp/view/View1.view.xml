@@ -5,49 +5,16 @@
     <Page id="page" title="{i18n>title}">
         <content>
             <VBox class="sapUiSmallMargin">
-                <Label text="Plant" labelFor="plantInput" />
-                <HBox justifyContent="SpaceBetween">
-                    <Input id="plantInput" placeholder="Enter Plant" required="true" showValueHelp="true" valueHelpRequest=".onPlantValueHelp" change=".onInputChange" maxLength="4" width="96%">
-                        <layoutData>
-                            <FlexItemData growFactor="1" />
-                        </layoutData>
-                    </Input>
-                    <core:Icon id="checkPlant" color="green" src="sap-icon://sys-enter-2" size="26px" visible="false"/>
-                </HBox>
-                <Label text="Warehouse Type" labelFor="warehouseTypeInput" />
-                <HBox>
-                    <Input id="warehouseTypeInput" placeholder="Enter Warehouse Type" required="true" showValueHelp="true" valueHelpRequest=".onWarehouseTypeValueHelp" change=".onInputChange" maxLength="2" width="96%">
-                        <layoutData>
-                            <FlexItemData growFactor="1" />
-                        </layoutData>
-                    </Input>
-                    <core:Icon id="checkWarehouse" color="green" src="sap-icon://sys-enter-2" size="26px" visible="false"/>
-                </HBox>
-                <Panel id="countingMethodPanel" visible="false" backgroundDesign="Transparent">
-                    <VBox>
-                        <Text id="countingMethodText" text="Counting Method Selection"/>
-                        <Button id="itemWiseButton" text="1. Item Wise" press=".onItemWisePress" type="Transparent" class="customButtonColor"/>
-                        <Button id="vendorWiseButton" text="2. Vendor Wise" type="Transparent" class="customButtonColor"/>
-                        <Button id="locationWiseButton" text="3. Location Wise" type="Transparent" class="customButtonColor"/>
-                    </VBox>
-                </Panel>
-                <Label id="itemLabel" text="Item" labelFor="itemInput" visible="false"/>
-                <Input id="itemInput" placeholder="Enter Item" required="true" showValueHelp="true" valueHelpRequest=".onItemValueHelp" maxLength="4" width="96%" visible="false"/>
-                <VBox class="sapUiMediumMarginTop" alignItems="Center">
-                    <Text id="instructionText" text="PLEASE SELECT COUNTING METHOD" class="sapUiLargeText sapThemeHighlight-asColor" visible="false"/>
-                </VBox>
+                <Label text="Purchase Order" labelFor="plantInput" textAlign="Center"/>
+                <Input id="plantInput" placeholder="Enter PO number" required="true" showValueHelp="true" valueHelpRequest=".onPlantValueHelp" change=".onInputChange" maxLength="10"/>
             </VBox>
         </content>
         <footer>
             <Toolbar design="Solid">
                 <ToolbarSpacer />
-                <Text text="F1=Logout" />
+                <Text text="Back (F3)" />
                 <ToolbarSpacer />
-                <Text text="F2=Reset" />
-                <ToolbarSpacer />
-                <Text text="F3=Back" />
-                <ToolbarSpacer />
-                <Text text="F7=Help" />
+                <Text text="Enter (F4)" />
                 <ToolbarSpacer />
             </Toolbar>
         </footer>
