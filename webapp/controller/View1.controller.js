@@ -20,7 +20,7 @@ sap.ui.define(
       _checkInputsAndShowButton: function () {
         const oPlantInput = this.byId("plantInput");
         const oWarehouseInput = this.byId("warehouseTypeInput");
-        const oSubmitButton = this.byId("submitButton");
+        const oCountingMethodPanel = this.byId("countingMethodPanel");
         const oPlantIcon = this.byId("checkPlant");
         const oWareshouseIcon = this.byId("checkWarehouse");
 
@@ -30,16 +30,13 @@ sap.ui.define(
         const sPlantMaxLength = oPlantInput.getMaxLength();
         const sWarehouseMaxLength = oWarehouseInput.getMaxLength();
 
-        console.log("JOT", sPlantValue);
-        console.log("HIT", sWarehouseValue);
-
         const isPlantValid = sPlantValue.length === sPlantMaxLength;
         const isWarehouseValid = sWarehouseValue.length === sWarehouseMaxLength;
 
         oPlantIcon.setVisible(isPlantValid);
         oWareshouseIcon.setVisible(isWarehouseValid);
 
-        oSubmitButton.setVisible(isPlantValid && isWarehouseValid);
+        oCountingMethodPanel.setVisible(isPlantValid && isWarehouseValid);
       },
 
       _attachInputEventDelegates: function () {
