@@ -1,38 +1,15 @@
-<mvc:View
-    controllerName="rfgundemo.controller.View1"
+<mvc:View controllerName="rfgundemo.controller.View1"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:f="sap.ui.layout.form"
->
-    <Page
-        id="page"
-        title="{i18n>title}"
-    >
+    xmlns:f="sap.ui.layout.form">
+    <Page id="page" title="{i18n>title}">
         <content>
             <VBox class="sapUiSmallMargin">
-                <Label
-                    text="Plant"
-                    labelFor="plantInput"
-                />
-                <Input
-                    id="plantInput"
-                    placeholder="Enter Plant"
-                    required="true"
-                    showValueHelp="true"
-                    valueHelpRequest=".onPlantValueHelp"
-                />
-
-                <Label
-                    text="Warehouse Type"
-                    labelFor="warehouseTypeInput"
-                />
-                <Input
-                    id="warehouseTypeInput"
-                    placeholder="Enter Warehouse Type"
-                    required="true"
-                    showValueHelp="true"
-                    valueHelpRequest=".onWarehouseTypeValueHelp"
-                />
+                <Label text="Plant" labelFor="plantInput" />
+                <Input id="plantInput" placeholder="Enter Plant" required="true" showValueHelp="true" valueHelpRequest=".onPlantValueHelp" change=".onInputChange" maxLength="4"/>
+                <Label text="Warehouse Type" labelFor="warehouseTypeInput" />
+                <Input id="warehouseTypeInput" placeholder="Enter Warehouse Type" required="true" showValueHelp="true" valueHelpRequest=".onWarehouseTypeValueHelp" change=".onInputChange" maxLength="2"/>
+                <Button id="submitButton" text="SUBMIT" visible="false"/>
             </VBox>
         </content>
         <footer>
