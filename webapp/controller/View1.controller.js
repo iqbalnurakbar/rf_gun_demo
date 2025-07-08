@@ -21,6 +21,8 @@ sap.ui.define(
         const oPlantInput = this.byId("plantInput");
         const oWarehouseInput = this.byId("warehouseTypeInput");
         const oSubmitButton = this.byId("submitButton");
+        const oPlantIcon = this.byId("checkPlant");
+        const oWareshouseIcon = this.byId("checkWarehouse");
 
         const sPlantValue = oPlantInput.getValue().trim();
         const sWarehouseValue = oWarehouseInput.getValue().trim();
@@ -30,15 +32,14 @@ sap.ui.define(
 
         console.log("JOT", sPlantValue);
         console.log("HIT", sWarehouseValue);
-        // Show button only if both fields have values
-        if (
-          sPlantValue.length == sPlantMaxLength &&
-          sWarehouseValue.length == sWarehouseMaxLength
-        ) {
-          oSubmitButton.setVisible(true);
-        } else {
-          oSubmitButton.setVisible(false);
-        }
+
+        const isPlantValid = sPlantValue.length === sPlantMaxLength;
+        const isWarehouseValid = sWarehouseValue.length === sWarehouseMaxLength;
+
+        oPlantIcon.setVisible(isPlantValid);
+        oWareshouseIcon.setVisible(isWarehouseValid);
+
+        oSubmitButton.setVisible(isPlantValid && isWarehouseValid);
       },
 
       _attachInputEventDelegates: function () {
