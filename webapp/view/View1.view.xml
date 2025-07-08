@@ -4,17 +4,19 @@
     xmlns:f="sap.ui.layout.form">
     <Page id="page" title="{i18n>title}">
         <content>
-            <VBox class="sapUiSmallMargin">
-                <Label text="Purchase Order" labelFor="plantInput" textAlign="Center"/>
-                <Input id="plantInput" placeholder="Enter PO number" required="true" showValueHelp="true" valueHelpRequest=".onPlantValueHelp" change=".onInputChange" maxLength="10"/>
-            </VBox>
+            <FlexBox direction="Column" alignItems="Center" justifyContent="Center" class="sapUiContentPadding" height="100%">
+                <f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="12" labelSpanS="12" adjustLabelSpan="true" emptySpanXL="4" emptySpanL="4" emptySpanM="0" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1" singleContainerFullSize="false" class="sapUiContentPadding">
+                    <Label text="Purchase Order" labelFor="plantInput" textAlign="Center"/>
+                    <Input id="poInput" placeholder="Enter PO number" required="true" showValueHelp="true" valueHelpRequest=".onPOValueHelp" maxLength="10"/>
+                </f:SimpleForm>
+            </FlexBox>
         </content>
         <footer>
             <Toolbar design="Solid">
                 <ToolbarSpacer />
-                <Text text="Back (F3)" />
+                <Button text="Back (F3)"/>
                 <ToolbarSpacer />
-                <Text text="Enter (F4)" />
+                <Button text="Enter (F4)"/>
                 <ToolbarSpacer />
             </Toolbar>
         </footer>
