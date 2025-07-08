@@ -17,12 +17,23 @@ sap.ui.define(
         this._checkInputsAndShowButton();
       },
 
+      onItemWisePress: function () {
+        const oItemLabel = this.byId("itemLabel");
+        const oItemInput = this.byId("itemInput");
+        const oInstructionText = this.byId("instructionText");
+
+        oItemLabel.setVisible(true);
+        oItemInput.setVisible(true);
+        oInstructionText.setText("PLEASE ENTER ITEM TO START THE COUNTING");
+      },
+
       _checkInputsAndShowButton: function () {
         const oPlantInput = this.byId("plantInput");
         const oWarehouseInput = this.byId("warehouseTypeInput");
         const oCountingMethodPanel = this.byId("countingMethodPanel");
         const oPlantIcon = this.byId("checkPlant");
         const oWareshouseIcon = this.byId("checkWarehouse");
+        const oInstructionText = this.byId("instructionText");
 
         const sPlantValue = oPlantInput.getValue().trim();
         const sWarehouseValue = oWarehouseInput.getValue().trim();
@@ -37,6 +48,7 @@ sap.ui.define(
         oWareshouseIcon.setVisible(isWarehouseValid);
 
         oCountingMethodPanel.setVisible(isPlantValid && isWarehouseValid);
+        oInstructionText.setVisible(isPlantValid && isWarehouseValid);
       },
 
       _attachInputEventDelegates: function () {

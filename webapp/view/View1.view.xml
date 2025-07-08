@@ -30,14 +30,12 @@
                         <Button id="vendorWiseButton" text="2. Vendor Wise" type="Transparent" class="customButtonColor"/>
                         <Button id="locationWiseButton" text="3. Location Wise" type="Transparent" class="customButtonColor"/>
                     </VBox>
-                    <VBox class="sapUiMediumMarginTop" alignItems="Center">
-                        <Text text="PLEASE SELECT COUNTING METHOD" class="sapUiLargeText sapThemeHighlight-asColor" />
-                    </VBox>
                 </Panel>
-                <Panel id="itemPanel" visible="false" backgroundDesign="Transparent">
-                    <Label text="Item" labelFor="ItemInput"/>
-                    <Input id="ItemInput" placeholder="Enter Plant" required="true" showValueHelp="true" valueHelpRequest=".onPlantValueHelp" change=".onInputChange" maxLength="4" width="96%"/>
-                </Panel>
+                <Label id="itemLabel" text="Item" labelFor="itemInput" visible="false"/>
+                <Input id="itemInput" placeholder="Enter Item" required="true" showValueHelp="true" valueHelpRequest=".onPlantValueHelp" change=".onInputChange" maxLength="4" width="96%" visible="false"/>
+                <VBox class="sapUiMediumMarginTop" alignItems="Center">
+                    <Text id="instructionText" text="PLEASE SELECT COUNTING METHOD" class="sapUiLargeText sapThemeHighlight-asColor" visible="false"/>
+                </VBox>
             </VBox>
         </content>
         <footer>
