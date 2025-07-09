@@ -1,5 +1,6 @@
-sap.ui.define([
-	"rfgundemo/test/unit/controller/View1.controller"
-], function () {
-	"use strict";
-});
+sap.ui.define(
+  ["rfgundemo/test/unit/controller/MainPage.controller"],
+  function () {
+    "use strict";
+  }
+);

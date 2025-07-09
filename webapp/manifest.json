@@ -106,8 +106,8 @@
       ],
       "targets": {
         "MainView": {
-          "id": "View1",
-          "name": "View1"
+          "id": "MainPage",
+          "name": "MainPage"
         },
         "detailtarget": {
           "id": "detailtargetid",

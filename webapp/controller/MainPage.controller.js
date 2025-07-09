@@ -8,7 +8,7 @@ sap.ui.define(
   (Controller, MessageToast, SelectDialog, StandardListItem) => {
     "use strict";
 
-    return Controller.extend("rfgundemo.controller.View1", {
+    return Controller.extend("rfgundemo.controller.MainPage", {
       onInit() {
         this._attachInputEventDelegates();
       },
