@@ -16,9 +16,7 @@
         <List
             id="orderList"
             mode="MultiSelect"
-            items="{
-                path: '/ZR_RF_PO_ITEM_MAIN'
-            }"
+            items="{purchaseOrder>/items}"
         >
             <headerToolbar>
                 <Toolbar>
@@ -45,7 +43,7 @@
                         />
                         <Input
                             id="purchaseOrderItemNoInput"
-                            value="{PurchaseOrderItemNo}"
+                            value="{purchaseOrder>PurchaseOrderItemNo}"
                             editable="false"
                         />
                     </VBox>
@@ -56,7 +54,7 @@
                         />
                         <Input
                             id="materialInput"
-                            value="{Material}"
+                            value="{purchaseOrder>Material}"
                             editable="false"
                         />
                     </VBox>
@@ -67,7 +65,7 @@
                         />
                         <Input
                             id="materialDescriptionInput"
-                            value="{MaterialDescription}"
+                            value="{purchaseOrder>MaterialDescription}"
                             editable="false"
                         />
                     </VBox>
@@ -78,7 +76,7 @@
                         />
                         <Input
                             id="quantitySuggestInput"
-                            value="{QuantitySuggest}"
+                            value="{purchaseOrder>QuantitySuggest}"
                             editable="false"
                         />
                     </VBox>
@@ -99,7 +97,7 @@
                         />
                         <Input
                             id="plantInput"
-                            value="{Plant}"
+                            value="{purchaseOrder>Plant}"
                         />
                     </VBox>
                     <VBox class="sapUiSmallMargin">
@@ -109,7 +107,7 @@
                         />
                         <Input
                             id="storageLocationInput"
-                            value="{StorageLocation}"
+                            value="{purchaseOrder>StorageLocation}"
                         />
                     </VBox>
                     <VBox class="sapUiSmallMargin">

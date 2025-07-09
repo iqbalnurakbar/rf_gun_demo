@@ -4,8 +4,9 @@ sap.ui.define(
     "sap/m/MessageToast",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
+    "sap/ui/model/json/JSONModel"
   ],
-  (Controller, MessageToast, Filter, FilterOperator) => {
+  (Controller, MessageToast, Filter, FilterOperator, JSONModel) => {
     "use strict";
 
     return Controller.extend("rfgundemo.controller.MainScreen", {
@@ -56,11 +57,13 @@ sap.ui.define(
             function (aContexts) {
               // Check if any contexts are returned
               if (aContexts.length > 0) {
+                const aFilteredData = aContexts.map(context => context.getObject());
                 // Purchase Order found
                 console.log("Purchase Order found:", aContexts[0].getObject());
                 MessageToast.show(
                   `Purchase Order ${sPurchaseOrder} found. Navigating to detail.`
                 );
+                this._storeFilteredData(aFilteredData, sPurchaseOrder);
                 this._navigateToDetail(sPurchaseOrder);
               } else {
                 // Purchase Order not found
@@ -85,6 +88,21 @@ sap.ui.define(
         const oRouter = this.getOwnerComponent().getRouter();
         oRouter.navTo("RouteDataDetail", {
           purchaseOrderNumber: sPurchaseOrder,
+        });
+      },
+
+      _storeFilteredData: function (aFilteredData, sPurchaseOrder) {
+        // Create or get existing JSON model for passing data
+        let oDataModel = this.getOwnerComponent().getModel("detailData");
+        if (!oDataModel) {
+          oDataModel = new JSONModel();
+          this.getOwnerComponent().setModel(oDataModel, "detailData");
+        }
+
+        // Store the filtered data
+        oDataModel.setData({
+          purchaseOrderNumber: sPurchaseOrder,
+          items: aFilteredData
         });
       },
     });
