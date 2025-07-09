@@ -2,7 +2,62 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:f="sap.ui.layout.form">
-    <Page title="Detail Page">
+    <Page id="dataDetailPage" title="Detail Page">
+        <List headerText="Order Details">
+            <CustomListItem>
+                <f:SimpleForm editable="true" layout="ResponsiveGridLayout" columnsXL="2" columnsL="2" columnsM="1" class="sapUiResponsiveMargin" maxContainerCols="3" width="auto">
+                    <VBox>
+                        <VBox>
+                            <Label text="Line No" />
+                            <Input value="00010" editable="false" width="17%"/>
+                        </VBox>
+                        <HBox>
+                            <VBox class="sapUiSmallMarginEnd">
+                                <Label text="Material" />
+                                <Input value="mat001" editable="false" />
+                            </VBox>
+                            <VBox class="sapUiSmallMarginEnd">
+                                <Label text="Material Desc" />
+                                <Input value="mat001 xxx" editable="false" />
+                            </VBox>
+                        </HBox>
+
+                        <HBox>
+                            <VBox class="sapUiSmallMarginEnd">
+                                <Label text="Quantity Suggest" />
+                                <Input value="222" editable="false" />
+                            </VBox>
+
+                            <VBox class="sapUiSmallMarginEnd">
+                                <Label text="Quantity Receive" />
+                                <Input value="222" />
+                            </VBox>
+                        </HBox>
+
+                        <HBox>
+                            <VBox>
+                                <Label text="Plant" />
+                                <Input value="1000" />
+                            </VBox>
+                            <!-- <Text text="Plant Description"/> -->
+                        </HBox>
+
+
+                        <VBox>
+                            <Label text="Storage Location" />
+                            <Input value="1101" />
+                        </VBox>
+
+                        <VBox>
+                            <Label text="Confirm Status" />
+                            <Button text="OK" />
+                        </VBox>
+                    </VBox>
+
+                </f:SimpleForm>
+            </CustomListItem>
+        </List>
+
         <footer>
             <Toolbar design="Solid">
                 <ToolbarSpacer />

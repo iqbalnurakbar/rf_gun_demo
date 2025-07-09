@@ -22,28 +22,15 @@ sap.ui.define(
       },
 
       _attachInputEventDelegates: function () {
-        const oPlantInput = this.byId("plantInput");
-        const oWarehouseInput = this.byId("warehouseTypeInput");
+        const oMainPage = this.byId("mainPage");
 
-        if (oPlantInput) {
-          oPlantInput.addEventDelegate({
+        if (oMainPage) {
+          oMainPage.addEventDelegate({
             onkeydown: (oEvent) => {
-              if (oEvent.key === "F7") {
-                this.onPlantValueHelp();
+              if (oEvent.key === "F4") {
+                this.onPressEnter();
                 // } else if (oEvent.key === "Enter") {
                 //   MessageToast.show("Enter pressed in Plant field");
-              }
-            },
-          });
-        }
-
-        if (oWarehouseInput) {
-          oWarehouseInput.addEventDelegate({
-            onkeydown: (oEvent) => {
-              if (oEvent.key === "F7") {
-                this.onWarehouseTypeValueHelp();
-                // } else if (oEvent.key === "Enter") {
-                //   MessageToast.show("Enter pressed in Warehouse Type field");
               }
             },
           });

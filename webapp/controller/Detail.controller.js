@@ -4,7 +4,9 @@ sap.ui.define(
     "use strict";
 
     return Controller.extend("rfgundemo.controller.App", {
-      onInit() {},
+      onInit() {
+        this._attachInputEventDelegates();
+      },
       onPressBack() {
         console.log("HIT NAV BACK");
         const oHistory = History.getInstance();
@@ -15,6 +17,22 @@ sap.ui.define(
         } else {
           const oRouter = this.getOwnerComponent().getRouter();
           oRouter.navTo("mainview", {}, true);
+        }
+      },
+      _attachInputEventDelegates: function () {
+        const oDetailPage = this.byId("dataDetailPage");
+
+        if (oDetailPage) {
+          console.log("Hit");
+          oDetailPage.addEventDelegate({
+            onkeydown: (oEvent) => {
+              if (oEvent.key === "F3") {
+                this.onPressBack();
+                // } else if (oEvent.key === "Enter") {
+                //   MessageToast.show("Enter pressed in Plant field");
+              }
+            },
+          });
         }
       },
     });

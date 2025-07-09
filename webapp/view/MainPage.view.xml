@@ -2,12 +2,12 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:f="sap.ui.layout.form">
-    <Page id="page" title="{i18n>title}">
+    <Page id="mainPage" title="Main Page">
         <content>
             <FlexBox direction="Column" alignItems="Center" justifyContent="Center" class="sapUiContentPadding" height="100%">
                 <f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="12" labelSpanS="12" adjustLabelSpan="true" emptySpanXL="4" emptySpanL="4" emptySpanM="0" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1" singleContainerFullSize="false" class="sapUiContentPadding">
                     <Label text="Purchase Order" labelFor="plantInput" textAlign="Center"/>
-                    <Input id="poInput" placeholder="Enter PO number" required="true" showValueHelp="true" valueHelpRequest=".onPOValueHelp" maxLength="10" submit=".onPressEnter"/>
+                    <Input id="poInput" placeholder="Enter PO number" required="true" maxLength="10" submit=".onPressEnter" />
                 </f:SimpleForm>
             </FlexBox>
         </content>
