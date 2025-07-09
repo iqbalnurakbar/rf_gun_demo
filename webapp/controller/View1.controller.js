@@ -14,9 +14,11 @@ sap.ui.define(
       },
 
       onPressEnter: function () {
-        const oRouter = this.getOwnerComponent().getRouter();
-        console.log("HITNAV");
-        oRouter.navTo("detail");
+        if (this._validateInput()) {
+          const oRouter = this.getOwnerComponent().getRouter();
+          console.log("HITNAV");
+          oRouter.navTo("detail");
+        }
       },
 
       _attachInputEventDelegates: function () {
@@ -56,6 +58,24 @@ sap.ui.define(
         this._openPOSelectDialog();
       },
 
+      _validateInput: function () {
+        const sInput = this.byId("poInput");
+        const sValue = sInput.getValue();
+        let bValid = true;
+        if (sValue.length === 0) {
+          const sMessage = "PO is required";
+          sInput.setValueState("Error");
+          sInput.setValueStateText(sMessage);
+          setTimeout(() => {
+            sInput.focus();
+          }, 0);
+          bValid = false;
+        } else {
+          sInput.setValueState("None");
+        }
+        return bValid;
+      },
+
       _openPOSelectDialog: function () {
         if (!this._oSelectPODialog) {
           this._oSelectPODialog = new SelectDialog({
@@ -64,8 +84,8 @@ sap.ui.define(
             items: {
               path: "/ZR_RF_PO_ITEM",
               template: new StandardListItem({
-                title: "{PurchaseOrder}",
-                description: "{PurchaseOrderItem}",
+                title: "{PurchaseOrderNo}",
+                description: "{PurchaseOrderItemNo}",
               }),
             },
             confirm: (oEvent) => {
