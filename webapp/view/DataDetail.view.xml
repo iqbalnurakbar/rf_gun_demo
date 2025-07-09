@@ -115,11 +115,17 @@
                             text="Confirm Status"
                             labelFor="confirmStatusButton"
                         />
-                        <Button
+                        <!-- <Button
                             id="confirmStatusButton"
                             text="OK"
                             width="100%"
-                        />
+                        /> -->
+                        <ToggleButton text="OK" enabled="true" pressed="false"
+                            press="onOkButtonPress">
+                            <layoutData>
+                                <FlexItemData growFactor="1" />
+                            </layoutData>
+                        </ToggleButton>
                     </VBox>
                 </HBox>
             </CustomListItem>
