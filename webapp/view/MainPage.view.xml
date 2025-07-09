@@ -4,19 +4,25 @@
     xmlns:f="sap.ui.layout.form">
     <Page id="mainPage" title="Main Page">
         <content>
-            <FlexBox direction="Column" alignItems="Center" justifyContent="Center" class="sapUiContentPadding" height="100%">
-                <f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="4" labelSpanM="12" labelSpanS="12" adjustLabelSpan="true" emptySpanXL="4" emptySpanL="4" emptySpanM="0" emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1" singleContainerFullSize="false" class="sapUiContentPadding">
-                    <Label text="Purchase Order" labelFor="plantInput" textAlign="Center"/>
-                    <Input id="poInput" placeholder="Enter PO number" required="true" maxLength="10" submit=".onPressEnter" />
+            <FlexBox direction="Column" alignItems="Center" justifyContent="Center"
+                class="sapUiContentPadding" height="100%">
+                <f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="4"
+                    labelSpanL="4" labelSpanM="12" labelSpanS="12" adjustLabelSpan="true"
+                    emptySpanXL="4" emptySpanL="4" emptySpanM="0" emptySpanS="0" columnsXL="1"
+                    columnsL="1" columnsM="1" singleContainerFullSize="false"
+                    class="sapUiContentPadding">
+                    <Label text="Purchase Order" labelFor="plantInput" textAlign="Center" />
+                    <Input id="poInput" placeholder="Enter PO number" required="true" maxLength="10"
+                        submit=".onPressEnter" value="4500000414" />
                 </f:SimpleForm>
             </FlexBox>
         </content>
         <footer>
             <Toolbar design="Solid">
                 <ToolbarSpacer />
-                <Button text="Back (F3)" press=".onPressBack"/>
+                <Button text="Back (F3)" press=".onPressBack" />
                 <ToolbarSpacer />
-                <Button text="Enter (F4)" press=".onPressEnter"/>
+                <Button text="Enter (F4)" press=".onPressEnter" />
                 <ToolbarSpacer />
             </Toolbar>
         </footer>
