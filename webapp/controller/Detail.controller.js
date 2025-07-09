@@ -11,7 +11,7 @@ sap.ui.define([
     onInit() {
       const oRouter = this.getOwnerComponent().getRouter();
       oRouter.getRoute("detail").attachPatternMatched(this._onRouteMatched, this);
-      this._attachInputEventDelegates();
+      this
     },
 
     _onRouteMatched: function (oEvent) {
@@ -220,6 +220,7 @@ sap.ui.define([
     },
     _attachInputEventDelegates: function () {
       const oDetailPage = this.byId("dataDetailPage");
+
       if (oDetailPage) {
         console.log("Hit");
         oDetailPage.addEventDelegate({
