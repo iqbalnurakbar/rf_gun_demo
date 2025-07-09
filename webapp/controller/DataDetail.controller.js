@@ -66,22 +66,20 @@ sap.ui.define(
           console.log("Retrieved stored data:", oData);
 
           if (oData && oData.purchaseOrderNumber === sPurchaseOrder) {
+            // Add isConfirmed to each individual item
+            const aEnhancedItems = oData.items.map(item => ({
+              ...item,
+              isConfirmed: false
+            }));
             // Update the view model with the filtered data
             const oPurchaseOrderModel = this.getView().getModel("purchaseOrder");
             oPurchaseOrderModel.setData({
               purchaseOrderNumber: sPurchaseOrder,
-              items: oData.items
+              items: aEnhancedItems
             });
-
-            console.log("Data loaded in detail view:", oPurchaseOrderModel.getData());
-          } else {
-            console.error("No matching data found for PO:", sPurchaseOrder);
           }
-        } else {
-          console.error("No detailData model found");
         }
       },
-
 
       onNavBack: function () {
         const oHistory = History.getInstance();
@@ -111,6 +109,31 @@ sap.ui.define(
           oBinding.filter([oFilter]);
         }
       },
+
+      onOkButtonPress: function (oEvent) {
+        const oButton = oEvent.getSource();
+        const bPressed = oButton.getPressed();
+        const oBindingContext = oButton.getBindingContext("purchaseOrder");
+
+        if (oBindingContext) {
+          const oModel = this.getView().getModel("purchaseOrder");
+          const sPath = oBindingContext.getPath(); // e.g., "/items/0", "/items/1"
+          const oRowData = oBindingContext.getObject();
+
+
+          console.log(`Item ${oRowData.PurchaseOrderItemNo} isConfirmed: ${bPressed}`);
+          console.log("Updated row data:", oBindingContext.getObject());
+
+          if (bPressed) {
+            // Update THIS specific item's isConfirmed property
+            oModel.setProperty(sPath + "/isConfirmed", true);
+            MessageToast.show(`Item ${oRowData.PurchaseOrderItemNo} confirmed`);
+          } else {
+            oModel.setProperty(sPath + "/isConfirmed", false);
+            MessageToast.show(`Item ${oRowData.PurchaseOrderItemNo} unconfirmed`);
+          }
+        }
+      }
     });
   }
 );
