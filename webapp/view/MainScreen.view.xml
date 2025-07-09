@@ -24,6 +24,7 @@
                 id="purchaseOrderNumber"
                 required="true"
                 submit=".onPurchaseOrderSubmit"
+                value="4500000414"
             />
         </VBox>
     </Page>
