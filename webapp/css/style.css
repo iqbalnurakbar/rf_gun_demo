@@ -1,1 +1,11 @@
 /* Enter your custom styles here */
+/* Hide the checkbox container */
+#orderList .sapMCb,
+#orderList .sapMLIBSelectM,
+#orderList .sapMCbBg,
+#orderList .sapMListItemSelection {
+	display: none !important;
+	width: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}

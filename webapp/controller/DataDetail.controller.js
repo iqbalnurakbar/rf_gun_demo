@@ -7,6 +7,7 @@ sap.ui.define(
     'sap/ui/model/Filter',
     'sap/ui/model/FilterOperator',
   ],
+  // @ts-ignore
   (Controller, MessageToast, History, JSONModel, Filter, FilterOperator) => {
     'use strict';
 
@@ -52,22 +53,101 @@ sap.ui.define(
         const aSelectedItems = oList.getSelectedItems();
         const aSelectedData = [];
 
-        aSelectedItems.forEach(item => {
+        aSelectedItems.forEach((item, index) => {
           const oItemData = {};
-          const oInputs = item.getContent()[0].getItems();
+          const sId = item.getId();
 
-          oItemData['lineNo'] = oInputs[0].getItems()[1].getValue();
-          oItemData['material'] = oInputs[1].getItems()[1].getValue();
-          oItemData['materialDesc'] = oInputs[2].getItems()[1].getValue();
-          oItemData['quantitySuggest'] = oInputs[3].getItems()[1].getValue();
-          oItemData['quantityReceive'] = oInputs[4].getItems()[1].getValue();
-          oItemData['plant'] = oInputs[5].getItems()[1].getValue();
-          oItemData['storageLocation'] = oInputs[6].getItems()[1].getValue();
+          // Get all the input references
+          const quantitySuggestInput = sap.ui.getCore().byId(`${sId}-quantitySuggestInput`);
+          const quantityReceiveInput = sap.ui.getCore().byId(`${sId}-quantityReceiveInput`);
+          const purchaseOrderItemInput = sap.ui.getCore().byId(`${sId}-purchaseOrderItemNoInput`);
+          const materialInput = sap.ui.getCore().byId(`${sId}-materialInput`);
+          const materialDescInput = sap.ui.getCore().byId(`${sId}-materialDescriptionInput`);
+          const plantInput = sap.ui.getCore().byId(`${sId}-plantInput`);
+          const storageLocationInput = sap.ui.getCore().byId(`${sId}-storageLocationInput`);
+
+          // Get all the values
+          // @ts-ignore
+          const quantitySuggestValue = quantitySuggestInput?.getValue() || '';
+          // @ts-ignore
+          const quantityReceiveValue = quantityReceiveInput?.getValue() || '';
+          // @ts-ignore
+          const purchaseOrderItemValue = purchaseOrderItemInput?.getValue() || '';
+          // @ts-ignore
+          const materialValue = materialInput?.getValue() || '';
+          // @ts-ignore
+          const materialDescValue = materialDescInput?.getValue() || '';
+          // @ts-ignore
+          const plantValue = plantInput?.getValue() || '';
+          // @ts-ignore
+          const storageLocationValue = storageLocationInput?.getValue() || '';
+
+          // Validate quantity receive
+          const parsedQuantityReceive = parseFloat(quantityReceiveValue);
+          if (!quantityReceiveValue || isNaN(parsedQuantityReceive) || parsedQuantityReceive <= 0) {
+            MessageToast.show(`Please enter a valid Quantity Receive value for item ${index + 1}`);
+            return;
+          }
+
+          const parsedQuantitySuggest = parseFloat(quantitySuggestValue);
+
+
+          // NOW populate oItemData with ALL the values
+          oItemData['MaterialDocument'] = "0000000000";
+          oItemData['PurchaseOrder'] = this.getOwnerComponent().getModel('purchaseOrder').getProperty('/purchaseOrderNumber');
+          oItemData['PurchaseOrderItem'] = purchaseOrderItemValue;
+          oItemData['Material'] = materialValue;
+          oItemData['MaterialDescription'] = materialDescValue;
+          oItemData['QuantitySuggest'] = parsedQuantitySuggest.toFixed(3);
+          oItemData['QuantityReceive'] = parsedQuantityReceive.toFixed(3);
+          oItemData['QuantityUnit'] = "PC";
+          oItemData['Plant'] = plantValue;
+          oItemData['StorageLocation'] = storageLocationValue;
+          oItemData['ConfirmStatus'] = true;
 
           aSelectedData.push(oItemData);
         });
 
+        if (aSelectedData.length === 0) {
+          MessageToast.show("Please select items and enter valid quantities");
+          return;
+        }
+
         console.log('Data from Selected Items:', aSelectedData);
+        this._postToMigoAPI(aSelectedData);
+      },
+
+
+      _postToMigoAPI: function (oData) {
+        // Get PurchaseOrder from your existing model instead of non-existent input
+        const sPurchaseOrder = this.getOwnerComponent().getModel('purchaseOrder').getProperty('/purchaseOrderNumber');
+
+        console.log("PurchaseOrder:", sPurchaseOrder);
+        console.log("Item data:", oData);
+
+        const oModel = this.getView().getModel();
+
+        // Try the simple flat structure first
+        const body = {
+          MaterialDocument: "",
+          PurchaseOrder: sPurchaseOrder,
+          item: [...oData]
+        };
+
+        oModel.bindList("/ZC_RFH_MIGO_DEMO")
+          .create(body)
+          .created()
+          .then(() => {
+            MessageToast.show("Data posted successfully");
+          })
+          .catch((oError) => {
+            console.log("=== ERROR DETAILS ===");
+            console.log("Error object:", oError);
+            console.log("Error message:", oError.message);
+            console.log("Error status:", oError.status);
+            console.error("Full error:", oError);
+            MessageToast.show("Error posting data: " + oError.message);
+          });
       },
 
       _attachInputEventDelegates: function () {
@@ -91,6 +171,7 @@ sap.ui.define(
         const oPurchaseOrderModel =
           this.getOwnerComponent().getModel('purchaseOrder');
 
+        // @ts-ignore
         return new Promise(resolve => {
           if (!oPurchaseOrderModel) {
             const oNewModel = new JSONModel({
@@ -118,7 +199,7 @@ sap.ui.define(
 
       _loadPurchaseOrderDataFromService: function (sPurchaseOrder) {
         const oModel = this.getView().getModel();
-        const sPath = `/ZR_RF_PO_ITEM_MAIN_BETA(P_PurchaseOrderNo='${sPurchaseOrder.trim()}')/Set`;
+        const sPath = `/ZR_RF_PO_ITEM_MAIN(P_PurchaseOrderNo='${sPurchaseOrder.trim()}')/Set`;
         const oListBinding = oModel.bindList(sPath);
 
         return oListBinding.requestContexts().then(
@@ -153,6 +234,7 @@ sap.ui.define(
         );
       },
 
+      // @ts-ignore
       _bindDataToList: function (aItems) {
         const oList = this.byId('orderList');
         oList.bindItems({
@@ -178,6 +260,7 @@ sap.ui.define(
         });
       },
 
+      // @ts-ignore
       _createListItem: function (sId, oContext) {
         return new sap.m.CustomListItem(sId, {
           content: [
@@ -282,11 +365,17 @@ sap.ui.define(
                       text: 'Confirm Status',
                       labelFor: `${sId}-confirmStatusButton`,
                     }),
-                    new sap.m.Button({
+                    new sap.m.ToggleButton({
                       id: `${sId}-confirmStatusButton`,
-                      text: 'OK',
+                      text: "OK",
                       width: '100%',
-                    }),
+                      enabled: true,
+                      pressed: '{purchaseOrder>ConfirmStatus}',
+                      press: this.onOkButtonPress.bind(this),
+                      layoutData: new sap.m.FlexItemData({
+                        growFactor: 1
+                      })
+                    })
                   ],
                 }).addStyleClass('sapUiSmallMargin'),
                 ,
@@ -294,6 +383,35 @@ sap.ui.define(
             }),
           ],
         });
+      },
+      onOkButtonPress: function (oEvent) {
+        const oButton = oEvent.getSource();
+        const bPressed = oButton.getPressed();
+
+        // Get the parent list item
+        const oListItem = oButton.getParent().getParent().getParent(); // Navigate to CustomListItem
+        const oList = this.byId('orderList');
+
+        if (bPressed) {
+          oButton.setIcon("sap-icon://accept");
+          oButton.setType("Emphasized");
+        } else {
+          oButton.setIcon("");
+          oButton.setType("Default");
+        }
+
+        // Update model data (Confirm Status)
+        const oContext = oButton.getBindingContext('purchaseOrder');
+        if (oContext) {
+          const sPath = oContext.getPath() + '/ConfirmStatus';
+          const oPurchaseOrderModel = this.getOwnerComponent().getModel('purchaseOrder');
+          oPurchaseOrderModel.setProperty(sPath, bPressed);
+        }
+
+        // Update list item selection state
+        oList.setSelectedItem(oListItem, bPressed);
+
+        console.log(`Item ${bPressed ? 'confirmed and selected' : 'unconfirmed and deselected'}`);
       },
     });
   }
