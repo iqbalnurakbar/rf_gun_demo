@@ -17,7 +17,7 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "/sap/opu/odata4/sap/zzui_rf_po_item/srvd_a2x/sap/zzui_rf_po_item/0001/",
+        "uri": "/sap/opu/odata4/sap/zui_rf_po_item/srvd_a2x/sap/zui_rf_po_item/0001/",
         "type": "OData",
         "settings": {
           "annotations": [],

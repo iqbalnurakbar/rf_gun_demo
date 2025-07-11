@@ -3,7 +3,7 @@
     xmlns="sap.m"
     xmlns:l="sap.ui.layout" displayBlock="true">
     <Page id="dataDetailPage" title="SMR Demo Apps" showNavButton="true" navButtonPress=".onNavBack" class="sapUiResponsiveContentPadding">
-        <Table id="orderList" mode="{= ${device>/system/phone} ? 'None' : 'MultiSelect' }" items="{path: 'purchaseOrder>/items'}" autoPopinMode="true" growing="true" growingThreshold="1" growingScrollToLoad="false">
+        <Table id="orderList" mode="MultiSelect" items="{path: 'purchaseOrder>/items'}" autoPopinMode="true" growing="true" growingThreshold="1" growingScrollToLoad="false" popinLayout="GridSmall" contextualWidth="Auto">
             <headerToolbar>
                 <Toolbar>
                     <Title text="{= 'Order Details for ' + ${purchaseOrder>/purchaseOrderNumber} }" />
