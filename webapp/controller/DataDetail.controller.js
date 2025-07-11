@@ -3,8 +3,9 @@ sap.ui.define(
     'sap/ui/core/mvc/Controller',
     'sap/m/MessageToast',
     'sap/ui/core/routing/History',
+    "sap/ui/core/Fragment"
   ],
-  function (Controller, MessageToast, History) {
+  function (Controller, MessageToast, History, Fragment) {
     'use strict';
 
     return Controller.extend('rfgundemo.controller.DataDetail', {
@@ -164,7 +165,7 @@ sap.ui.define(
                   } else {
                     console.warn('First item not found');
                   }
-                }, 100); // Adjust delay as needed
+                }, 100);
               }
             }.bind(this),
             dataRequested: function () { },
@@ -198,6 +199,60 @@ sap.ui.define(
         // Update list item selection state
         oList.setSelectedItem(oListItem, bPressed);
       },
+
+      onPlantVHRequest: async function (oEvent) {
+        const oInput = oEvent.getSource();
+        this._currentPlantInput = oInput;
+
+        if (!this._plantVHDialog) {
+          this._plantVHDialog = await Fragment.load({
+            name: "rfgundemo.view.fragments.PlantVHDialog",
+            controller: this
+          });
+          this.getView().addDependent(this._plantVHDialog);
+        }
+
+        this._plantVHDialog.open();
+      },
+
+      onPlantVHConfirm: function (oEvent) {
+        const oSelectedItem = oEvent.getParameter("selectedItem");
+        if (oSelectedItem && this._currentPlantInput) {
+          const sPlantCode = oSelectedItem.getTitle();
+          this._currentPlantInput.setValue(sPlantCode);
+        }
+        oEvent.getSource().close();
+      },
+
+      onPlantVHCancel: function (oEvent) {
+        oEvent.getSource().close();
+      },
+
+      onStrLocVHRequest: async function (oEvent) {
+        const oInput = oEvent.getSource();
+        this._currentStrLocInput = oInput;
+        if (!this._strLocVHDialog) {
+          this._strLocVHDialog = await Fragment.load({
+            name: "rfgundemo.view.fragments.StrLocVHDialog",
+            controller: this
+          });
+          this.getView().addDependent(this._strLocVHDialog);
+        }
+        this._strLocVHDialog.open();
+      },
+
+      onStrLocVHConfirm: function (oEvent) {
+        const oSelectedItem = oEvent.getParameter("selectedItem");
+        if (oSelectedItem && this._currentStrLocInput) {
+          const sStorageLocationCode = oSelectedItem.getTitle();
+          this._currentStrLocInput.setValue(sStorageLocationCode);
+        }
+        oEvent.getSource().close();
+      },
+
+      onStrLocVHCancel: function (oEvent) {
+        oEvent.getSource().close();
+      }
     });
   }
 );

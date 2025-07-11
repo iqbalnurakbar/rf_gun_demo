@@ -111,6 +111,8 @@
                         <Input
                             id="plantInput"
                             value="{Plant}"
+                            showValueHelp="true"
+                            valueHelpRequest="onPlantVHRequest"
                         />
                     </VBox>
                     <VBox class="sapUiSmallMargin" width="7rem">
@@ -121,6 +123,8 @@
                         <Input
                             id="storageLocationInput"
                             value="{StorageLocation}"
+                            showValueHelp="true"
+                            valueHelpRequest="onStrLocVHRequest"
                         />
                     </VBox>
                     <VBox class="sapUiSmallMargin">
