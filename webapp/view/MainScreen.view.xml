@@ -1,32 +1,20 @@
-<mvc:View
-    controllerName="rfgundemo.controller.MainScreen"
+<mvc:View controllerName="rfgundemo.controller.MainScreen"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
-    displayBlock="true"
->
-    <Page
-        title="SMR Demo Apps"
-        id="mainScreenPage"
-    >
-        <VBox
-            class="sapUiSmallMargin"
-            justifyContent="Center"
-            alignItems="Center"
-            fitContainer="true"
-        >
-            <Label
-                text="Purchase Order (Scan)"
-                labelFor="purchaseOrderNumber"
-            />
+    xmlns="sap.m" displayBlock="true">
+    <Page title="SMR Demo Apps" id="mainScreenPage">
+        <VBox class="sapUiSmallMargin" justifyContent="Center" alignItems="Center" fitContainer="true">
+            <Label text="Purchase Order (Scan)" labelFor="purchaseOrderNumber" />
 
-            <Input
-                placeholder="Purchase Order"
-                id="purchaseOrderNumber"
-                required="true"
-                submit=".onPurchaseOrderSubmit"
-                maxLength="10"
-                value="4500000252"
-            />
+            <Input placeholder="Purchase Order" id="purchaseOrderNumber" required="true" submit=".onPurchaseOrderSubmit" maxLength="10" value="4500000252" />
         </VBox>
+        <footer>
+            <Toolbar design="Solid" visible="{device>/system/phone}">
+                <ToolbarSpacer />
+                <Button text="Back (F3)" press=".onNavBack"/>
+                <ToolbarSpacer />
+                <Button text="Enter (F4)" press=".onPurchaseOrderSubmit"/>
+                <ToolbarSpacer />
+            </Toolbar>
+        </footer>
     </Page>
 </mvc:View>

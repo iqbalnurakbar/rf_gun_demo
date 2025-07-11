@@ -1,125 +1,82 @@
-<mvc:View
-    xmlns:layout="sap.ui.layout"
-    controllerName="rfgundemo.controller.DataDetail"
+<mvc:View xmlns:uxap="sap.uxap"
+    xmlns:layout="sap.ui.layout" controllerName="rfgundemo.controller.DataDetail"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:l="sap.ui.layout"
-    displayBlock="true"
->
-    <Page
-        id="dataDetailPage"
-        title="SMR Demo Apps"
-        showNavButton="true"
-        navButtonPress=".onNavBack"
-        class="sapUiResponsiveContentPadding"
-    >
-        <List
-            id="orderList"
-            mode="MultiSelect"
-        >
+    xmlns:l="sap.ui.layout" displayBlock="true">
+    <Page id="dataDetailPage" title="SMR Demo Apps" showNavButton="true" navButtonPress=".onNavBack" class="sapUiResponsiveContentPadding">
+        <Table id="orderList" mode="MultiSelect" autoPopinMode="true" popinLayout="GridSmall" contextualWidth="Auto">
             <headerToolbar>
                 <Toolbar>
-                    <Title id="orderDetailsTitle" />
+                    <Title text="{= 'Order Details for ' + ${purchaseOrder>/purchaseOrderNumber} }" />
                     <ToolbarSpacer />
-                    <Button
-                        id="saveAndPostButton"
-                        icon="sap-icon://save"
-                        press=".onSaveAndPostButtonPress"
-                        text="Save and Post"
-                        type="Emphasized"
-                    />
+                    <Button id="saveAndPostButton" icon="sap-icon://save" press=".onSaveAndPostButtonPress" text="{= ${device>/system/phone} ? '(F8)' : 'Save and Post' }" type="Emphasized" />
                 </Toolbar>
             </headerToolbar>
-            <CustomListItem id="orderListItem">
-                <HBox>
-                    <VBox class="sapUiSmallMargin">
-                        <Label
-                            text="Line No"
-                            labelFor="purchaseOrderItemNoInput"
-                        />
-                        <Input
-                            id="purchaseOrderItemNoInput"
-                            value="{PurchaseOrderItemNo}"
-                            editable="false"
-                        />
-                    </VBox>
-                    <VBox class="sapUiSmallMargin">
-                        <Label
-                            text="Material"
-                            labelFor="materialInput"
-                        />
-                        <Input
-                            id="materialInput"
-                            value="{Material}"
-                            editable="false"
-                        />
-                    </VBox>
-                    <VBox class="sapUiSmallMargin">
-                        <Label
-                            text="Material Desc"
-                            labelFor="materialDescriptionInput"
-                        />
-                        <Input
-                            id="materialDescriptionInput"
-                            value="{MaterialDescription}"
-                            editable="false"
-                        />
-                    </VBox>
-                    <VBox class="sapUiSmallMargin">
-                        <Label
-                            text="Quantity Suggest"
-                            labelFor="quantitySuggestInput"
-                        />
-                        <Input
-                            id="quantitySuggestInput"
-                            value="{QuantitySuggest}"
-                            editable="false"
-                        />
-                    </VBox>
-                    <VBox class="sapUiSmallMargin">
-                        <Label
-                            text="Quantity Receive"
-                            labelFor="quantityReceiveInput"
-                        />
-                        <Input
-                            id="quantityReceiveInput"
-                            value=""
-                        />
-                    </VBox>
-                    <VBox class="sapUiSmallMargin">
-                        <Label
-                            text="Plant"
-                            labelFor="plantInput"
-                        />
-                        <Input
-                            id="plantInput"
-                            value="{Plant}"
-                        />
-                    </VBox>
-                    <VBox class="sapUiSmallMargin">
-                        <Label
-                            text="Storage Location"
-                            labelFor="storageLocationInput"
-                        />
-                        <Input
-                            id="storageLocationInput"
-                            value="{StorageLocation}"
-                        />
-                    </VBox>
-                    <VBox class="sapUiSmallMargin">
-                        <Label
-                            text="Confirm Status"
-                            labelFor="confirmStatusButton"
-                        />
-                        <ToggleButton
-                            id="confirmStatusButton"
-                            text="OK"
-                            width="100%"
-                            press="onOkButtonPress"
-                        />
-                    </VBox>
-                </HBox>
-            </CustomListItem>
-        </List>
+            <columns>
+                <Column minScreenWidth="Small" width="{= ${device>/system/phone} ? '3rem' : 'auto' }">
+                    <Label text="Line No" labelFor="purchaseOrderItemNoInput" />
+                </Column>
+                <Column minScreenWidth="Small" visible="false">
+                    <Label text="Material" labelFor="materialInput" />
+                </Column>
+                <Column minScreenWidth="Small" visible="false">
+                    <Label text="Material Desc" labelFor="materialDescriptionInput" />
+                </Column>
+                <Column minScreenWidth="Small" width="{= ${device>/system/phone} ? '20rem' : 'auto' }">
+                    <Label text="Material" labelFor="materialInputShow"/>
+                </Column>
+                <Column minScreenWidth="Small">
+                    <Label text="Quantity Suggest" labelFor="quantitySuggestInput" />
+                </Column>
+                <Column minScreenWidth="Small">
+                    <Label text="Quantity Receive" labelFor="quantityReceiveInput" />
+                </Column>
+                <Column minScreenWidth="Small">
+                    <Label text="Unit" labelFor="unitInput" />
+                </Column>
+                <Column minScreenWidth="Small">
+                    <Label text="Plant" labelFor="plantInput" />
+                </Column>
+                <Column minScreenWidth="Small">
+                    <Label text="Storage Location" labelFor="storageLocationInput" />
+                </Column>
+                <Column minScreenWidth="Small">
+                    <Label text="Attachment" labelFor="confirmStatusButton" />
+                </Column>
+                <Column minScreenWidth="Small">
+                    <Label text="Confirm Status" labelFor="confirmStatusButton" />
+                </Column>
+            </columns>
+
+            <items>
+                <ColumnListItem id="orderListItem">
+                    <cells>
+                        <Input id="purchaseOrderItemNoInput" value="{PurchaseOrderItemNo}" editable="false" width="{= ${device>/system/phone} ? '3rem' : 'auto' }"/>
+                        <Input id="materialInput" value="{Material}" editable="false" visible="false"/>
+                        <Input id="materialDescriptionInput" value="{MaterialDescription}" editable="false" visible="false"/>
+                        <Input id="materialInputShow" value="{Material} {MaterialDescription}" editable="false" width="{= ${device>/system/phone} ? '20rem' : 'auto' }"/>
+                        <Input id="quantitySuggestInput" value="{QuantitySuggest}" editable="false" />
+                        <Input id="quantityReceiveInput" value="" />
+                        <Input id="unitInput" value="{PurchaseOrderQuantityUnit}" editable="false" width="{= ${device>/system/phone} ? '3rem' : 'auto' }"/>
+                        <Input id="plantInput" value="{Plant}" width="{= ${device>/system/phone} ? '7rem' : 'auto' }"/>
+                        <Input id="storageLocationInput" value="{StorageLocation}" width="{= ${device>/system/phone} ? '7rem' : 'auto' }"/>
+                        <HBox class="sapUiSmallMargin">
+                            <Button icon="sap-icon://upload" class="sapUiTinyMarginEnd" press="onUploadPress"/>
+                            <Button icon="sap-icon://download" class="sapUiTinyMarginEnd" press="onDownloadPress"/>
+                        </HBox>
+                        <ToggleButton id="confirmStatusButton" text="OK" press="onOkButtonPress" class="sapUiSmallMargin" width="{= ${device>/system/phone} ? '8rem' : 'auto' }"/>
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
+        <footer>
+            <OverflowToolbar design="Solid" visible="{device>/system/phone}">
+                <Button text="Back (F3)" press=".onNavBack"/>
+                <ToolbarSpacer />
+                <Button text="PageUp (F5)" press=".onPageUp"/>
+                <ToolbarSpacer />
+                <Button text="PageDown (F6)" press=".onPageDown"/>
+            </OverflowToolbar>
+        </footer>
     </Page>
 </mvc:View>

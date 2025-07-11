@@ -1,20 +1,20 @@
 sap.ui.define(
   [
-    'sap/ui/core/mvc/Controller',
-    'sap/m/MessageToast',
-    'sap/ui/core/routing/History',
+    "sap/ui/core/mvc/Controller",
+    "sap/m/MessageToast",
+    "sap/ui/core/routing/History",
   ],
   function (Controller, MessageToast, History) {
-    'use strict';
+    "use strict";
 
-    return Controller.extend('rfgundemo.controller.DataDetail', {
+    return Controller.extend("rfgundemo.controller.DataDetail", {
       onInit: function () {
         var that = this;
         var oRouter = this.getOwnerComponent().getRouter();
         this.sPurchaseOrderNumber = "";
 
         oRouter.attachRouteMatched(function (oEvent) {
-          var oArgs = oEvent.getParameter('arguments');
+          var oArgs = oEvent.getParameter("arguments");
           if (oArgs && oArgs.purchaseOrderNumber) {
             that.getView().setBusy(true);
             that._loadPurchaseOrderData(oArgs.purchaseOrderNumber);
@@ -34,43 +34,43 @@ sap.ui.define(
           window.history.go(-1);
         } else {
           var oRouter = this.getOwnerComponent().getRouter();
-          oRouter.navTo('RouteMainScreen', {}, true);
+          oRouter.navTo("RouteMainScreen", {}, true);
         }
       },
 
       onSaveAndPostButtonPress: function () {
-        const oList = this.byId('orderList');
+        const oList = this.byId("orderList");
         const aSelectedItems = oList.getSelectedItems();
         const aSelectedData = [];
+        console.log("Selected Items:", aSelectedItems);
 
-        aSelectedItems.forEach(item => {
+        aSelectedItems.forEach((item) => {
           const oItemData = {};
-          const oHBox = item.getContent()[0];
-          const aVBoxes = oHBox.getItems();
+          const aCells = item.getCells(); // ✅ Use getCells() instead of getContent()
 
           const MaterialDocument = "";
           const PurchaseOrder = this.sPurchaseOrderNumber;
-          const PurchaseOrderItem = aVBoxes[0].getItems()[1].getValue();
-          const Material = aVBoxes[1].getItems()[1].getValue();
-          const MaterialDescription = aVBoxes[2].getItems()[1].getValue();
-          const QuantitySuggest = parseFloat(aVBoxes[3].getItems()[1].getValue()).toFixed(3);
-          const QuantityReceive = parseFloat(aVBoxes[4].getItems()[1].getValue()).toFixed(3);
-          //const QuantityUnit = aVBoxes[5].getItems()[1].getValue(),
-          const Plant = aVBoxes[5].getItems()[1].getValue();
-          const StorageLocation = aVBoxes[6].getItems()[1].getValue();
+          const PurchaseOrderItem = aCells[0].getValue(); // Line No
+          const Material = aCells[1].getValue(); // Material
+          const MaterialDescription = aCells[2].getValue(); // Material Desc
+          const QuantitySuggest = parseFloat(aCells[4].getValue()).toFixed(3); // Quantity Suggest
+          const QuantityReceive = parseFloat(aCells[5].getValue()).toFixed(3); // Quantity Receive
+          const QuantityUnit = aCells[6].getValue(); // Quantity Unit
+          const Plant = aCells[7].getValue(); // Plant
+          const StorageLocation = aCells[8].getValue(); // Storage Location
           const ConfirmStatus = true;
 
-          oItemData['MaterialDocument'] = MaterialDocument;
-          oItemData['PurchaseOrder'] = PurchaseOrder;
-          oItemData['PurchaseOrderItem'] = PurchaseOrderItem;
-          oItemData['Material'] = Material;
-          oItemData['MaterialDescription'] = MaterialDescription;
-          oItemData['QuantitySuggest'] = QuantitySuggest;
-          oItemData['QuantityReceive'] = QuantityReceive;
-          oItemData['QuantityUnit'] = "PC";
-          oItemData['Plant'] = Plant;
-          oItemData['StorageLocation'] = StorageLocation;
-          oItemData['ConfirmStatus'] = ConfirmStatus;
+          oItemData["MaterialDocument"] = MaterialDocument;
+          oItemData["PurchaseOrder"] = PurchaseOrder;
+          oItemData["PurchaseOrderItem"] = PurchaseOrderItem;
+          oItemData["Material"] = Material;
+          oItemData["MaterialDescription"] = MaterialDescription;
+          oItemData["QuantitySuggest"] = QuantitySuggest;
+          oItemData["QuantityReceive"] = QuantityReceive;
+          oItemData["QuantityUnit"] = QuantityUnit;
+          oItemData["Plant"] = Plant;
+          oItemData["StorageLocation"] = StorageLocation;
+          oItemData["ConfirmStatus"] = ConfirmStatus;
 
           aSelectedData.push(oItemData);
         });
@@ -80,22 +80,23 @@ sap.ui.define(
           return;
         }
 
-        console.log('Data from Selected Items:', aSelectedData);
+        console.log("Data from Selected Items:", aSelectedData);
         this._postToMigoAPI(aSelectedData);
       },
 
       _postToMigoAPI: function (aBAPIData) {
-        const that = this
+        const that = this;
         const oModel = this.getView().getModel();
 
         // Try the simple flat structure first
         const body = {
           MaterialDocument: "",
           PurchaseOrder: aBAPIData[0].PurchaseOrder,
-          item: [...aBAPIData]
+          item: [...aBAPIData],
         };
 
-        oModel.bindList("/ZC_RFH_MIGO_DEMO")
+        oModel
+          .bindList("/ZC_RFH_MIGO_DEMO")
           .create(body)
           .created()
           .then(() => {
@@ -112,14 +113,14 @@ sap.ui.define(
       },
 
       _attachInputEventDelegates: function () {
-        var oDataDetailPage = this.byId('dataDetailPage');
+        var oDataDetailPage = this.byId("dataDetailPage");
         if (oDataDetailPage) {
           oDataDetailPage.addEventDelegate({
             onkeydown: function (oEvent) {
-              if (oEvent.key === 'F3') {
+              if (oEvent.key === "F3") {
                 oEvent.preventDefault();
                 this.onNavBack();
-              } else if (oEvent.key === 'F8') {
+              } else if (oEvent.key === "F8") {
                 oEvent.preventDefault();
                 this.onSaveAndPostButtonPress();
               }
@@ -134,16 +135,16 @@ sap.ui.define(
           sPurchaseOrder.trim() +
           "')/Set";
 
-        var oList = this.byId('orderList');
+        var oList = this.byId("orderList");
         oList.bindItems({
           path: sPath,
-          template: this.byId('orderList').getItems()[0].clone(),
+          template: this.byId("orderList").getItems()[0].clone(),
           events: {
             dataReceived: function (oEvent) {
               this.getView().setBusy(false);
               if (!oEvent.getParameters().data) {
                 MessageToast.show(
-                  'No data found for Purchase Order: ' + sPurchaseOrder
+                  "No data found for Purchase Order: " + sPurchaseOrder
                 );
               } else {
                 // Use setTimeout to ensure the DOM is rendered
@@ -151,31 +152,27 @@ sap.ui.define(
                   var oFirstItem = oList.getItems()[0];
                   if (oFirstItem) {
                     // Assuming a standard way to find the input
-                    var oInput = oFirstItem
-                      .getContent()[0]
-                      ?.getItems()[4]
-                      ?.getItems()[1];
-
+                    var oInput = oFirstItem.getCells()[4];
                     if (oInput) {
                       oInput.focus();
                     } else {
-                      console.warn('Quantity Receive Input not found');
+                      console.warn("Quantity Receive Input not found");
                     }
                   } else {
-                    console.warn('First item not found');
+                    console.warn("First item not found");
                   }
                 }, 100); // Adjust delay as needed
               }
             }.bind(this),
-            dataRequested: function () { },
+            dataRequested: function () {},
           },
         });
       },
 
       _setOrderDetailsTitle: function (sPurchaseOrder) {
-        var oTitle = this.byId('orderDetailsTitle');
+        var oTitle = this.byId("orderDetailsTitle");
         if (oTitle) {
-          oTitle.setText('Order Details for ' + sPurchaseOrder);
+          oTitle.setText("Order Details for " + sPurchaseOrder);
         }
       },
 
@@ -184,8 +181,8 @@ sap.ui.define(
         const bPressed = oButton.getPressed();
 
         // Get the parent list item
-        const oList = this.byId('orderList');
-        const oListItem = oButton.getParent().getParent().getParent();
+        const oList = this.byId("orderList");
+        const oListItem = oButton.getParent();
 
         if (bPressed) {
           oButton.setIcon("sap-icon://accept");
@@ -193,14 +190,6 @@ sap.ui.define(
         } else {
           oButton.setIcon("");
           oButton.setType("Default");
-        }
-
-        // Update model data (Confirm Status)
-        const oContext = oButton.getBindingContext('purchaseOrder');
-        if (oContext) {
-          const sPath = oContext.getPath() + '/Co nfirmStatus';
-          const oPurchaseOrderModel = this.getOwnerComponent().getModel('purchaseOrder');
-          oPurchaseOrderModel.setProperty(sPath, bPressed);
         }
 
         // Update list item selection state

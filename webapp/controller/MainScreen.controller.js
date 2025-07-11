@@ -1,15 +1,16 @@
 sap.ui.define(
   [
-    'sap/ui/core/mvc/Controller',
-    'sap/m/MessageToast',
-    'sap/ui/model/Filter',
-    'sap/ui/model/FilterOperator',
-    'sap/ui/model/json/JSONModel',
+    "sap/ui/core/mvc/Controller",
+    "sap/m/MessageToast",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/core/routing/History",
   ],
-  (Controller, MessageToast, Filter, FilterOperator, JSONModel) => {
-    'use strict';
+  (Controller, MessageToast, Filter, FilterOperator, JSONModel, History) => {
+    "use strict";
 
-    return Controller.extend('rfgundemo.controller.MainScreen', {
+    return Controller.extend("rfgundemo.controller.MainScreen", {
       onInit() {
         const oRouter = this.getOwnerComponent().getRouter();
         const oModel = this.getOwnerComponent().getModel();
@@ -22,30 +23,42 @@ sap.ui.define(
         this._attachInputEventDelegates();
       },
 
+      onNavBack: function () {
+        var oHistory = History.getInstance();
+        var sPreviousHash = oHistory.getPreviousHash();
+
+        if (sPreviousHash !== undefined) {
+          window.history.go(-1);
+        } else {
+          var oRouter = this.getOwnerComponent().getRouter();
+          oRouter.navTo("RouteMainScreen", {}, true);
+        }
+      },
+
       onPurchaseOrderSubmit: function () {
-        const oPurchaseOrderInput = this.byId('purchaseOrderNumber');
+        const oPurchaseOrderInput = this.byId("purchaseOrderNumber");
         const sPurchaseOrder = oPurchaseOrderInput.getValue();
 
         if (!sPurchaseOrder) {
-          oPurchaseOrderInput.setValueState('Error');
+          oPurchaseOrderInput.setValueState("Error");
           oPurchaseOrderInput.setValueStateText(
-            'Purchase Order number is required.'
+            "Purchase Order number is required."
           );
           oPurchaseOrderInput.focus();
           return;
         }
-        oPurchaseOrderInput.setValueState('None');
-        oPurchaseOrderInput.setValueStateText('');
+        oPurchaseOrderInput.setValueState("None");
+        oPurchaseOrderInput.setValueStateText("");
 
         this._checkPurchaseOrder(sPurchaseOrder);
       },
 
       _attachInputEventDelegates: function () {
-        const oMainScreenPage = this.byId('mainScreenPage');
+        const oMainScreenPage = this.byId("mainScreenPage");
         if (oMainScreenPage) {
           oMainScreenPage.addEventDelegate({
-            onkeydown: oEvent => {
-              if (oEvent.key === 'F4') {
+            onkeydown: (oEvent) => {
+              if (oEvent.key === "F4") {
                 oEvent.preventDefault();
                 this.onPurchaseOrderSubmit();
               }
@@ -67,7 +80,7 @@ sap.ui.define(
             this.getView().setBusy(false);
             if (aContexts.length === 0) {
               MessageToast.show(
-                'No data found for Purchase Order: ' + sPurchaseOrder
+                "No data found for Purchase Order: " + sPurchaseOrder
               );
               return;
             }
@@ -77,7 +90,7 @@ sap.ui.define(
           function () {
             this.getView().setBusy(false);
             MessageToast.show(
-              'Error retrieving data for Purchase Order: ' + sPurchaseOrder
+              "Error retrieving data for Purchase Order: " + sPurchaseOrder
             );
           }.bind(this)
         );
@@ -85,7 +98,7 @@ sap.ui.define(
 
       _navigateToDetail: function (sPurchaseOrder) {
         const oRouter = this.getOwnerComponent().getRouter();
-        oRouter.navTo('RouteDataDetail', {
+        oRouter.navTo("RouteDataDetail", {
           purchaseOrderNumber: sPurchaseOrder,
         });
       },
