@@ -11,12 +11,6 @@ sap.ui.define(
 
     return Controller.extend("rfgundemo.controller.MainScreen", {
       onInit() {
-        const oPurchaseOrderModel = new JSONModel({
-          purchaseOrderNumber: "",
-          items: [],
-        });
-
-        this.getOwnerComponent().setModel(oPurchaseOrderModel, "purchaseOrder");
         const oRouter = this.getOwnerComponent().getRouter();
         const oModel = this.getOwnerComponent().getModel();
         oRouter.attachRouteMatched(
@@ -63,7 +57,7 @@ sap.ui.define(
       _checkPurchaseOrder: function (sPurchaseOrder) {
         const oModel = this.getView().getModel();
         const sPath =
-          "/ZR_RF_PO_ITEM_MAIN_BETA(P_PurchaseOrderNo='" +
+          "/ZR_RF_PO_ITEM_MAIN(P_PurchaseOrderNo='" +
           sPurchaseOrder.trim() +
           "')/Set";
         const oListBinding = oModel.bindList(sPath);
@@ -77,17 +71,6 @@ sap.ui.define(
               );
               return;
             }
-
-            const oPurchaseOrderModel =
-              this.getOwnerComponent().getModel("purchaseOrder");
-            oPurchaseOrderModel.setProperty(
-              "/purchaseOrderNumber",
-              sPurchaseOrder
-            );
-            oPurchaseOrderModel.setProperty(
-              "/items",
-              aContexts.map((oContext) => oContext.getObject())
-            );
 
             this._navigateToDetail(sPurchaseOrder);
           }.bind(this),
