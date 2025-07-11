@@ -44,7 +44,7 @@ sap.ui.define(
       },
 
       onDownload: function (oEvent) {
-        const oContexts = this.byId("orderList").getSelectedContexts();
+        const oContexts = this.byId("orderList").getSelectedItems();
         if (oContexts && oContexts.length) {
           oContexts.forEach((oContext) =>
             this.oUploadPluginInstance.download(oContext, true)
