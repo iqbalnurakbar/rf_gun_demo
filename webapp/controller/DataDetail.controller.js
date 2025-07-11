@@ -1,23 +1,23 @@
 sap.ui.define(
   [
-    'sap/ui/core/mvc/Controller',
-    'sap/m/MessageToast',
-    'sap/ui/core/routing/History',
-    'sap/ui/model/json/JSONModel',
-    'sap/ui/model/Filter',
-    'sap/ui/model/FilterOperator',
+    "sap/ui/core/mvc/Controller",
+    "sap/m/MessageToast",
+    "sap/ui/core/routing/History",
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
   ],
-  
-  (Controller, MessageToast, History, JSONModel, Filter, FilterOperator) => {
-    'use strict';
 
-    return Controller.extend('rfgundemo.controller.DataDetail', {
+  (Controller, MessageToast, History, JSONModel, Filter, FilterOperator) => {
+    "use strict";
+
+    return Controller.extend("rfgundemo.controller.DataDetail", {
       onInit() {
         const that = this;
         const oRouter = this.getOwnerComponent().getRouter();
 
         oRouter.attachRouteMatched(function (oEvent) {
-          const oArgs = oEvent.getParameter('arguments');
+          const oArgs = oEvent.getParameter("arguments");
           if (oArgs && oArgs.purchaseOrderNumber) {
             that.getView().setBusy(true);
             that
@@ -42,21 +42,21 @@ sap.ui.define(
           window.history.go(-1);
         } else {
           const oRouter = this.getOwnerComponent().getRouter();
-          oRouter.navTo('RouteMainScreen', {}, true);
+          oRouter.navTo("RouteMainScreen", {}, true);
         }
       },
 
       onSaveAndPostButtonPress: function () {},
 
       _attachInputEventDelegates: function () {
-        const oDataDetailPage = this.byId('dataDetailPage');
+        const oDataDetailPage = this.byId("dataDetailPage");
         if (oDataDetailPage) {
           oDataDetailPage.addEventDelegate({
-            onkeydown: oEvent => {
-              if (oEvent.key === 'F3') {
+            onkeydown: (oEvent) => {
+              if (oEvent.key === "F3") {
                 oEvent.preventDefault();
                 this.onNavBack();
-              } else if (oEvent.key === 'F8') {
+              } else if (oEvent.key === "F8") {
                 oEvent.preventDefault();
                 this.onSaveAndPostButtonPress();
               }
@@ -67,21 +67,21 @@ sap.ui.define(
 
       _loadPurchaseOrderData: function (sPurchaseOrder) {
         const oPurchaseOrderModel =
-          this.getOwnerComponent().getModel('purchaseOrder');
+          this.getOwnerComponent().getModel("purchaseOrder");
 
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           if (!oPurchaseOrderModel) {
             const oNewModel = new JSONModel({
-              purchaseOrderNumber: '',
+              purchaseOrderNumber: "",
               items: [],
             });
 
-            this.getOwnerComponent().setModel(oNewModel, 'purchaseOrder');
+            this.getOwnerComponent().setModel(oNewModel, "purchaseOrder");
             this._loadPurchaseOrderDataFromService(sPurchaseOrder).then(
               resolve
             );
           } else {
-            const aItems = oPurchaseOrderModel.getProperty('/items') || [];
+            const aItems = oPurchaseOrderModel.getProperty("/items") || [];
             if (Array.isArray(aItems) && aItems.length > 0) {
               this._bindDataToList(aItems);
               resolve();
@@ -109,14 +109,14 @@ sap.ui.define(
             }
 
             const oPurchaseOrderModel =
-              this.getOwnerComponent().getModel('purchaseOrder');
+              this.getOwnerComponent().getModel("purchaseOrder");
             oPurchaseOrderModel.setProperty(
-              '/purchaseOrderNumber',
+              "/purchaseOrderNumber",
               sPurchaseOrder
             );
             oPurchaseOrderModel.setProperty(
-              '/items',
-              aContexts.map(oContext => oContext.getObject())
+              "/items",
+              aContexts.map((oContext) => oContext.getObject())
             );
           }.bind(this),
           function () {

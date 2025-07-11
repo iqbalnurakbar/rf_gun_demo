@@ -1,22 +1,22 @@
 sap.ui.define(
   [
-    'sap/ui/core/mvc/Controller',
-    'sap/m/MessageToast',
-    'sap/ui/model/Filter',
-    'sap/ui/model/FilterOperator',
-    'sap/ui/model/json/JSONModel',
+    "sap/ui/core/mvc/Controller",
+    "sap/m/MessageToast",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "sap/ui/model/json/JSONModel",
   ],
   (Controller, MessageToast, Filter, FilterOperator, JSONModel) => {
-    'use strict';
+    "use strict";
 
-    return Controller.extend('rfgundemo.controller.MainScreen', {
+    return Controller.extend("rfgundemo.controller.MainScreen", {
       onInit() {
         const oPurchaseOrderModel = new JSONModel({
-          purchaseOrderNumber: '',
+          purchaseOrderNumber: "",
           items: [],
         });
 
-        this.getOwnerComponent().setModel(oPurchaseOrderModel, 'purchaseOrder');
+        this.getOwnerComponent().setModel(oPurchaseOrderModel, "purchaseOrder");
         const oRouter = this.getOwnerComponent().getRouter();
         const oModel = this.getOwnerComponent().getModel();
         oRouter.attachRouteMatched(
@@ -29,29 +29,29 @@ sap.ui.define(
       },
 
       onPurchaseOrderSubmit: function () {
-        const oPurchaseOrderInput = this.byId('purchaseOrderNumber');
+        const oPurchaseOrderInput = this.byId("purchaseOrderNumber");
         const sPurchaseOrder = oPurchaseOrderInput.getValue();
 
         if (!sPurchaseOrder) {
-          oPurchaseOrderInput.setValueState('Error');
+          oPurchaseOrderInput.setValueState("Error");
           oPurchaseOrderInput.setValueStateText(
-            'Purchase Order number is required.'
+            "Purchase Order number is required."
           );
           oPurchaseOrderInput.focus();
           return;
         }
-        oPurchaseOrderInput.setValueState('None');
-        oPurchaseOrderInput.setValueStateText('');
+        oPurchaseOrderInput.setValueState("None");
+        oPurchaseOrderInput.setValueStateText("");
 
         this._checkPurchaseOrder(sPurchaseOrder);
       },
 
       _attachInputEventDelegates: function () {
-        const oMainScreenPage = this.byId('mainScreenPage');
+        const oMainScreenPage = this.byId("mainScreenPage");
         if (oMainScreenPage) {
           oMainScreenPage.addEventDelegate({
-            onkeydown: oEvent => {
-              if (oEvent.key === 'F4') {
+            onkeydown: (oEvent) => {
+              if (oEvent.key === "F4") {
                 oEvent.preventDefault();
                 this.onPurchaseOrderSubmit();
               }
@@ -73,20 +73,20 @@ sap.ui.define(
             this.getView().setBusy(false);
             if (aContexts.length === 0) {
               MessageToast.show(
-                'No data found for Purchase Order: ' + sPurchaseOrder
+                "No data found for Purchase Order: " + sPurchaseOrder
               );
               return;
             }
 
             const oPurchaseOrderModel =
-              this.getOwnerComponent().getModel('purchaseOrder');
+              this.getOwnerComponent().getModel("purchaseOrder");
             oPurchaseOrderModel.setProperty(
-              '/purchaseOrderNumber',
+              "/purchaseOrderNumber",
               sPurchaseOrder
             );
             oPurchaseOrderModel.setProperty(
-              '/items',
-              aContexts.map(oContext => oContext.getObject())
+              "/items",
+              aContexts.map((oContext) => oContext.getObject())
             );
 
             this._navigateToDetail(sPurchaseOrder);
@@ -94,7 +94,7 @@ sap.ui.define(
           function () {
             this.getView().setBusy(false);
             MessageToast.show(
-              'Error retrieving data for Purchase Order: ' + sPurchaseOrder
+              "Error retrieving data for Purchase Order: " + sPurchaseOrder
             );
           }.bind(this)
         );
@@ -102,7 +102,7 @@ sap.ui.define(
 
       _navigateToDetail: function (sPurchaseOrder) {
         const oRouter = this.getOwnerComponent().getRouter();
-        oRouter.navTo('RouteDataDetail', {
+        oRouter.navTo("RouteDataDetail", {
           purchaseOrderNumber: sPurchaseOrder,
         });
       },
