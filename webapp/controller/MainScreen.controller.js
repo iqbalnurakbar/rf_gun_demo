@@ -57,7 +57,7 @@ sap.ui.define(
       _checkPurchaseOrder: function (sPurchaseOrder) {
         const oModel = this.getView().getModel();
         const sPath =
-          "/ZR_RF_PO_ITEM_MAIN_BETA(P_PurchaseOrderNo='" +
+          "/ZR_RF_PO_ITEM_MAIN(P_PurchaseOrderNo='" +
           sPurchaseOrder.trim() +
           "')/Set";
         const oListBinding = oModel.bindList(sPath);

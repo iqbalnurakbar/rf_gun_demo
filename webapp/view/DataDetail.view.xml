@@ -32,9 +32,9 @@
             </headerToolbar>
             <CustomListItem id="orderListItem">
                 <HBox>
-                    <VBox class="sapUiSmallMargin">
+                    <VBox class="sapUiSmallMargin" width="3rem">
                         <Label
-                            text="Line No"
+                            text="No."
                             labelFor="purchaseOrderItemNoInput"
                         />
                         <Input
@@ -43,7 +43,7 @@
                             editable="false"
                         />
                     </VBox>
-                    <VBox class="sapUiSmallMargin">
+                    <VBox class="sapUiSmallMargin" width="20rem">
                         <Label
                             text="Material"
                             labelFor="materialInput"
@@ -52,9 +52,15 @@
                             id="materialInput"
                             value="{Material}"
                             editable="false"
+                            visible="false"
+                        />
+                        <Input
+                            id="materialInputShow"
+                            value="{Material} {MaterialDescription}"
+                            editable="false"
                         />
                     </VBox>
-                    <VBox class="sapUiSmallMargin">
+                    <VBox class="sapUiSmallMargin" visible="false">
                         <Label
                             text="Material Desc"
                             labelFor="materialDescriptionInput"
@@ -86,7 +92,18 @@
                             value=""
                         />
                     </VBox>
-                    <VBox class="sapUiSmallMargin">
+                    <VBox class="sapUiSmallMargin" width="3rem">
+                        <Label
+                            text="Unit"
+                            labelFor="unit"
+                        />
+                        <Input
+                            id="unit"
+                            value="{PurchaseOrderQuantityUnit}"
+                            editable="false"
+                        />
+                    </VBox>
+                    <VBox class="sapUiSmallMargin" width="7rem">
                         <Label
                             text="Plant"
                             labelFor="plantInput"
@@ -96,7 +113,7 @@
                             value="{Plant}"
                         />
                     </VBox>
-                    <VBox class="sapUiSmallMargin">
+                    <VBox class="sapUiSmallMargin" width="7rem">
                         <Label
                             text="Storage Location"
                             labelFor="storageLocationInput"
@@ -108,13 +125,32 @@
                     </VBox>
                     <VBox class="sapUiSmallMargin">
                         <Label
+                            text="Attachment"
+                            labelFor="attachment"
+                        />
+                        <HBox id="attachment">
+                            <Button
+                                class="sapUiTinyMarginEnd"
+                                id="uploadButton"
+                                icon="sap-icon://upload"
+                            />
+                            <Button
+                                id="downloadButton"
+                                icon="sap-icon://download"
+                            />
+                        </HBox>
+
+                    </VBox>
+                    <VBox class="sapUiSmallMargin">
+                        <Label
                             text="Confirm Status"
                             labelFor="confirmStatusButton"
                         />
-                        <Button
+                        <ToggleButton
                             id="confirmStatusButton"
                             text="OK"
                             width="100%"
+                            press="onOkButtonPress"
                         />
                     </VBox>
                 </HBox>
