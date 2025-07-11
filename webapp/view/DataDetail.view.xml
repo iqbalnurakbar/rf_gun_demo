@@ -111,10 +111,11 @@
                             text="Confirm Status"
                             labelFor="confirmStatusButton"
                         />
-                        <Button
+                        <ToggleButton
                             id="confirmStatusButton"
                             text="OK"
                             width="100%"
+                            press="onOkButtonPress"
                         />
                     </VBox>
                 </HBox>
