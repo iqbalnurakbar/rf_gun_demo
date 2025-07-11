@@ -1,4 +1,5 @@
-<mvc:View xmlns:uxap="sap.uxap"
+<mvc:View xmlns:unified="sap.ui.unified"
+    xmlns:uxap="sap.uxap"
     xmlns:layout="sap.ui.layout" controllerName="rfgundemo.controller.DataDetail"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
@@ -61,8 +62,8 @@
                         <Input id="plantInput" value="{Plant}" width="{= ${device>/system/phone} ? '7rem' : 'auto' }"/>
                         <Input id="storageLocationInput" value="{StorageLocation}" width="{= ${device>/system/phone} ? '7rem' : 'auto' }"/>
                         <HBox class="sapUiSmallMargin">
-                            <Button icon="sap-icon://upload" class="sapUiTinyMarginEnd" press="onUploadPress"/>
-                            <Button icon="sap-icon://download" class="sapUiTinyMarginEnd" press="onDownloadPress"/>
+                            <Button icon="sap-icon://upload" class="sapUiTinyMarginEnd" press="onUpload"/>
+                            <Button icon="sap-icon://download" class="sapUiTinyMarginEnd" press="onDownload"/>
                         </HBox>
                         <ToggleButton id="confirmStatusButton" text="OK" press="onOkButtonPress" class="sapUiSmallMargin" width="{= ${device>/system/phone} ? '8rem' : 'auto' }"/>
                     </cells>
