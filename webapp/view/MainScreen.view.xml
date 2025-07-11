@@ -25,6 +25,7 @@
                 required="true"
                 submit=".onPurchaseOrderSubmit"
                 maxLength="10"
+                value="4500000252"
             />
         </VBox>
     </Page>
