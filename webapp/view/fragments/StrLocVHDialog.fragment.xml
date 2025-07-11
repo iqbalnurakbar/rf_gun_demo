@@ -1,0 +1,15 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <SelectDialog
+        id="storageLocationValueHelpDialog"
+        title="Select Storage Location"
+        confirm="onStrLocVHConfirm"
+        cancel="onStrLocVHCancel"
+        items="{/I_StorageLocationStdVH}">
+        <StandardListItem
+            title="{StorageLocation}"
+            description="{StorageLocationName}"
+            info="{Plant}" />
+    </SelectDialog>
+</core:FragmentDefinition>

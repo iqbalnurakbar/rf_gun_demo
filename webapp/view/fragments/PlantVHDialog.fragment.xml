@@ -1,0 +1,14 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <SelectDialog
+        id="plantValueHelpDialog"
+        title="Select Plant"
+        confirm="onPlantVHConfirm"
+        cancel="onPlantVHCancel"
+        items="{/I_PlantStdVH}">
+        <StandardListItem
+            title="{Plant}"
+            description="{PlantName}" />
+    </SelectDialog>
+</core:FragmentDefinition>

@@ -111,6 +111,8 @@
                         <Input
                             id="plantInput"
                             value="{Plant}"
+                            showValueHelp="true"
+                            valueHelpRequest="onPlantVHRequest"
                         />
                     </VBox>
                     <VBox class="sapUiSmallMargin" width="7rem">
@@ -121,6 +123,8 @@
                         <Input
                             id="storageLocationInput"
                             value="{StorageLocation}"
+                            showValueHelp="true"
+                            valueHelpRequest="onStrLocVHRequest"
                         />
                     </VBox>
                     <VBox class="sapUiSmallMargin">
@@ -129,7 +133,7 @@
                             labelFor="attachment"
                         />
                         <HBox id="attachment">
-                            <Button
+                            <!-- <Button
                                 class="sapUiTinyMarginEnd"
                                 id="uploadButton"
                                 icon="sap-icon://upload"
@@ -137,7 +141,11 @@
                             <Button
                                 id="downloadButton"
                                 icon="sap-icon://download"
-                            />
+                            /> -->
+                            <Button icon="sap-icon://upload" class="sapUiTinyMarginEnd"
+                                press="onUpload" />
+                            <Button icon="sap-icon://download" class="sapUiTinyMarginEnd"
+                                press="onDownload" />
                         </HBox>
 
                     </VBox>
