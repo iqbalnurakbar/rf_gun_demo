@@ -56,7 +56,7 @@ sap.ui.define(
       onUpload: async function () {
         this.loadFragment({
           id: "uploadFileDialog",
-          name: "rfgundemo.view.fragment.UploadFileDialog",
+          name: "rfgundemo.view.fragments.UploadFileDialog",
           controller: this,
         }).then((fragment) => {
           this.dialog = fragment;
@@ -81,28 +81,28 @@ sap.ui.define(
           const oContext = this.getView().getBindingContext();
           console.log("Binding Context:", oContext);
 
-          // const oAction = oModel.bindContext(
-          //   "/ZR_PO_VIEW/com.sap.gateway.srvd.zui_po_view.v0001.uploadExcel(...)",
-          //   oContext
-          // );
+          const oAction = oModel.bindContext(
+            "/ZC_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.uploadFile(...)",
+            oContext
+          );
 
           // // * Set required parameters on the action
-          // oAction.setParameter("fileName", this.fileName);
-          // oAction.setParameter("fileContent", this.fileContent);
-          // oAction.setParameter("mimeType", this.mimeType);
-          // oAction.setParameter("fileExtension", this.fileExtension);
+          oAction.setParameter("fileName", this.fileName);
+          oAction.setParameter("fileContent", this.fileContent);
+          oAction.setParameter("mimeType", this.mimeType);
+          oAction.setParameter("fileExtension", this.fileExtension);
 
           // // * Invoke the service call
-          // oAction.execute();
+          oAction.execute();
 
           // // * On success: notify user & clean up
-          // MessageToast.show(this._getText("uploadSuccess"));
-          // this.dialog.close();
-          // this.dialog.destroy();
+          MessageToast.show("Upload Success");
+          this.dialog.close();
+          this.dialog.destroy();
         } catch (error) {
           // ! Upload failed: log error & inform user
           console.error("Upload failed:", error);
-          MessageToast.show(this._getText("uploadFailed", [error.message]));
+          MessageToast.show("Upload Failed");
         }
       },
 
@@ -204,14 +204,13 @@ sap.ui.define(
           .created()
           .then(() => {
             MessageToast.show("Data posted successfully");
+            that._loadPurchaseOrderData(aBAPIData[0].PurchaseOrder);
+            oModel.refresh();
           })
           .catch((oError) => {
-            console.log("=== ERROR DETAILS ===");
-            console.log("Error object:", oError);
-            console.log("Error message:", oError.message);
-            console.log("Error status:", oError.status);
-            console.error("Full error:", oError);
             MessageToast.show("Error posting data: " + oError.message);
+            that._loadPurchaseOrderData(aBAPIData[0].PurchaseOrder);
+            oModel.refresh();
           });
       },
 
@@ -230,6 +229,29 @@ sap.ui.define(
             }.bind(this),
           });
         }
+      },
+
+      _resetAfterSuccessfulPost: function () {
+        const oList = this.byId('orderList');
+
+        // Clear all selections
+        oList.removeSelections();
+
+        // Reset all confirm buttons and quantity receive fields
+        oList.getItems().forEach(function (oItem) {
+          const oHBox = oItem.getContent()[0];
+          const aVBoxes = oHBox.getItems();
+
+          // Reset Quantity Receive input (index 4)
+          const oQuantityReceiveInput = aVBoxes[4].getItems()[1];
+          oQuantityReceiveInput.setValue("");
+
+          // Reset Confirm Status button (index 9)
+          const oConfirmButton = aVBoxes[9].getItems()[1];
+          oConfirmButton.setPressed(false);
+          oConfirmButton.setIcon("");
+          oConfirmButton.setType("Default");
+        });
       },
 
       _loadPurchaseOrderData: function (sPurchaseOrder) {
@@ -251,24 +273,24 @@ sap.ui.define(
                 );
               } else {
                 // Use setTimeout to ensure the DOM is rendered
-                setTimeout(() => {
-                  var oFirstItem = oList.getItems()[0];
-                  if (oFirstItem) {
-                    // Assuming a standard way to find the input
-                    var oInput = oFirstItem
-                      .getContent()[0]
-                      ?.getItems()[4]
-                      ?.getItems()[1];
+                // setTimeout(() => {
+                //   var oFirstItem = oList.getItems()[0];
+                //   if (oFirstItem) {
+                //     // Assuming a standard way to find the input
+                //     var oInput = oFirstItem
+                //       .getContent()[0]
+                //       ?.getItems()[4]
+                //       ?.getItems()[1];
 
-                    if (oInput) {
-                      oInput.focus();
-                    } else {
-                      console.warn('Quantity Receive Input not found');
-                    }
-                  } else {
-                    console.warn('First item not found');
-                  }
-                }, 100);
+                //     if (oInput) {
+                //       oInput.focus();
+                //     } else {
+                //       console.warn('Quantity Receive Input not found');
+                //     }
+                //   } else {
+                //     console.warn('First item not found');
+                //   }
+                // }, 100);
               }
             }.bind(this),
             dataRequested: function () { },
@@ -328,7 +350,6 @@ sap.ui.define(
       },
 
       onPlantVHCancel: function (oEvent) {
-        oEvent.getSource().close();
       },
 
       onStrLocVHRequest: async function (oEvent) {
@@ -354,7 +375,6 @@ sap.ui.define(
       },
 
       onStrLocVHCancel: function (oEvent) {
-        oEvent.getSource().close();
       }
     });
   }

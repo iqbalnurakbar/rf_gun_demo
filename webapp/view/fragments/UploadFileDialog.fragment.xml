@@ -1,0 +1,30 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:l="sap.ui.layout"
+    xmlns:u="sap.ui.unified"
+    xmlns="sap.m">
+    <Dialog id="idFIleDialog" title="Upload File Attachment">
+        <VBox id="idVbox" width="100%">
+            <core:InvisibleText id="idInvisibleText" text="File" />
+            <f:SimpleForm id="idSimpleForm" editable="true" layout="ResponsiveGridLayout"
+                maxContainerCols="2">
+                <f:content>
+                    <Label id="idFileUploadlabel" required="true" text="File" />
+                    <u:FileUploader id="idFileUpload" name="internalFileUpload"
+                        change="onFileChange" width="100%" style="Emphasized"
+                        placeholder="Upload your file" sendXHR="false" />
+                </f:content>
+            </f:SimpleForm>
+        </VBox>
+        <footer>
+            <Toolbar id="idToolbar">
+                <content>
+                    <Button id="idUploadButton" text="Upload" type="Emphasized"
+                        press="onUploadPress" icon="sap-icon://upload-to-cloud" />
+                    <Button id="idCancelButton" text="Cancel" press="onCancelPress"
+                        icon="sap-icon://cancel" />
+                </content>
+            </Toolbar>
+        </footer>
+    </Dialog>
+</core:FragmentDefinition>
