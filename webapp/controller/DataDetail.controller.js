@@ -55,9 +55,9 @@ sap.ui.define(
           const MaterialDescription = aVBoxes[2].getItems()[1].getValue();
           const QuantitySuggest = parseFloat(aVBoxes[3].getItems()[1].getValue()).toFixed(3);
           const QuantityReceive = parseFloat(aVBoxes[4].getItems()[1].getValue()).toFixed(3);
-          //const QuantityUnit = aVBoxes[5].getItems()[1].getValue(),
-          const Plant = aVBoxes[5].getItems()[1].getValue();
-          const StorageLocation = aVBoxes[6].getItems()[1].getValue();
+          const QuantityUnit = aVBoxes[5].getItems()[1].getValue();
+          const Plant = aVBoxes[6].getItems()[1].getValue();
+          const StorageLocation = aVBoxes[7].getItems()[1].getValue();
           const ConfirmStatus = true;
 
           oItemData['MaterialDocument'] = MaterialDocument;
@@ -67,7 +67,7 @@ sap.ui.define(
           oItemData['MaterialDescription'] = MaterialDescription;
           oItemData['QuantitySuggest'] = QuantitySuggest;
           oItemData['QuantityReceive'] = QuantityReceive;
-          oItemData['QuantityUnit'] = "PC";
+          oItemData['QuantityUnit'] = QuantityUnit;
           oItemData['Plant'] = Plant;
           oItemData['StorageLocation'] = StorageLocation;
           oItemData['ConfirmStatus'] = ConfirmStatus;
@@ -140,7 +140,7 @@ sap.ui.define(
           template: this.byId('orderList').getItems()[0].clone(),
           events: {
             dataReceived: function (oEvent) {
-              this.getView().setBusy(false);
+              this.getView().setBusy(false);  //Disable Loading
               if (!oEvent.getParameters().data) {
                 MessageToast.show(
                   'No data found for Purchase Order: ' + sPurchaseOrder
@@ -193,14 +193,6 @@ sap.ui.define(
         } else {
           oButton.setIcon("");
           oButton.setType("Default");
-        }
-
-        // Update model data (Confirm Status)
-        const oContext = oButton.getBindingContext('purchaseOrder');
-        if (oContext) {
-          const sPath = oContext.getPath() + '/Co nfirmStatus';
-          const oPurchaseOrderModel = this.getOwnerComponent().getModel('purchaseOrder');
-          oPurchaseOrderModel.setProperty(sPath, bPressed);
         }
 
         // Update list item selection state
