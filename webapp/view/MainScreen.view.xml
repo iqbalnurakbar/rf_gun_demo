@@ -1,24 +1,49 @@
+<!--
+    Main Screen View
+    Purpose: This view provides a simple interface for scanning or entering a purchase order number.
+    It includes a label, input field, and a footer bar for mobile device hints.
+-->
 <mvc:View
     controllerName="rfgundemo.controller.MainScreen"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     displayBlock="true"
 >
+
+    <!--
+        Main page container with title and ID.
+        Acts as the root page of the screen and provides a structured layout.
+    -->
     <Page
         title="SMR Demo Apps"
         id="mainScreenPage"
     >
+
+        <!--
+            VBox layout centers the form content vertically and horizontally.
+            Provides margin and full height/width to ensure responsive behavior.
+        -->
         <VBox
             class="sapUiSmallMargin"
             justifyContent="Center"
             alignItems="Center"
-            fitContainer="true"
+            height="100%"
+            width="100%"
         >
+
+            <!--
+                Label for the Purchase Order input field.
+                Improves accessibility and UX clarity.
+            -->
             <Label
                 text="Purchase Order (Scan)"
                 labelFor="purchaseOrderNumber"
             />
 
+            <!--
+                Input field for entering or scanning the Purchase Order number.
+                Supports keyboard "Enter" (or scanner trigger) via 'submit' event.
+            -->
             <Input
                 placeholder="Purchase Order"
                 id="purchaseOrderNumber"
@@ -26,7 +51,29 @@
                 submit=".onPurchaseOrderSubmit"
                 maxLength="10"
                 value="4500000252"
+                liveChange=".onLiveChangeCheckNumber"
+                
             />
         </VBox>
+
+        <!--
+            Footer bar only visible on phone devices.
+            Displays shortcut hints to guide users using physical keys.
+        -->
+        <footer>
+            <Bar visible="{device>/system/phone}">
+                <contentMiddle>
+                    <Text
+                        text="Back (F3)"
+                        class="sapUiSmallMargin"
+                    />
+                    <Text
+                        text="Enter (F4)"
+                        class="sapUiSmallMargin"
+                    />
+                </contentMiddle>
+            </Bar>
+        </footer>
+
     </Page>
 </mvc:View>

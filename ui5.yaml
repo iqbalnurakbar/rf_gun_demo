@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
 
-specVersion: "3.1"
+specVersion: '3.1'
 metadata:
   name: rfgundemo
 type: application
@@ -15,6 +15,10 @@ server:
             - /resources
             - /test-resources
           url: https://ui5.sap.com
+        # backend:
+        #   - path: /sap
+        #     url: https://handhana01.hand-china.com:44350
+        #     client: "300"
         backend:
           - path: /sap
             url: https://192.168.11.90:44310

@@ -1,4 +1,11 @@
+<!--
+    Data Detail View
+    Purpose: Displays detailed line item data for a selected Purchase Order.
+    Includes table layout for desktop and carousel layout for phones, plus a toolbar with action
+buttons.
+-->
 <mvc:View
+    xmlns:f="sap.f"
     xmlns:layout="sap.ui.layout"
     controllerName="rfgundemo.controller.DataDetail"
     xmlns:mvc="sap.ui.core.mvc"
@@ -6,6 +13,10 @@
     xmlns:l="sap.ui.layout"
     displayBlock="true"
 >
+    <!--
+        Main page container with title and navigation button.
+        Provides padding and responsive behavior.
+    -->
     <Page
         id="dataDetailPage"
         title="SMR Demo Apps"
@@ -13,156 +24,296 @@
         navButtonPress=".onNavBack"
         class="sapUiResponsiveContentPadding"
     >
-        <List
-            id="orderList"
+        <!--
+            Subheader toolbar with page title and "Save and Post" action button.
+        -->
+        <subHeader>
+            <Toolbar>
+                <Title
+                    id="orderDetailsTitle"
+                    text="Order Details"
+                    class="sapUiTinyMarginBegin"
+                />
+                <ToolbarSpacer />
+                <Button
+                    id="saveAndPostButton"
+                    icon="sap-icon://save"
+                    press=".onSaveAndPostButtonPress"
+                    text="Save and Post"
+                    type="Emphasized"
+                    class="sapUiTinyMarginEnd"
+                />
+            </Toolbar>
+        </subHeader>
+
+        <!--
+            Table to display Purchase Order line items for desktop/tablet users.
+            Uses multi-selection and OData list binding.
+        -->
+        <Table
+            id="orderTable"
             mode="MultiSelect"
+            items="{path: '/ZR_RF_PO_ITEM_MAIN_BETA'}"
+            inset="false"
+            class="sapUiResponsiveContentPadding"
+            visible="{= !${device>/system/phone} }"
         >
-            <headerToolbar>
-                <Toolbar>
-                    <Title id="orderDetailsTitle" />
-                    <ToolbarSpacer />
-                    <Button
-                        id="saveAndPostButton"
-                        icon="sap-icon://save"
-                        press=".onSaveAndPostButtonPress"
-                        text="Save and Post"
-                        type="Emphasized"
-                    />
-                </Toolbar>
-            </headerToolbar>
-            <CustomListItem id="orderListItem">
-                <HBox>
-                    <VBox class="sapUiSmallMargin" width="3rem">
-                        <Label
-                            text="No."
-                            labelFor="purchaseOrderItemNoInput"
-                        />
+            <!--
+                Table Columns (Desktop/Tablet view).
+                Each column displays a specific field from the PO line item.
+            -->
+            <columns>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                >
+                    <Text text="Line No" />
+                </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                    visible="false"
+                >
+                    <Text text="Material" />
+                </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                    visible="false"
+                >
+                    <Text text="Material Desc" />
+                </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                >
+                    <Text text="Material" />
+                </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                >
+                    <Text text="Quantity Suggest" />
+                </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                >
+                    <Text text="Quantity Receive" />
+                </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                >
+                    <Text text="Unit" />
+                </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                >
+                    <Text text="Plant" />
+                </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                >
+                    <Text text="Storage Location" />
+                </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                >
+                    <Text text="Confirm" />
+                </Column>
+            </columns>
+
+            <!--
+                Table Row Items
+                Each row corresponds to one Purchase Order item.
+            -->
+            <items>
+                <ColumnListItem>
+                    <cells>
                         <Input
-                            id="purchaseOrderItemNoInput"
                             value="{PurchaseOrderItemNo}"
                             editable="false"
-                        />
-                    </VBox>
-                    <VBox class="sapUiSmallMargin" width="20rem">
-                        <Label
-                            text="Material"
-                            labelFor="materialInput"
+                            width="100%"
                         />
                         <Input
-                            id="materialInput"
                             value="{Material}"
                             editable="false"
+                            width="100%"
                             visible="false"
                         />
                         <Input
-                            id="materialInputShow"
-                            value="{Material} {MaterialDescription}"
-                            editable="false"
-                        />
-                    </VBox>
-                    <VBox class="sapUiSmallMargin" visible="false">
-                        <Label
-                            text="Material Desc"
-                            labelFor="materialDescriptionInput"
-                        />
-                        <Input
-                            id="materialDescriptionInput"
                             value="{MaterialDescription}"
                             editable="false"
-                        />
-                    </VBox>
-                    <VBox class="sapUiSmallMargin">
-                        <Label
-                            text="Quantity Suggest"
-                            labelFor="quantitySuggestInput"
+                            width="100%"
+                            visible="false"
                         />
                         <Input
-                            id="quantitySuggestInput"
+                            value="{Material} {MaterialDescription}"
+                            editable="false"
+                            width="100%"
+                        />
+                        <Input
                             value="{QuantitySuggest}"
                             editable="false"
-                        />
-                    </VBox>
-                    <VBox class="sapUiSmallMargin">
-                        <Label
-                            text="Quantity Receive"
-                            labelFor="quantityReceiveInput"
+                            width="100%"
+                            liveChange=".onLiveChangeCheckNumber"
                         />
                         <Input
-                            id="quantityReceiveInput"
                             value=""
-                        />
-                    </VBox>
-                    <VBox class="sapUiSmallMargin" width="3rem">
-                        <Label
-                            text="Unit"
-                            labelFor="unit"
+                            width="100%"
+                            liveChange=".onLiveChangeCheckNumber"
                         />
                         <Input
-                            id="unit"
                             value="{PurchaseOrderQuantityUnit}"
                             editable="false"
-                        />
-                    </VBox>
-                    <VBox class="sapUiSmallMargin" width="7rem">
-                        <Label
-                            text="Plant"
-                            labelFor="plantInput"
+                            width="100%"
                         />
                         <Input
-                            id="plantInput"
                             value="{Plant}"
-                            showValueHelp="true"
-                            valueHelpRequest="onPlantVHRequest"
-                        />
-                    </VBox>
-                    <VBox class="sapUiSmallMargin" width="7rem">
-                        <Label
-                            text="Storage Location"
-                            labelFor="storageLocationInput"
+                            width="100%"
                         />
                         <Input
-                            id="storageLocationInput"
                             value="{StorageLocation}"
-                            showValueHelp="true"
-                            valueHelpRequest="onStrLocVHRequest"
-                        />
-                    </VBox>
-                    <VBox class="sapUiSmallMargin">
-                        <Label
-                            text="Attachment"
-                            labelFor="attachment"
-                        />
-                        <HBox id="attachment">
-                            <!-- <Button
-                                class="sapUiTinyMarginEnd"
-                                id="uploadButton"
-                                icon="sap-icon://upload"
-                            />
-                            <Button
-                                id="downloadButton"
-                                icon="sap-icon://download"
-                            /> -->
-                            <Button icon="sap-icon://upload" class="sapUiTinyMarginEnd"
-                                press="onUpload" />
-                            <Button icon="sap-icon://download" class="sapUiTinyMarginEnd"
-                                press="onDownload" />
-                        </HBox>
-
-                    </VBox>
-                    <VBox class="sapUiSmallMargin">
-                        <Label
-                            text="Confirm Status"
-                            labelFor="confirmStatusButton"
+                            width="100%"
                         />
                         <ToggleButton
-                            id="confirmStatusButton"
                             text="OK"
+                            press=".onOkButtonPress"
                             width="100%"
-                            press="onOkButtonPress"
+                            type="Emphasized"
                         />
-                    </VBox>
-                </HBox>
-            </CustomListItem>
-        </List>
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
+
+        <!--
+            Carousel for displaying Purchase Order line items on phones.
+            Uses a card-style layout for small screens.
+        -->
+        <Carousel
+            id="orderCarousel"
+            pages="{path: '/ZR_RF_PO_ITEM_MAIN_BETA'}"
+            visible="{device>/system/phone}"
+            arrowsPlacement="PageIndicator"
+            pageChanged=".onCarouselPageChanged"
+        >
+            <pages>
+                <VBox class="sapUiSmallMargin">
+                    <items>
+                        <!-- Line No -->
+                        <VBox class="sapUiSmallMargin">
+                            <Label text="Line No:" />
+                            <Input
+                                value="{PurchaseOrderItemNo}"
+                                editable="false"
+                            />
+                        </VBox>
+
+                        <!-- Material and Description -->
+                        <HBox class="sapUiSmallMargin">
+                            <VBox class="sapUiSmallMarginEnd">
+                                <Label text="Material:" />
+                                <Input
+                                    value="{Material}"
+                                    editable="false"
+                                />
+                            </VBox>
+                            <VBox>
+                                <Label text="Material Desc:" />
+                                <Input
+                                    value="{MaterialDescription}"
+                                    editable="false"
+                                />
+                            </VBox>
+                        </HBox>
+
+                        <!-- Quantity Suggest and Receive -->
+                        <HBox class="sapUiSmallMargin">
+                            <VBox class="sapUiSmallMarginEnd">
+                                <Label text="Quantity Suggest:" />
+                                <Input
+                                    value="{QuantitySuggest}"
+                                    editable="false"
+                                    liveChange=".onLiveChangeCheckNumber"
+                                />
+                            </VBox>
+                            <VBox>
+                                <Label text="Quantity Receive:" />
+                                <Input
+                                    value=""
+                                    liveChange=".onLiveChangeCheckNumber"
+                                />
+                            </VBox>
+                        </HBox>
+
+                        <!-- Unit -->
+                        <VBox class="sapUiSmallMargin">
+                            <Label text="Unit:" />
+                            <Input
+                                value="{PurchaseOrderQuantityUnit}"
+                                editable="false"
+                            />
+                        </VBox>
+
+                        <!-- Plant -->
+                        <VBox class="sapUiSmallMargin">
+                            <Label text="Plant:" />
+                            <Input value="{Plant}" />
+                        </VBox>
+
+                        <!-- Storage Location -->
+                        <VBox class="sapUiSmallMargin">
+                            <Label text="Storage Location:" />
+                            <Input value="{StorageLocation}" />
+                        </VBox>
+
+                        <!-- Confirm Button -->
+                        <HBox class="sapUiSmallMargin">
+                            <ToggleButton
+                                text="OK"
+                                press=".onOkButtonPress"
+                                width="100%"
+                                type="Emphasized"
+                            />
+                        </HBox>
+                    </items>
+                </VBox>
+            </pages>
+        </Carousel>
+
+        <!--
+            Footer bar with keyboard shortcut hints for phone users.
+        -->
+        <footer>
+            <Bar visible="{device>/system/phone}">
+                <contentMiddle>
+                    <Text
+                        text="Back (F3)"
+                        class="sapUiSmallMargin"
+                    />
+                    <Text
+                        text="Next (F5)"
+                        class="sapUiSmallMargin"
+                    />
+                    <Text
+                        text="Previous (F6)"
+                        class="sapUiSmallMargin"
+                    />
+                    <Text
+                        text="(un)Confirm (F7)"
+                        class="sapUiSmallMargin"
+                    />
+                    <Text
+                        text="Save (F8)"
+                        class="sapUiSmallMargin"
+                    />
+                </contentMiddle>
+            </Bar>
+        </footer>
     </Page>
 </mvc:View>
