@@ -114,7 +114,7 @@ sap.ui.define(
         const oModel = this.getView().getModel();
 
         // Backend entity path to check PO data
-        const sPath = '/ZR_RF_PO_ITEM_MAIN_BETA';
+        const sPath = '/ZR_RF_PO_ITEM_MAIN';
 
         // Create filter to search for matching PO number
         const aFilters = [
