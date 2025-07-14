@@ -50,9 +50,8 @@
                 required="true"
                 submit=".onPurchaseOrderSubmit"
                 maxLength="10"
-                value="4500000252"
+                value="4500000254"
                 liveChange=".onLiveChangeCheckNumber"
-                
             />
         </VBox>
 
