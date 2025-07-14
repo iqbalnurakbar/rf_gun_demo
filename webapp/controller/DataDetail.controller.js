@@ -233,7 +233,7 @@ sap.ui.define(
             oItemData['QuantityUnit'] = aItems[3].getItems()[1].getValue();
             oItemData['Plant'] = aItems[4].getItems()[1].getValue();
             oItemData['StorageLocation'] = aItems[5].getItems()[1].getValue();
-            oItemData['ConfirmStatus'] = aItems[6].getItems()[0].getPressed();
+            oItemData['ConfirmStatus'] = aItems[7].getItems()[0].getPressed();
 
             aSelectedData.push(oItemData);
           }
@@ -262,7 +262,7 @@ sap.ui.define(
               oItemData['QuantityUnit'] = aCells[6].getValue();
               oItemData['Plant'] = aCells[7].getValue();
               oItemData['StorageLocation'] = aCells[8].getValue();
-              oItemData['ConfirmStatus'] = aCells[9].getPressed();
+              oItemData['ConfirmStatus'] = aCells[10].getPressed();
 
               aSelectedData.push(oItemData);
             }.bind(this)
@@ -310,6 +310,60 @@ sap.ui.define(
             oInput.focus();
           }, 200);
         }
+      },
+
+      onPlantVHRequest: async function (oEvent) {
+        const oInput = oEvent.getSource();
+        this._currentPlantInput = oInput;
+
+        if (!this._plantVHDialog) {
+          this._plantVHDialog = await Fragment.load({
+            name: "rfgundemo.view.fragments.PlantVHDialog",
+            controller: this
+          });
+          this.getView().addDependent(this._plantVHDialog);
+        }
+
+        this._plantVHDialog.open();
+      },
+
+      onPlantVHConfirm: function (oEvent) {
+        const oSelectedItem = oEvent.getParameter("selectedItem");
+        if (oSelectedItem && this._currentPlantInput) {
+          const sPlantCode = oSelectedItem.getTitle();
+          this._currentPlantInput.setValue(sPlantCode);
+        }
+        oEvent.getSource().close();
+      },
+
+      onPlantVHCancel: function (oEvent) {
+        oEvent.getSource().close();
+      },
+
+      onStrLocVHRequest: async function (oEvent) {
+        const oInput = oEvent.getSource();
+        this._currentStrLocInput = oInput;
+        if (!this._strLocVHDialog) {
+          this._strLocVHDialog = await Fragment.load({
+            name: "rfgundemo.view.fragments.StrLocVHDialog",
+            controller: this
+          });
+          this.getView().addDependent(this._strLocVHDialog);
+        }
+        this._strLocVHDialog.open();
+      },
+
+      onStrLocVHConfirm: function (oEvent) {
+        const oSelectedItem = oEvent.getParameter("selectedItem");
+        if (oSelectedItem && this._currentStrLocInput) {
+          const sStorageLocationCode = oSelectedItem.getTitle();
+          this._currentStrLocInput.setValue(sStorageLocationCode);
+        }
+        oEvent.getSource().close();
+      },
+
+      onStrLocVHCancel: function (oEvent) {
+        oEvent.getSource().close();
       },
 
       // =====================================================

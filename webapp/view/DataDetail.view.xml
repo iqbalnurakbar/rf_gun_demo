@@ -123,6 +123,12 @@ buttons.
                     demandPopin="true"
                     minScreenWidth="Tablet"
                 >
+                    <Text text="Attachment" />
+                </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
+                >
                     <Text text="Confirm" />
                 </Column>
             </columns>
@@ -175,11 +181,21 @@ buttons.
                         <Input
                             value="{Plant}"
                             width="100%"
+                            showValueHelp="true"
+                            valueHelpRequest="onPlantVHRequest"
                         />
                         <Input
                             value="{StorageLocation}"
                             width="100%"
+                            showValueHelp="true"
+                            valueHelpRequest="onStrLocVHRequest"
                         />
+                        <HBox class="sapUiSmallMargin">
+                            <Button icon="sap-icon://upload" class="sapUiTinyMarginEnd"
+                                press="onUpload" />
+                            <Button icon="sap-icon://download" class="sapUiTinyMarginEnd"
+                                press="onDownload" />
+                        </HBox>
                         <ToggleButton
                             text="OK"
                             press=".onOkButtonPress"
@@ -216,17 +232,24 @@ buttons.
 
                         <!-- Material and Description -->
                         <HBox class="sapUiSmallMargin">
-                            <VBox class="sapUiSmallMarginEnd">
+                            <VBox class="sapUiSmallMarginEnd" visible="false">
                                 <Label text="Material:" />
                                 <Input
                                     value="{Material}"
                                     editable="false"
                                 />
                             </VBox>
-                            <VBox>
+                            <VBox visible="false">
                                 <Label text="Material Desc:" />
                                 <Input
                                     value="{MaterialDescription}"
+                                    editable="false"
+                                />
+                            </VBox>
+                            <VBox width="100%">
+                                <Label text="Material" />
+                                <Input
+                                    value="{Material} {MaterialDescription}"
                                     editable="false"
                                 />
                             </VBox>
@@ -263,14 +286,24 @@ buttons.
                         <!-- Plant -->
                         <VBox class="sapUiSmallMargin">
                             <Label text="Plant:" />
-                            <Input value="{Plant}" />
+                            <Input value="{Plant}" showValueHelp="true"
+                                valueHelpRequest="onPlantVHRequest" />
                         </VBox>
 
                         <!-- Storage Location -->
                         <VBox class="sapUiSmallMargin">
                             <Label text="Storage Location:" />
-                            <Input value="{StorageLocation}" />
+                            <Input value="{StorageLocation}" showValueHelp="true"
+                                valueHelpRequest="onStrLocVHRequest" />
                         </VBox>
+
+                        <!-- Attachment Button -->
+                        <HBox class="sapUiSmallMargin">
+                            <Button icon="sap-icon://upload" class="sapUiTinyMarginEnd"
+                                press="onUpload" />
+                            <Button icon="sap-icon://download" class="sapUiTinyMarginEnd"
+                                press="onDownload" />
+                        </HBox>
 
                         <!-- Confirm Button -->
                         <HBox class="sapUiSmallMargin">
