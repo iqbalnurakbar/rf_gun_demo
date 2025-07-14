@@ -53,7 +53,7 @@ buttons.
         <Table
             id="orderTable"
             mode="MultiSelect"
-            items="{path: '/ZR_RF_PO_ITEM_MAIN_BETA'}"
+            items="{path: '/ZR_RF_PO_ITEM_MAIN'}"
             inset="false"
             class="sapUiResponsiveContentPadding"
             visible="{= !${device>/system/phone} }"
@@ -213,7 +213,7 @@ buttons.
         -->
         <Carousel
             id="orderCarousel"
-            pages="{path: '/ZR_RF_PO_ITEM_MAIN_BETA'}"
+            pages="{path: '/ZR_RF_PO_ITEM_MAIN'}"
             visible="{device>/system/phone}"
             arrowsPlacement="PageIndicator"
             pageChanged=".onCarouselPageChanged"
@@ -323,8 +323,9 @@ buttons.
             Footer bar with keyboard shortcut hints for phone users.
         -->
         <footer>
-            <Bar visible="{device>/system/phone}">
-                <contentMiddle>
+            <OverflowToolbar>
+                <!-- Phone keyboard shortcuts - only visible on phone devices -->
+                <HBox visible="{device>/system/phone}" class="sapUiContentPadding">
                     <Text
                         text="Back (F3)"
                         class="sapUiSmallMargin"
@@ -345,8 +346,28 @@ buttons.
                         text="Save (F8)"
                         class="sapUiSmallMargin"
                     />
-                </contentMiddle>
-            </Bar>
+                </HBox>
+
+                <ToolbarSpacer />
+
+                <!-- MessagePopover Button - only visible on non-phone devices -->
+                <Button id="messagePopoverBtn"
+                    visible="{=!!${message>/}.length}"
+                    icon="{
+                        parts: ['message>/'],
+                        formatter: '.getButtonIcon'
+                    }"
+                    type="{
+                        parts: ['message>/'],
+                        formatter: '.getButtonType'
+                    }"
+                    text="{
+                        parts: ['message>/'],
+                        formatter: '.getMessageCount'
+                    }"
+                    press="onShowMessagePopover"
+                    ariaHasPopup="Dialog" />
+            </OverflowToolbar>
         </footer>
     </Page>
 </mvc:View>

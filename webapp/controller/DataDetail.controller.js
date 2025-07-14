@@ -8,6 +8,11 @@ sap.ui.define(
     'rfgundemo/util/Utility',
     "sap/ui/core/Fragment",
     "sap/m/plugins/UploadSetwithTable",
+    'sap/m/MessagePopover',
+    'sap/m/MessageItem',
+    'sap/ui/core/Messaging',
+    'sap/ui/core/message/Message',
+    'sap/ui/core/message/MessageType'
   ],
   function (
     Controller,
@@ -15,9 +20,14 @@ sap.ui.define(
     History,
     Filter,
     FilterOperator,
-    Utility
-    // @ts-ignore
-    , Fragment, UploadSetwithTable) {
+    Utility,
+    Fragment,
+    UploadSetwithTable,
+    MessagePopover,
+    MessageItem,
+    Messaging,
+    Message,
+    MessageType) {
     'use strict';
 
     return Controller.extend('rfgundemo.controller.DataDetail', {
@@ -53,6 +63,11 @@ sap.ui.define(
 
         // Register keyboard shortcut support
         this._attachInputEventDelegates();
+
+        // Message popover initialization
+        this._MessageManager = Messaging;
+        this._MessageManager.removeAllMessages();
+        this.getView().setModel(this._MessageManager.getMessageModel(), "message");
       },
 
       /**
@@ -99,6 +114,12 @@ sap.ui.define(
       onUploadPress: async function () {
         if (!this.fileContent || !this.fileName) {
           MessageToast.show("Please select a file to upload.");
+          this._addMessage(
+            "Please select a file to upload.",
+            MessageType.Error,
+            "",
+            ""
+          );
           return;
         }
 
@@ -276,7 +297,7 @@ sap.ui.define(
         }
 
         // Submit data to backend
-        this._postToMigoAPI(aSelectedData);
+        this._postToGMBAPI(aSelectedData);
       },
 
       /**
@@ -366,10 +387,60 @@ sap.ui.define(
         oEvent.getSource().close();
       },
 
+      // MessagePopover Methods
+      onShowMessagePopover: function (oEvent) {
+        if (!this._oMessagePopover) {
+          this._createMessagePopover();
+        }
+        this._oMessagePopover.toggle(oEvent.getSource());
+      },
+
+
+
+      // Helper methods for button formatting
+      getMessageCount: function () {
+        var aMessages = this._MessageManager.getMessageModel().getData();
+        return aMessages.length || "";
+      },
+
+      getButtonType: function () {
+        var aMessages = this._MessageManager.getMessageModel().getData();
+        var bHasError = aMessages.some(function (msg) { return msg.type === "Error"; });
+        var bHasWarning = aMessages.some(function (msg) { return msg.type === "Warning"; });
+
+        if (bHasError) return "Negative";
+        if (bHasWarning) return "Critical";
+        return "Neutral";
+      },
+
+      getButtonIcon: function () {
+        var aMessages = this._MessageManager.getMessageModel().getData();
+        var bHasError = aMessages.some(function (msg) { return msg.type === "Error"; });
+        var bHasWarning = aMessages.some(function (msg) { return msg.type === "Warning"; });
+
+        if (bHasError) return "sap-icon://error";
+        if (bHasWarning) return "sap-icon://alert";
+        return "sap-icon://information";
+      },
+
       // =====================================================
       // PRIVATE METHODS
       // =====================================================
 
+      _createMessagePopover: function () {
+        this._oMessagePopover = new MessagePopover({
+          items: {
+            path: "message>/",
+            template: new MessageItem({
+              title: "{message>message}",
+              subtitle: "{message>additionalText}",
+              type: "{message>type}",
+              description: "{message>description}"
+            })
+          }
+        });
+        this.getView().addDependent(this._oMessagePopover);
+      },
       /**
        * Attaches keyboard shortcuts to the page.
        * F3: Back, F8: Post, F7: OK — all devices
@@ -519,10 +590,70 @@ sap.ui.define(
 
       /**
        * Posts collected item data to backend MIGO API.
-       * @param {Array} aBAPIData - List of items to be posted
-       * @private
        */
-      _postToMigoAPI: function (aBAPIData) {
+      // _postToGMBAPI: function (aBAPIData) {
+      //   var oDeviceModel = this.getView().getModel('device');
+      //   var bIsPhone = oDeviceModel.getProperty('/system/phone');
+      //   var oModel = this.getView().getModel();
+      //   var body = {
+      //     PurchaseOrder: aBAPIData[0].PurchaseOrder,
+      //     item: [...aBAPIData],
+      //   };
+
+      //   // Send data to backend service
+      //   oModel
+      //     .bindList('/ZC_RFH_MIGO_DEMO')
+      //     .create(body)
+      //     .created()
+      //     .then(() => {
+      //       MessageToast.show('Data posted successfully');
+      //       if (bIsPhone) {
+      //         this.byId('orderCarousel').getBinding('pages').refresh();
+      //       } else {
+      //         this.byId('orderTable').getBinding('items').refresh();
+      //       }
+      //     })
+      //     .catch(oError => {
+      //       MessageToast.show('Error posting data: ' + oError.message);
+      //       oModel.refresh();
+      //     });
+      // },
+
+      // Add the missing _extractStatusCode method first:
+      _extractStatusCode: function (oError) {
+        // Try different ways to extract status code
+        if (oError && oError.status) {
+          return parseInt(oError.status);
+        }
+
+        if (oError && oError.statusCode) {
+          return parseInt(oError.statusCode);
+        }
+
+        // Check in error details
+        if (oError && oError.error && oError.error.status) {
+          return parseInt(oError.error.status);
+        }
+
+        // Check in response
+        if (oError && oError.response && oError.response.status) {
+          return parseInt(oError.response.status);
+        }
+
+        // Check if it's in the message
+        if (oError && oError.message) {
+          var statusMatch = oError.message.match(/(\d{3})/);
+          if (statusMatch) {
+            return parseInt(statusMatch[1]);
+          }
+        }
+
+        return 0; // Unknown status
+      },
+
+      // Fixed _postToGMBAPI method:
+      _postToGMBAPI: function (aBAPIData) {
+        var that = this;
         var oDeviceModel = this.getView().getModel('device');
         var bIsPhone = oDeviceModel.getProperty('/system/phone');
         var oModel = this.getView().getModel();
@@ -531,23 +662,185 @@ sap.ui.define(
           item: [...aBAPIData],
         };
 
+        // Clear previous messages before new API call
+        this._MessageManager.removeAllMessages();
+
+        // Show loading indicator
+        this.getView().setBusy(true);
+
         // Send data to backend service
-        oModel
-          .bindList('/ZC_RFH_MIGO_DEMO')
-          .create(body)
-          .created()
-          .then(() => {
+        var oListBinding = oModel.bindList('/ZC_RFH_MIGO_DEMO');
+        var oContext = oListBinding.create(body);
+
+        oContext.created()
+          .then(function (oCreatedContext) {
+            that.getView().setBusy(false);
+
+            // Success - HTTP 200/201
+            that._addMessage(
+              "Data posted successfully",
+              MessageType.Success,
+              "HTTP 201 - Created",
+              "Purchase Order " + body.PurchaseOrder + " has been processed successfully."
+            );
+
             MessageToast.show('Data posted successfully');
+
+            // Refresh the data - THIS SHOULD BE HERE IN SUCCESS
             if (bIsPhone) {
-              this.byId('orderCarousel').getBinding('pages').refresh();
+              that.byId('orderCarousel').getBinding('pages').refresh();
             } else {
-              this.byId('orderTable').getBinding('items').refresh();
+              that.byId('orderTable').getBinding('items').refresh();
             }
           })
-          .catch(oError => {
-            MessageToast.show('Error posting data: ' + oError.message);
+          .catch(function (oError) {
+            that.getView().setBusy(false);
+
+            // Extract HTTP status code and handle different error scenarios
+            var iStatusCode = that._extractStatusCode(oError);
+            var sErrorMessage = that._getErrorMessage(oError);
+            var sHttpStatusText = that._getHttpStatusText(iStatusCode);
+
+            // Add message based on HTTP status code
+            switch (iStatusCode) {
+              case 400:
+                that._addMessage(
+                  "Bad Request - Invalid data provided",
+                  MessageType.Error,
+                  "HTTP 400 - Bad Request",
+                  "Please check your input data. " + sErrorMessage
+                );
+                break;
+
+              case 401:
+                that._addMessage(
+                  "Authentication required",
+                  MessageType.Error,
+                  "HTTP 401 - Unauthorized",
+                  "Please check your login credentials. " + sErrorMessage
+                );
+                break;
+
+              case 403:
+                that._addMessage(
+                  "Access forbidden",
+                  MessageType.Error,
+                  "HTTP 403 - Forbidden",
+                  "You don't have permission to perform this operation. " + sErrorMessage
+                );
+                break;
+
+              case 404:
+                that._addMessage(
+                  "Service not found",
+                  MessageType.Error,
+                  "HTTP 404 - Not Found",
+                  "The requested service endpoint was not found. " + sErrorMessage
+                );
+                break;
+
+              case 422:
+                that._addMessage(
+                  "Validation failed",
+                  MessageType.Warning,
+                  "HTTP 422 - Unprocessable Entity",
+                  "Data validation failed. Please check your entries. " + sErrorMessage
+                );
+                break;
+
+              case 500:
+                that._addMessage(
+                  "Internal server error",
+                  MessageType.Error,
+                  "HTTP 500 - Internal Server Error",
+                  "An error occurred on the server. Please try again later. " + sErrorMessage
+                );
+                break;
+
+              case 502:
+                that._addMessage(
+                  "Bad gateway",
+                  MessageType.Error,
+                  "HTTP 502 - Bad Gateway",
+                  "Gateway error occurred. Please try again. " + sErrorMessage
+                );
+                break;
+
+              case 503:
+                that._addMessage(
+                  "Service unavailable",
+                  MessageType.Warning,
+                  "HTTP 503 - Service Unavailable",
+                  "Service is temporarily unavailable. Please try again later. " + sErrorMessage
+                );
+                break;
+
+              default:
+                that._addMessage(
+                  "Error posting data",
+                  MessageType.Error,
+                  sHttpStatusText || "HTTP " + iStatusCode,
+                  sErrorMessage || "An unexpected error occurred."
+                );
+            }
+            // Only refresh model on error, not the data binding
             oModel.refresh();
           });
+      },
+
+      // Helper method to add API messages to MessagePopover
+      _addMessage: function (sMessage, sType, sAdditionalText, sDescription) {
+        this._MessageManager.addMessages(
+          new Message({
+            message: sMessage,
+            type: sType,
+            additionalText: sAdditionalText,
+            description: sDescription,
+            processor: this.getView().getModel()
+          })
+        );
+      },
+
+      // Helper method to extract error message
+      _getErrorMessage: function (oError) {
+        if (oError && oError.message) {
+          return oError.message;
+        }
+
+        if (oError && oError.error && oError.error.message) {
+          return oError.error.message;
+        }
+
+        if (oError && oError.responseText) {
+          try {
+            var oParsed = JSON.parse(oError.responseText);
+            if (oParsed.error && oParsed.error.message) {
+              return oParsed.error.message;
+            }
+          } catch (e) {
+            return oError.responseText;
+          }
+        }
+
+        return "Unknown error occurred";
+      },
+
+      // Helper method to get HTTP status text
+      _getHttpStatusText: function (iStatusCode) {
+        var mStatusTexts = {
+          200: "HTTP 200 - OK",
+          201: "HTTP 201 - Created",
+          400: "HTTP 400 - Bad Request",
+          401: "HTTP 401 - Unauthorized",
+          403: "HTTP 403 - Forbidden",
+          404: "HTTP 404 - Not Found",
+          422: "HTTP 422 - Unprocessable Entity",
+          500: "HTTP 500 - Internal Server Error",
+          502: "HTTP 502 - Bad Gateway",
+          503: "HTTP 503 - Service Unavailable"
+        };
+
+        return mStatusTexts[iStatusCode] || "HTTP " + iStatusCode;
       },
 
       /**
@@ -629,7 +922,6 @@ sap.ui.define(
             });
           }
         } else {
-          // Simulate OK press on table row
           var oTable = this.byId('orderTable');
           var oSelectedItems = oTable.getSelectedItems();
           if (oSelectedItems.length > 0) {
