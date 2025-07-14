@@ -197,37 +197,34 @@ sap.ui.define(
           const oContext = this.getView().getBindingContext();
           console.log("Binding Context:", oContext);
 
-          const oAction = oModel.bindContext(
-            "/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.uploadFile(...)",
-            oContext
-          );
+          // const oAction = oModel.bindContext(
+          //   "/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.uploadFile(...)",
+          //   oContext
+          // );
 
-          console.log("Action Bound:", oAction);
+          // console.log("Action Bound:", oAction);
 
-          var body = {
-            PurchaseOrder: aSelectedData[0].PurchaseOrder,
-            PurchaseOrderItem: aSelectedData[0].PurchaseOrderItem,
-            Filename: aSelectedData[0].filename,
-            Filecontent: aSelectedData[0].filecontent,
-            Mimetype: aSelectedData[0].mimetype,
-            Fileextension: aSelectedData[0].fileextension,
-          };
+          // var body = {
+          //   PurchaseOrder: aSelectedData[0].PurchaseOrder,
+          //   item: [aSelectedData[0].PurchaseOrder],
+          //   attachment: [...aSelectedData],
+          // };
 
-          oModel
-            .bindList("/ZC_FILE")
-            .create(body)
-            .created()
-            .then(() => {
-              MessageToast.show("Upload Success");
-              if (bIsPhone) {
-                this.byId("orderCarousel").getBinding("pages").refresh();
-              } else {
-                this.byId("orderTable").getBinding("items").refresh();
-              }
-            })
-            .catch((oError) => {
-              MessageToast.show("Error uploading file: " + oError.message);
-            });
+          // oModel
+          //   .bindList("/ZC_FILE")
+          //   .create(body)
+          //   .created()
+          //   .then(() => {
+          //     MessageToast.show("Upload Success");
+          //     if (bIsPhone) {
+          //       this.byId("orderCarousel").getBinding("pages").refresh();
+          //     } else {
+          //       this.byId("orderTable").getBinding("items").refresh();
+          //     }
+          //   })
+          //   .catch((oError) => {
+          //     MessageToast.show("Error uploading file: " + oError.message);
+          //   });
 
           // // // * Set required parameters on the action
           // oAction.setParameter(
