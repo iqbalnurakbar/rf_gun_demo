@@ -371,12 +371,14 @@ sap.ui.define(
       onLiveChangeCheckNumber: function (oEvent) {
         var oInput = oEvent.getSource();
         // @ts-ignore
+        // @ts-ignore
         var sValue = oInput.getValue();
 
         // Match only numbers
         var sValidatedValue = sValue.replace(/[^0-9]/g, "");
 
         // Set back only numeric value
+        // @ts-ignore
         // @ts-ignore
         oInput.setValue(sValidatedValue);
       },
@@ -480,6 +482,7 @@ sap.ui.define(
         var oTable = this.byId("orderTable");
         // @ts-ignore
         var oTableItem = oButton.getParent(); // Get table row where the button is located
+        // @ts-ignore
         // @ts-ignore
         oTable.setSelectedItem(oTableItem, oButton.getPressed()); // Select or deselect row
       },
@@ -622,6 +625,7 @@ sap.ui.define(
        * F5/F6: Carousel navigation — mobile only
        * @private
        */
+
 
       _attachInputEventDelegates: function () {
         var oDataDetailPage = this.byId("dataDetailPage");
@@ -807,6 +811,12 @@ sap.ui.define(
           item: [...aBAPIData],  // This is already an array of objects
         };
 
+        // Clear previous messages before new API call
+        this._MessageManager.removeAllMessages();
+
+        // Show loading indicator
+        this.getView().setBusy(true);
+
         // Clear previous messages
         this._MessageManager.removeAllMessages();
 
@@ -925,6 +935,61 @@ sap.ui.define(
           500: "HTTP 500 - Internal Server Error",
           502: "HTTP 502 - Bad Gateway",
           503: "HTTP 503 - Service Unavailable",
+        };
+
+        return mStatusTexts[iStatusCode] || "HTTP " + iStatusCode;
+      },
+
+      // Helper method to add API messages to MessagePopover
+      _addMessage: function (sMessage, sType, sAdditionalText, sDescription) {
+        this._MessageManager.addMessages(
+          new Message({
+            message: sMessage,
+            type: sType,
+            additionalText: sAdditionalText,
+            description: sDescription,
+            processor: this.getView().getModel()
+          })
+        );
+      },
+
+      // Helper method to extract error message
+      _getErrorMessage: function (oError) {
+        if (oError && oError.message) {
+          return oError.message;
+        }
+
+        if (oError && oError.error && oError.error.message) {
+          return oError.error.message;
+        }
+
+        if (oError && oError.responseText) {
+          try {
+            var oParsed = JSON.parse(oError.responseText);
+            if (oParsed.error && oParsed.error.message) {
+              return oParsed.error.message;
+            }
+          } catch (e) {
+            return oError.responseText;
+          }
+        }
+
+        return "Unknown error occurred";
+      },
+
+      // Helper method to get HTTP status text
+      _getHttpStatusText: function (iStatusCode) {
+        var mStatusTexts = {
+          200: "HTTP 200 - OK",
+          201: "HTTP 201 - Created",
+          400: "HTTP 400 - Bad Request",
+          401: "HTTP 401 - Unauthorized",
+          403: "HTTP 403 - Forbidden",
+          404: "HTTP 404 - Not Found",
+          422: "HTTP 422 - Unprocessable Entity",
+          500: "HTTP 500 - Internal Server Error",
+          502: "HTTP 502 - Bad Gateway",
+          503: "HTTP 503 - Service Unavailable"
         };
 
         return mStatusTexts[iStatusCode] || "HTTP " + iStatusCode;
