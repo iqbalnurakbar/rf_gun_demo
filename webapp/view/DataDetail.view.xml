@@ -91,7 +91,7 @@ buttons.
                                 <Button icon="sap-icon://upload" class="sapUiTinyMarginEnd" press="onUpload" />
                                 <Button icon="sap-icon://download" class="sapUiTinyMarginEnd" press="onDownload" />
                             </HBox>
-                            <Text text="{filename}{fileextension}"/>
+                            <Text text="{filename}"/>
                         </VBox>
                         <ToggleButton text="OK" press=".onOkButtonPress" width="100%" type="Emphasized" />
                     </cells>

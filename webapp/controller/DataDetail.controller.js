@@ -197,55 +197,32 @@ sap.ui.define(
           const oContext = this.getView().getBindingContext();
           console.log("Binding Context:", oContext);
 
-          // const oAction = oModel.bindContext(
-          //   "/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.uploadFile(...)",
-          //   oContext
-          // );
+          const oAction = oModel.bindContext(
+            "/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.uploadFile(...)",
+            oContext
+          );
 
-          // console.log("Action Bound:", oAction);
+          // * Set required parameters on the action
+          oAction.setParameter(
+            "material_document",
+            aSelectedData[0].MaterialDocument
+          );
+          oAction.setParameter(
+            "purchase_order",
+            aSelectedData[0].PurchaseOrder
+          );
+          oAction.setParameter(
+            "purchase_order_item",
+            aSelectedData[0].PurchaseOrderItem
+          );
+          oAction.setParameter("fileName", aSelectedData[0].filename);
+          oAction.setParameter("fileContent", aSelectedData[0].filecontent);
+          oAction.setParameter("mimeType", aSelectedData[0].mimetype);
+          oAction.setParameter("fileExtension", aSelectedData[0].fileextension);
 
-          // var body = {
-          //   PurchaseOrder: aSelectedData[0].PurchaseOrder,
-          //   item: [aSelectedData[0].PurchaseOrder],
-          //   attachment: [...aSelectedData],
-          // };
-
-          // oModel
-          //   .bindList("/ZC_FILE")
-          //   .create(body)
-          //   .created()
-          //   .then(() => {
-          //     MessageToast.show("Upload Success");
-          //     if (bIsPhone) {
-          //       this.byId("orderCarousel").getBinding("pages").refresh();
-          //     } else {
-          //       this.byId("orderTable").getBinding("items").refresh();
-          //     }
-          //   })
-          //   .catch((oError) => {
-          //     MessageToast.show("Error uploading file: " + oError.message);
-          //   });
-
-          // // // * Set required parameters on the action
-          // oAction.setParameter(
-          //   "MaterialDocument",
-          //   aSelectedData[0].MaterialDocument
-          // );
-          // oAction.setParameter("PurchaseOrder", aSelectedData[0].PurchaseOrder);
-          // oAction.setParameter(
-          //   "PurchaseOrderItem",
-          //   aSelectedData[0].PurchaseOrderItem
-          // );
-          // oAction.setParameter("fileName", this.fileName);
-          // oAction.setParameter("fileContent", this.fileContent);
-          // oAction.setParameter("mimeType", this.mimeType);
-          // oAction.setParameter("fileExtension", this.fileExtension);
-
-          // // // * Invoke the service call
-          // oAction.execute();
-
-          // // * On success: notify user & clean up
-
+          // * Invoke the service call
+          oAction.execute();
+          MessageToast.show("File uploaded successfully");
           this.dialog.close();
           this.dialog.destroy();
         } catch (error) {
