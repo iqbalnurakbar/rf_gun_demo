@@ -225,6 +225,7 @@ sap.ui.define(
           MessageToast.show("File uploaded successfully");
           this.dialog.close();
           this.dialog.destroy();
+          oModel.refresh();
         } catch (error) {
           // ! Upload failed: log error & inform user
           console.error("Upload failed:", error);
