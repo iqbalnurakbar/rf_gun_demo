@@ -72,12 +72,7 @@ sap.ui.define(
 
       // @ts-ignore
       onDownload: function (oEvent) {
-        const oContexts = this.byId("orderList").getSelectedContexts();
-        if (oContexts && oContexts.length) {
-          oContexts.forEach((oContext) =>
-            this.oUploadPluginInstance.download(oContext, true)
-          );
-        }
+        
       },
 
       onUpload: async function () {
