@@ -1,30 +1,39 @@
 {
-  "name": "rfgundemo",
-  "version": "0.0.1",
-  "description": "RF Gun Demo Apps",
-  "keywords": [
-    "ui5",
-    "openui5",
-    "sapui5"
-  ],
-  "main": "webapp/index.html",
-  "devDependencies": {
-    "@sap/eslint-plugin-ui5-jsdocs": "2.0.5",
-    "@sap/ux-ui5-tooling": "1",
-    "@sapui5/ts-types": "~1.136.0",
-    "@ui5/cli": "^3.11.9",
-    "eslint": "8.57.0"
-  },
-  "scripts": {
-    "start": "fiori run --open \"test/flp.html#app-preview\"",
-    "start-local": "fiori run --config ./ui5-local.yaml --open \"test/flp.html#app-preview\"",
-    "build": "ui5 build --config=ui5.yaml --clean-dest --dest dist",
-    "deploy": "fiori verify",
-    "deploy-config": "fiori add deploy-config",
-    "start-noflp": "fiori run --open \"index.html?sap-ui-xx-viewCache=false\"",
-    "int-test": "fiori run --open 'test/integration/opaTests.qunit.html'",
-    "start-variants-management": "fiori run --open \"preview.html#app-preview\"",
-    "unit-test": "fiori run --open 'test/unit/unitTests.qunit.html'"
-  },
-  "sapuxLayer": "CUSTOMER_BASE"
+	"name": "rfgundemo",
+	"version": "0.0.1",
+	"description": "RF Gun Demo Apps",
+	"keywords": [
+		"ui5",
+		"openui5",
+		"sapui5"
+	],
+	"main": "webapp/index.html",
+	"devDependencies": {
+		"@sap/eslint-plugin-ui5-jsdocs": "2.0.5",
+		"@sap/ux-ui5-tooling": "1",
+		"@sapui5/ts-types": "~1.136.0",
+		"@ui5/cli": "^3.11.9",
+		"eslint": "8.57.0"
+	},
+	"scripts": {
+		"start": "fiori run --open \"test/flp.html#app-preview\"",
+		"start-local": "fiori run --config ./ui5-local.yaml --open \"test/flp.html#app-preview\"",
+		"build": "ui5 build --config=ui5.yaml --clean-dest --dest dist",
+		"deploy": "fiori verify",
+		"deploy-config": "fiori add deploy-config",
+		"start-noflp": "fiori run --open \"index.html?sap-ui-xx-viewCache=false\"",
+		"int-test": "fiori run --open 'test/integration/opaTests.qunit.html'",
+		"start-variants-management": "fiori run --open \"preview.html#app-preview\"",
+		"unit-test": "fiori run --open 'test/unit/unitTests.qunit.html'"
+	},
+	"sapuxLayer": "CUSTOMER_BASE",
+	"ui5": {
+		"ui5linter": {
+			"severity": {
+				"TagAttributeLinter": "Information",
+				"UnusedNamespaceLinter": "Information",
+        "WrongParametersLinter": "Warning"
+			}
+		}
+	}
 }
