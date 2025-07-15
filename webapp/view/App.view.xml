@@ -1,8 +1,5 @@
-<mvc:View
-    controllerName="rfgundemo.controller.App"
-    displayBlock="true"
+<mvc:View controllerName="rfgundemo.controller.App" displayBlock="true"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
->
+    xmlns="sap.m">
     <App id="app" />
 </mvc:View>

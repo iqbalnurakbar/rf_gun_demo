@@ -72,7 +72,86 @@ sap.ui.define(
 
       // @ts-ignore
       onDownload: function (oEvent) {
-        
+        var aSelectedData = []; // Will store all the selected item data
+        var oDeviceModel = this.getView().getModel("device");
+        var bIsPhone = oDeviceModel.getProperty("/system/phone"); // Check if device is phone
+
+        if (bIsPhone) {
+          // For phones, get the data from the active carousel page
+          var oCarousel = this.byId("orderCarousel");
+          var sActivePageId = oCarousel.getActivePage();
+          var oActivePage = oCarousel
+            .getPages()
+            .find((page) => page.getId() === sActivePageId);
+
+          if (oActivePage) {
+            var oItemData = {};
+            var aItems = oActivePage.getItems();
+
+            // Extract field values from carousel layout (nested structure)
+            oItemData["MaterialDocument"] = "";
+            oItemData["PurchaseOrder"] = this.sPurchaseOrderNumber;
+            oItemData["PurchaseOrderItem"] = aItems[0].getItems()[1].getValue();
+            oItemData["Material"] = aItems[1]
+              .getItems()[0]
+              .getItems()[1]
+              .getValue();
+            oItemData["MaterialDescription"] = aItems[1]
+              .getItems()[1]
+              .getItems()[1]
+              .getValue();
+            oItemData["QuantitySuggest"] = parseFloat(
+              aItems[2].getItems()[0].getItems()[1].getValue()
+            ).toFixed(3);
+            oItemData["QuantityReceive"] = parseFloat(
+              aItems[2].getItems()[1].getItems()[1].getValue()
+            ).toFixed(3);
+            oItemData["QuantityUnit"] = aItems[3].getItems()[1].getValue();
+            oItemData["Plant"] = aItems[4].getItems()[1].getValue();
+            oItemData["StorageLocation"] = aItems[5].getItems()[1].getValue();
+            oItemData["ConfirmStatus"] = aItems[7].getItems()[0].getPressed();
+            oItemData["filename"] = this.fileName;
+            oItemData["filecontent"] = this.fileContent;
+            oItemData["mimetype"] = this.mimeType;
+            oItemData["fileextension"] = this.fileExtension;
+            aSelectedData.push(oItemData);
+          }
+        } else {
+          // For tablets/desktops, get selected rows from the table
+          var oTable = this.byId("orderTable");
+          var aSelectedItems = oTable.getSelectedItems();
+          console.log("Selected Items:", aSelectedItems);
+
+          aSelectedItems.forEach(
+            function (oItem) {
+              var oItemData = {};
+              var aCells = oItem.getCells();
+
+              // Extract values from each selected row
+              oItemData["MaterialDocument"] = "";
+              oItemData["PurchaseOrder"] = this.sPurchaseOrderNumber;
+              oItemData["PurchaseOrderItem"] = aCells[0].getValue();
+              oItemData["Material"] = aCells[1].getValue();
+              oItemData["MaterialDescription"] = aCells[2].getValue();
+              oItemData["QuantitySuggest"] = parseFloat(
+                aCells[4].getValue()
+              ).toFixed(3);
+              oItemData["QuantityReceive"] = parseFloat(
+                aCells[5].getValue()
+              ).toFixed(3);
+              oItemData["QuantityUnit"] = aCells[6].getValue();
+              oItemData["Plant"] = aCells[7].getValue();
+              oItemData["StorageLocation"] = aCells[8].getValue();
+              oItemData["ConfirmStatus"] = aCells[10].getPressed();
+              oItemData["filename"] = this.fileName;
+              oItemData["filecontent"] = this.fileContent;
+              oItemData["mimetype"] = this.mimeType;
+              oItemData["fileextension"] = this.fileExtension;
+              aSelectedData.push(oItemData);
+            }.bind(this)
+          );
+        }
+        console.log("Selected Data for Download:", aSelectedData);
       },
 
       onUpload: async function () {
