@@ -208,10 +208,16 @@ buttons.
                             valueHelpRequest="onStrLocVHRequest"
                         />
                         <HBox class="sapUiSmallMargin">
-                            <Button icon="sap-icon://upload" class="sapUiTinyMarginEnd"
-                                press="onUpload" />
-                            <Button icon="sap-icon://download" class="sapUiTinyMarginEnd"
-                                press="onDownload" />
+                            <Button
+                                icon="sap-icon://upload"
+                                class="sapUiTinyMarginEnd"
+                                press="onUpload"
+                            />
+                            <Button
+                                icon="sap-icon://download"
+                                class="sapUiTinyMarginEnd"
+                                press="onDownload"
+                            />
                         </HBox>
                         <ToggleButton
                             text="OK"
@@ -249,7 +255,10 @@ buttons.
 
                         <!-- Material and Description -->
                         <HBox class="sapUiSmallMargin">
-                            <VBox class="sapUiSmallMarginEnd" visible="false">
+                            <VBox
+                                class="sapUiSmallMarginEnd"
+                                visible="false"
+                            >
                                 <Label text="Material:" />
                                 <Input
                                     value="{Material}"
@@ -303,23 +312,35 @@ buttons.
                         <!-- Plant -->
                         <VBox class="sapUiSmallMargin">
                             <Label text="Plant:" />
-                            <Input value="{Plant}" showValueHelp="true"
-                                valueHelpRequest="onPlantVHRequest" />
+                            <Input
+                                value="{Plant}"
+                                showValueHelp="true"
+                                valueHelpRequest="onPlantVHRequest"
+                            />
                         </VBox>
 
                         <!-- Storage Location -->
                         <VBox class="sapUiSmallMargin">
                             <Label text="Storage Location:" />
-                            <Input value="{StorageLocation}" showValueHelp="true"
-                                valueHelpRequest="onStrLocVHRequest" />
+                            <Input
+                                value="{StorageLocation}"
+                                showValueHelp="true"
+                                valueHelpRequest="onStrLocVHRequest"
+                            />
                         </VBox>
 
                         <!-- Attachment Button -->
                         <HBox class="sapUiSmallMargin">
-                            <Button icon="sap-icon://upload" class="sapUiTinyMarginEnd"
-                                press="onUpload" />
-                            <Button icon="sap-icon://download" class="sapUiTinyMarginEnd"
-                                press="onDownload" />
+                            <Button
+                                icon="sap-icon://upload"
+                                class="sapUiTinyMarginEnd"
+                                press="onUpload"
+                            />
+                            <Button
+                                icon="sap-icon://download"
+                                class="sapUiTinyMarginEnd"
+                                press="onDownload"
+                            />
                         </HBox>
 
                         <!-- Confirm Button -->
@@ -360,26 +381,36 @@ buttons.
                         ariaHasPopup="Dialog" />
                 </HBox>
                 <!-- Phone keyboard shortcuts - only visible on phone devices -->
-                <HBox visible="{device>/system/phone}" class="sapUiContentPadding">
+                <HBox
+                    visible="{device>/system/phone}"
+                    class="sapUiContentPadding"
+                    width="100%"
+                    justifyContent="Center"
+                >
                     <Text
                         text="Back (F3)"
                         class="sapUiSmallMargin"
+                        textAlign="Center"
                     />
                     <Text
                         text="Next (F5)"
                         class="sapUiSmallMargin"
+                        textAlign="Center"
                     />
                     <Text
                         text="Previous (F6)"
                         class="sapUiSmallMargin"
+                        textAlign="Center"
                     />
                     <Text
                         text="(un)Confirm (F7)"
                         class="sapUiSmallMargin"
+                        textAlign="Center"
                     />
                     <Text
                         text="Save (F8)"
                         class="sapUiSmallMargin"
+                        textAlign="Center"
                     />
                 </HBox>
 

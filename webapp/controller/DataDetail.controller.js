@@ -579,7 +579,7 @@ sap.ui.define(
         var oTable = this.byId('orderTable');
         var oFirstItem = oTable.getItems()[0];
         if (oFirstItem) {
-          oFirstItem.getCells()[4].focus();
+          oFirstItem.getCells()[5].focus();
         }
       },
 
