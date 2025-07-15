@@ -1,18 +1,17 @@
 sap.ui.define(
   [
-    'sap/ui/core/mvc/Controller',
-    'sap/m/MessageToast',
-    'sap/ui/core/routing/History',
-    'sap/ui/model/Filter',
-    'sap/ui/model/FilterOperator',
-    'rfgundemo/util/Utility',
+    "sap/ui/core/mvc/Controller",
+    "sap/m/MessageToast",
+    "sap/ui/core/routing/History",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "rfgundemo/util/Utility",
     "sap/ui/core/Fragment",
-    "sap/m/plugins/UploadSetwithTable",
-    'sap/m/MessagePopover',
-    'sap/m/MessageItem',
-    'sap/ui/core/Messaging',
-    'sap/ui/core/message/Message',
-    'sap/ui/core/message/MessageType'
+    "sap/m/MessagePopover",
+    "sap/m/MessageItem",
+    "sap/ui/core/Messaging",
+    "sap/ui/core/message/Message",
+    "sap/ui/core/message/MessageType",
   ],
   function (
     Controller,
@@ -22,43 +21,43 @@ sap.ui.define(
     FilterOperator,
     Utility,
     Fragment,
-    UploadSetwithTable,
     MessagePopover,
     MessageItem,
     Messaging,
     Message,
-    MessageType) {
-    'use strict';
+    MessageType
+  ) {
+    "use strict";
 
-    return Controller.extend('rfgundemo.controller.DataDetail', {
+    return Controller.extend("rfgundemo.controller.DataDetail", {
       /**
        * Called when the controller is initialized.
        * Attaches route matched handler, sets up debounced carousel navigation, and keyboard shortcuts.
        */
       onInit: function () {
         var that = this;
-        var oRouter = this.getOwnerComponent().getRouter(); // Get the router instance from the component
-        this.sPurchaseOrderNumber = ''; // Store the selected purchase order number
-        that.getView().setBusy(true); // Show busy indicator while loading data
+        var oRouter = this.getOwnerComponent().getRouter();
+        this.sPurchaseOrderNumber = "";
+        that.getView().setBusy(true);
 
         // When the route is matched, load data based on purchase order number
         oRouter.attachRouteMatched(function (oEvent) {
-          var oArgs = oEvent.getParameter('arguments');
+          var oArgs = oEvent.getParameter("arguments");
           if (oArgs && oArgs.purchaseOrderNumber) {
             that.sPurchaseOrderNumber = oArgs.purchaseOrderNumber;
-            that._loadPurchaseOrderData(); // Load data for given PO
-            that._setOrderDetailsTitle(); // Update title in the view
+            that._loadPurchaseOrderData();
+            that._setOrderDetailsTitle();
           }
         });
 
         // Set up functions for navigating carousel pages (mobile only) with a delay to prevent rapid firing
         this.debounceGoToNextCarouselPage = Utility.debounce(
           this._goToNextCarouselPage,
-          500
+          300
         );
         this.debounceGoToPreviousCarouselPage = Utility.debounce(
           this._goToPreviousCarouselPage,
-          500
+          300
         );
 
         // Register keyboard shortcut support
@@ -67,7 +66,10 @@ sap.ui.define(
         // Message popover initialization
         this._MessageManager = Messaging;
         this._MessageManager.removeAllMessages();
-        this.getView().setModel(this._MessageManager.getMessageModel(), "message");
+        this.getView().setModel(
+          this._MessageManager.getMessageModel(),
+          "message"
+        );
       },
 
       /**
@@ -81,13 +83,12 @@ sap.ui.define(
           window.history.go(-1); // Go back one step in browser history
         } else {
           var oRouter = this.getOwnerComponent().getRouter();
-          oRouter.navTo('RouteMainScreen', {}, true); // If no history, navigate to default screen
+          oRouter.navTo("RouteMainScreen", {}, true); // If no history, navigate to default screen
         }
       },
 
-      // @ts-ignore
       onDownload: function (oEvent) {
-        const oContexts = this.byId("orderList").getSelectedContexts();
+        var oContexts = this.byId("orderList").getSelectedContexts();
         if (oContexts && oContexts.length) {
           oContexts.forEach((oContext) =>
             this.oUploadPluginInstance.download(oContext, true)
@@ -205,7 +206,7 @@ sap.ui.define(
         var sValue = oInput.getValue();
 
         // Match only numbers
-        var sValidatedValue = sValue.replace(/[^0-9]/g, '');
+        var sValidatedValue = sValue.replace(/[^0-9]/g, "");
 
         // Set back only numeric value
         // @ts-ignore
@@ -218,59 +219,49 @@ sap.ui.define(
        */
       onSaveAndPostButtonPress: function () {
         var aSelectedData = []; // Will store all the selected item data
-        var oDeviceModel = this.getView().getModel('device');
-        var bIsPhone = oDeviceModel.getProperty('/system/phone'); // Check if device is phone
+        var oDeviceModel = this.getView().getModel("device");
+        var bIsPhone = oDeviceModel.getProperty("/system/phone"); // Check if device is phone
 
         if (bIsPhone) {
           // For phones, get the data from the active carousel page
-          var oCarousel = this.byId('orderCarousel');
+          var oCarousel = this.byId("orderCarousel");
           var sActivePageId = oCarousel.getActivePage();
           var oActivePage = oCarousel
             .getPages()
-            .find(page => page.getId() === sActivePageId);
+            .find((page) => page.getId() === sActivePageId);
 
           if (oActivePage) {
             var oItemData = {};
             var aItems = oActivePage.getItems();
 
             // Extract field values from carousel layout (nested structure)
-            oItemData['MaterialDocument'] = '';
-            oItemData['PurchaseOrder'] = this.sPurchaseOrderNumber;
-            oItemData['PurchaseOrderItem'] = aItems[0].getItems()[1].getValue();
-            oItemData['Material'] = aItems[1]
+            oItemData["MaterialDocument"] = "";
+            oItemData["PurchaseOrder"] = this.sPurchaseOrderNumber;
+            oItemData["PurchaseOrderItem"] = aItems[0].getItems()[1].getValue();
+            oItemData["Material"] = aItems[1]
               .getItems()[0]
               .getItems()[1]
               .getValue();
-            oItemData['MaterialDescription'] = aItems[1]
+            oItemData["MaterialDescription"] = aItems[1]
               .getItems()[1]
               .getItems()[1]
               .getValue();
-            oItemData['QuantitySuggest'] = parseFloat(
+            oItemData["QuantitySuggest"] = parseFloat(
               aItems[2].getItems()[0].getItems()[1].getValue()
             ).toFixed(3);
-            oItemData['QuantityReceive'] = parseFloat(
+            oItemData["QuantityReceive"] = parseFloat(
               aItems[2].getItems()[1].getItems()[1].getValue()
             ).toFixed(3);
-            oItemData['QuantityUnit'] = aItems[3].getItems()[1].getValue();
-            oItemData['Plant'] = aItems[4].getItems()[1].getValue();
-            oItemData['StorageLocation'] = aItems[5].getItems()[1].getValue();
-            oItemData['ConfirmStatus'] = aItems[7].getItems()[0].getPressed();
-
-            if (oItemData.QuantityReceive == "") {
-              this._addMessage(
-                "Quantity Suggest is Empty",
-                MessageType.Error,
-                "Validation Error",
-                "Item " + oItemData.PurchaseOrderItem + " has no suggested quantity."
-              );
-              return;
-            }
+            oItemData["QuantityUnit"] = aItems[3].getItems()[1].getValue();
+            oItemData["Plant"] = aItems[4].getItems()[1].getValue();
+            oItemData["StorageLocation"] = aItems[5].getItems()[1].getValue();
+            oItemData["ConfirmStatus"] = aItems[7].getItems()[0].getPressed();
 
             aSelectedData.push(oItemData);
           }
         } else {
           // For tablets/desktops, get selected rows from the table
-          var oTable = this.byId('orderTable');
+          var oTable = this.byId("orderTable");
           var aSelectedItems = oTable.getSelectedItems();
 
           aSelectedItems.forEach(
@@ -279,31 +270,21 @@ sap.ui.define(
               var aCells = oItem.getCells();
 
               // Extract values from each selected row
-              oItemData['MaterialDocument'] = '';
-              oItemData['PurchaseOrder'] = this.sPurchaseOrderNumber;
-              oItemData['PurchaseOrderItem'] = aCells[0].getValue();
-              oItemData['Material'] = aCells[1].getValue();
-              oItemData['MaterialDescription'] = aCells[2].getValue();
-              oItemData['QuantitySuggest'] = parseFloat(
+              oItemData["MaterialDocument"] = "";
+              oItemData["PurchaseOrder"] = this.sPurchaseOrderNumber;
+              oItemData["PurchaseOrderItem"] = aCells[0].getValue();
+              oItemData["Material"] = aCells[1].getValue();
+              oItemData["MaterialDescription"] = aCells[2].getValue();
+              oItemData["QuantitySuggest"] = parseFloat(
                 aCells[4].getValue()
               ).toFixed(3);
-              oItemData['QuantityReceive'] = parseFloat(
+              oItemData["QuantityReceive"] = parseFloat(
                 aCells[5].getValue()
               ).toFixed(3);
-              oItemData['QuantityUnit'] = aCells[6].getValue();
-              oItemData['Plant'] = aCells[7].getValue();
-              oItemData['StorageLocation'] = aCells[8].getValue();
-              oItemData['ConfirmStatus'] = aCells[10].getPressed();
-
-              if (oItemData.QuantityReceive == "") {
-                this._addMessage(
-                  "Quantity Suggest is Empty",
-                  MessageType.Error,
-                  "Validation Error",
-                  "Item " + oItemData.PurchaseOrderItem + " has no suggested quantity."
-                );
-                return;
-              }
+              oItemData["QuantityUnit"] = aCells[6].getValue();
+              oItemData["Plant"] = aCells[7].getValue();
+              oItemData["StorageLocation"] = aCells[8].getValue();
+              oItemData["ConfirmStatus"] = aCells[10].getPressed();
 
               aSelectedData.push(oItemData);
             }.bind(this)
@@ -312,7 +293,7 @@ sap.ui.define(
 
         if (aSelectedData.length === 0) {
           // No selection — show message
-          MessageToast.show('Please select items and enter valid quantities');
+          MessageToast.show("Please select items and enter valid quantities");
           return;
         }
 
@@ -328,7 +309,7 @@ sap.ui.define(
         var oButton = oEvent.getSource(); // The button that was pressed
         this._handleToggleButtonState(oButton); // Change visual state
 
-        var oTable = this.byId('orderTable');
+        var oTable = this.byId("orderTable");
         // @ts-ignore
         var oTableItem = oButton.getParent(); // Get table row where the button is located
         // @ts-ignore
@@ -341,15 +322,15 @@ sap.ui.define(
        */
       onCarouselPageChanged: function (oEvent) {
         // @ts-ignore
-        var aActivePageId = oEvent.getParameter('activePages');
-        var oPage = this.byId('orderCarousel').getPages()[aActivePageId];
+        var aActivePageId = oEvent.getParameter("activePages");
+        var oPage = this.byId("orderCarousel").getPages()[aActivePageId];
         var oInput = oPage.getItems()[2].getItems()[1].getItems()[1];
 
         if (oInput) {
           // Wait for UI to update then set focus
           setTimeout(() => {
             oInput.focus();
-          }, 200);
+          }, 500);
         }
       },
 
@@ -360,7 +341,7 @@ sap.ui.define(
         if (!this._plantVHDialog) {
           this._plantVHDialog = await Fragment.load({
             name: "rfgundemo.view.fragments.PlantVHDialog",
-            controller: this
+            controller: this,
           });
           this.getView().addDependent(this._plantVHDialog);
         }
@@ -387,7 +368,7 @@ sap.ui.define(
         if (!this._strLocVHDialog) {
           this._strLocVHDialog = await Fragment.load({
             name: "rfgundemo.view.fragments.StrLocVHDialog",
-            controller: this
+            controller: this,
           });
           this.getView().addDependent(this._strLocVHDialog);
         }
@@ -415,8 +396,6 @@ sap.ui.define(
         this._oMessagePopover.toggle(oEvent.getSource());
       },
 
-
-
       // Helper methods for button formatting
       getMessageCount: function () {
         var aMessages = this._MessageManager.getMessageModel().getData();
@@ -425,8 +404,12 @@ sap.ui.define(
 
       getButtonType: function () {
         var aMessages = this._MessageManager.getMessageModel().getData();
-        var bHasError = aMessages.some(function (msg) { return msg.type === "Error"; });
-        var bHasWarning = aMessages.some(function (msg) { return msg.type === "Warning"; });
+        var bHasError = aMessages.some(function (msg) {
+          return msg.type === "Error";
+        });
+        var bHasWarning = aMessages.some(function (msg) {
+          return msg.type === "Warning";
+        });
 
         if (bHasError) return "Negative";
         if (bHasWarning) return "Critical";
@@ -435,8 +418,12 @@ sap.ui.define(
 
       getButtonIcon: function () {
         var aMessages = this._MessageManager.getMessageModel().getData();
-        var bHasError = aMessages.some(function (msg) { return msg.type === "Error"; });
-        var bHasWarning = aMessages.some(function (msg) { return msg.type === "Warning"; });
+        var bHasError = aMessages.some(function (msg) {
+          return msg.type === "Error";
+        });
+        var bHasWarning = aMessages.some(function (msg) {
+          return msg.type === "Warning";
+        });
 
         if (bHasError) return "sap-icon://error";
         if (bHasWarning) return "sap-icon://alert";
@@ -455,9 +442,9 @@ sap.ui.define(
               title: "{message>message}",
               subtitle: "{message>additionalText}",
               type: "{message>type}",
-              description: "{message>description}"
-            })
-          }
+              description: "{message>description}",
+            }),
+          },
         });
         this.getView().addDependent(this._oMessagePopover);
       },
@@ -469,36 +456,36 @@ sap.ui.define(
        */
 
       _attachInputEventDelegates: function () {
-        var oDataDetailPage = this.byId('dataDetailPage');
+        var oDataDetailPage = this.byId("dataDetailPage");
         if (oDataDetailPage) {
           oDataDetailPage.addEventDelegate({
             onkeydown: function (oEvent) {
-              var oDeviceModel = this.getView().getModel('device');
-              var bIsPhone = oDeviceModel.getProperty('/system/phone');
+              var oDeviceModel = this.getView().getModel("device");
+              var bIsPhone = oDeviceModel.getProperty("/system/phone");
 
               // Handle different function keys
               switch (oEvent.key) {
-                case 'F3': // Back
+                case "F3": // Back
                   oEvent.preventDefault();
                   this.onNavBack();
                   break;
-                case 'F5': // Next (mobile only)
+                case "F5": // Next (mobile only)
                   if (bIsPhone) {
                     oEvent.preventDefault();
                     this.debounceGoToNextCarouselPage();
                   }
                   break;
-                case 'F6': // Previous (mobile only)
+                case "F6": // Previous (mobile only)
                   if (bIsPhone) {
                     oEvent.preventDefault();
                     this.debounceGoToPreviousCarouselPage();
                   }
                   break;
-                case 'F7': // OK
+                case "F7": // OK
                   oEvent.preventDefault();
                   this._triggerOkButtonPress();
                   break;
-                case 'F8': // Post
+                case "F8": // Post
                   oEvent.preventDefault();
                   this.onSaveAndPostButtonPress();
                   break;
@@ -509,7 +496,7 @@ sap.ui.define(
       },
 
       _resetAfterSuccessfulPost: function () {
-        const oList = this.byId('orderList');
+        const oList = this.byId("orderList");
 
         // Clear all selections
         oList.removeSelections();
@@ -537,11 +524,11 @@ sap.ui.define(
        */
       _loadPurchaseOrderData: function () {
         var that = this;
-        var oDeviceModel = this.getView().getModel('device');
-        var bIsPhone = oDeviceModel.getProperty('/system/phone');
+        var oDeviceModel = this.getView().getModel("device");
+        var bIsPhone = oDeviceModel.getProperty("/system/phone");
         var aFilters = [
           new Filter(
-            'PurchaseOrderNo',
+            "PurchaseOrderNo",
             FilterOperator.EQ,
             this.sPurchaseOrderNumber
           ),
@@ -549,19 +536,19 @@ sap.ui.define(
 
         // Bind data to the correct control based on device type
         if (bIsPhone) {
-          var oCarousel = this.byId('orderCarousel');
-          var oBinding = oCarousel.getBinding('pages');
+          var oCarousel = this.byId("orderCarousel");
+          var oBinding = oCarousel.getBinding("pages");
           oBinding.filter(aFilters);
-          oBinding.attachEventOnce('dataReceived', function () {
+          oBinding.attachEventOnce("dataReceived", function () {
             that.getView().setBusy(false);
             that._setFocusOnFirstQuantityReceivedInCarousel();
           });
         } else {
-          var oTable = this.byId('orderTable');
-          var oBinding = oTable.getBinding('items');
+          var oTable = this.byId("orderTable");
+          var oBinding = oTable.getBinding("items");
           oBinding.filter(aFilters);
           oTable.attachEventOnce(
-            'updateFinished',
+            "updateFinished",
             function () {
               this.getView().setBusy(false);
               this._setFocusOnFirstQuantityReceived();
@@ -576,7 +563,7 @@ sap.ui.define(
        * @private
        */
       _setFocusOnFirstQuantityReceived: function () {
-        var oTable = this.byId('orderTable');
+        var oTable = this.byId("orderTable");
         var oFirstItem = oTable.getItems()[0];
         if (oFirstItem) {
           oFirstItem.getCells()[5].focus();
@@ -588,7 +575,7 @@ sap.ui.define(
        * @private
        */
       _setFocusOnFirstQuantityReceivedInCarousel: function () {
-        var oFirstPage = this.byId('orderCarousel').getPages()[0];
+        var oFirstPage = this.byId("orderCarousel").getPages()[0];
         var oInput = oFirstPage?.getItems()[2].getItems()[1].getItems()[1];
         if (oInput) {
           setTimeout(() => {
@@ -602,9 +589,9 @@ sap.ui.define(
        * @private
        */
       _setOrderDetailsTitle: function () {
-        var oTitle = this.byId('orderDetailsTitle');
+        var oTitle = this.byId("orderDetailsTitle");
         if (oTitle) {
-          oTitle.setText('Order Details for ' + this.sPurchaseOrderNumber);
+          oTitle.setText("Order Details for " + this.sPurchaseOrderNumber);
         }
       },
 
@@ -642,8 +629,8 @@ sap.ui.define(
 
       _postToGoodsMovementBAPI: function (aBAPIData) {
         var that = this;
-        var oDeviceModel = this.getView().getModel('device');
-        var bIsPhone = oDeviceModel.getProperty('/system/phone');
+        var oDeviceModel = this.getView().getModel("device");
+        var bIsPhone = oDeviceModel.getProperty("/system/phone");
         var oModel = this.getView().getModel();
 
         // Your existing body structure works perfectly!
@@ -728,7 +715,7 @@ sap.ui.define(
             type: sType,
             additionalText: sAdditionalText,
             description: sDescription,
-            processor: this.getView().getModel()
+            processor: this.getView().getModel(),
           })
         );
       },
@@ -769,7 +756,7 @@ sap.ui.define(
           422: "HTTP 422 - Unprocessable Entity",
           500: "HTTP 500 - Internal Server Error",
           502: "HTTP 502 - Bad Gateway",
-          503: "HTTP 503 - Service Unavailable"
+          503: "HTTP 503 - Service Unavailable",
         };
 
         return mStatusTexts[iStatusCode] || "HTTP " + iStatusCode;
@@ -780,11 +767,11 @@ sap.ui.define(
        * @private
        */
       _goToNextCarouselPage: function () {
-        var oCarousel = this.byId('orderCarousel');
+        var oCarousel = this.byId("orderCarousel");
         var aPages = oCarousel.getPages();
         var sCurrentPageId = oCarousel.getActivePage();
         var iCurrentIndex = aPages.findIndex(
-          page => page.getId() === sCurrentPageId
+          (page) => page.getId() === sCurrentPageId
         );
 
         if (iCurrentIndex < aPages.length - 1) {
@@ -798,11 +785,11 @@ sap.ui.define(
        * @private
        */
       _goToPreviousCarouselPage: function () {
-        var oCarousel = this.byId('orderCarousel');
+        var oCarousel = this.byId("orderCarousel");
         var aPages = oCarousel.getPages();
         var sCurrentPageId = oCarousel.getActivePage();
         var iCurrentIndex = aPages.findIndex(
-          page => page.getId() === sCurrentPageId
+          (page) => page.getId() === sCurrentPageId
         );
 
         if (iCurrentIndex > 0) {
@@ -819,7 +806,7 @@ sap.ui.define(
       _handleToggleButtonState: function (oToggleButton) {
         var bPressed = oToggleButton.getPressed();
         // @ts-ignore
-        oToggleButton.setType(bPressed ? 'Success' : 'Emphasized');
+        oToggleButton.setType(bPressed ? "Success" : "Emphasized");
       },
 
       /**
@@ -827,24 +814,24 @@ sap.ui.define(
        * @private
        */
       _triggerOkButtonPress: function () {
-        var oDeviceModel = this.getView().getModel('device');
-        var bIsPhone = oDeviceModel.getProperty('/system/phone');
+        var oDeviceModel = this.getView().getModel("device");
+        var bIsPhone = oDeviceModel.getProperty("/system/phone");
 
         if (bIsPhone) {
-          var oCarousel = this.byId('orderCarousel');
+          var oCarousel = this.byId("orderCarousel");
           var sActivePageId = oCarousel.getActivePage();
           var oActivePage = oCarousel
             .getPages()
-            .find(page => page.getId() === sActivePageId);
+            .find((page) => page.getId() === sActivePageId);
 
           if (oActivePage) {
             // Simulate OK press on mobile
-            oActivePage.getItems().forEach(item => {
+            oActivePage.getItems().forEach((item) => {
               if (item.getItems) {
-                item.getItems().forEach(subItem => {
+                item.getItems().forEach((subItem) => {
                   if (
                     subItem instanceof sap.m.ToggleButton &&
-                    subItem.getText() === 'OK'
+                    subItem.getText() === "OK"
                   ) {
                     subItem.setPressed(!subItem.getPressed());
                     this._handleToggleButtonState(subItem);
@@ -854,15 +841,15 @@ sap.ui.define(
             });
           }
         } else {
-          var oTable = this.byId('orderTable');
+          var oTable = this.byId("orderTable");
           var oSelectedItems = oTable.getSelectedItems();
           if (oSelectedItems.length > 0) {
             var oFirstSelectedItem = oSelectedItems[0];
             var oOkButtonTable = oFirstSelectedItem
               .getCells()
               .find(
-                cell =>
-                  cell instanceof sap.m.ToggleButton && cell.getText() === 'OK'
+                (cell) =>
+                  cell instanceof sap.m.ToggleButton && cell.getText() === "OK"
               );
 
             if (oOkButtonTable) {
