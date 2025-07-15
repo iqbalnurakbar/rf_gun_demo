@@ -207,7 +207,10 @@ buttons.
                             showValueHelp="true"
                             valueHelpRequest="onStrLocVHRequest"
                         />
-                        <HBox class="sapUiSmallMargin">
+                        <HBox
+                            width="100%"
+                            wrap="Wrap"
+                        >
                             <Button
                                 icon="sap-icon://upload"
                                 class="sapUiTinyMarginEnd"
@@ -218,7 +221,12 @@ buttons.
                                 class="sapUiTinyMarginEnd"
                                 press="onDownload"
                             />
+                            <Button
+                                text="{filename}"
+                                type="Transparent"
+                            />
                         </HBox>
+
                         <ToggleButton
                             text="OK"
                             press=".onOkButtonPress"
@@ -350,6 +358,10 @@ buttons.
                                 press=".onOkButtonPress"
                                 width="100%"
                                 type="Emphasized"
+                            />
+                            <Button
+                                text="{filename}"
+                                type="Transparent"
                             />
                         </HBox>
                     </items>

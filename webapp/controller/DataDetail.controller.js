@@ -87,16 +87,89 @@ sap.ui.define(
         }
       },
 
-      onDownload: function (oEvent) {
-        var oContexts = this.byId("orderList").getSelectedContexts();
-        if (oContexts && oContexts.length) {
-          oContexts.forEach((oContext) =>
-            this.oUploadPluginInstance.download(oContext, true)
-          );
-        }
+      onDownload: function () {
+        var oModel = this.getView().getModel();
+        var oTable = this.byId("orderTable");
+        var aSelectedItems = oTable.getSelectedItems();
+
+        var aPurchaseOrderNumber = aSelectedItems.map((item) => {
+          const context = item.getBindingContext();
+          return context?.getProperty("PurchaseOrderNo");
+        });
+
+        var aPurchaseOrderNumberItem = aSelectedItems.map((item) => {
+          const context = item.getBindingContext();
+          return context?.getProperty("PurchaseOrderItemNo");
+        });
+
+        var oAction = oModel.bindContext(
+          "/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.downloadFile(...)"
+        );
+
+        oAction.setParameter("purchase_order", aPurchaseOrderNumber[0]);
+        oAction.setParameter("purchase_order_item", aPurchaseOrderNumberItem[0]);
+
+        oAction
+          .execute()
+          .then(function () {
+            // Handle success
+            var oActionContext = oAction.getBoundContext();   
+            var oResult = oActionContext ? oActionContext.getObject() : null;
+
+            MessageToast.show("Download initiated successfully");
+            console.log("Action result:", oResult);
+          })
+          .catch(function (oError) {
+            // Handle error
+            console.error("Download action failed:", oError);
+          });
+        // var fileContent = "";
+        // var mimeType = "";
+        // var fileName = "";
+        // if (oContexts && oContexts.length) {
+        //   oContexts.forEach((oContext) => {
+        //     // Decode the base64 file content
+        //     fileName = oContext.getProperty("filename");
+        //     fileContent = oContext.getProperty("filecontent");
+        //     mimeType = oContext.getProperty("mimetype");
+        //   });
+        // }
+        // // Decode the base64 file content
+        // console.log("ocontext: ", fileContent);
+        // console.log("this: ", this.fileContent);
+
+        // // Remove any whitespace, newlines
+        // fileContent = fileContent.replace(/\s/g, "");
+
+        // // Handle URL-safe base64 if needed
+        // fileContent = fileContent.replace(/-/g, "+").replace(/_/g, "/");
+
+        // var sBase64Content = atob(fileContent);
+
+        // console.log("atob: ", this.fileContent);
+        // var aBinaryData = new Uint8Array(sBase64Content.length);
+
+        // for (var i = 0; i < sBase64Content.length; i++) {
+        //   aBinaryData[i] = sBase64Content.charCodeAt(i);
+        // }
+
+        // var oBlob = new Blob([aBinaryData], { type: mimeType });
+
+        // // Utilize FileSaver.js or similar if needed, else create download link
+        // var sFileUrl = URL.createObjectURL(oBlob);
+
+        // // Open the downloaded file in a new tab
+        // var oDownloadLink = document.createElement("a");
+        // oDownloadLink.href = sFileUrl;
+        // oDownloadLink.download = fileName;
+        // oDownloadLink.style.display = "none";
+
+        // oDownloadLink.click();
+
+        // MessageToast.show("Download has been initiated for " + fileName);
       },
 
-      onUpload: async function () {
+      onUpload: function () {
         this.loadFragment({
           id: "uploadFileDialog",
           name: "rfgundemo.view.fragments.UploadFileDialog",
@@ -115,39 +188,134 @@ sap.ui.define(
       onUploadPress: async function () {
         if (!this.fileContent || !this.fileName) {
           MessageToast.show("Please select a file to upload.");
-          this._addMessage(
-            "Please select a file to upload.",
-            MessageType.Error,
-            "",
-            ""
-          );
           return;
         }
 
         try {
+          var aSelectedData = []; // Will store all the selected item data
+          var oDeviceModel = this.getView().getModel("device");
+          var bIsPhone = oDeviceModel.getProperty("/system/phone"); // Check if device is phone
+
+          if (bIsPhone) {
+            // For phones, get the data from the active carousel page
+            var oCarousel = this.byId("orderCarousel");
+            var sActivePageId = oCarousel.getActivePage();
+            var oActivePage = oCarousel
+              .getPages()
+              .find((page) => page.getId() === sActivePageId);
+
+            if (oActivePage) {
+              var oItemData = {};
+              var aItems = oActivePage.getItems();
+
+              // Extract field values from carousel layout (nested structure)
+              oItemData["MaterialDocument"] = "";
+              oItemData["PurchaseOrder"] = this.sPurchaseOrderNumber;
+              oItemData["PurchaseOrderItem"] = aItems[0]
+                .getItems()[1]
+                .getValue();
+              oItemData["Material"] = aItems[1]
+                .getItems()[0]
+                .getItems()[1]
+                .getValue();
+              oItemData["MaterialDescription"] = aItems[1]
+                .getItems()[1]
+                .getItems()[1]
+                .getValue();
+              oItemData["QuantitySuggest"] = parseFloat(
+                aItems[2].getItems()[0].getItems()[1].getValue()
+              ).toFixed(3);
+              oItemData["QuantityReceive"] = parseFloat(
+                aItems[2].getItems()[1].getItems()[1].getValue()
+              ).toFixed(3);
+              oItemData["QuantityUnit"] = aItems[3].getItems()[1].getValue();
+              oItemData["Plant"] = aItems[4].getItems()[1].getValue();
+              oItemData["StorageLocation"] = aItems[5].getItems()[1].getValue();
+              oItemData["ConfirmStatus"] = aItems[7].getItems()[0].getPressed();
+              oItemData["filename"] = this.fileName;
+              oItemData["filecontent"] = this.fileContent;
+              oItemData["mimetype"] = this.mimeType;
+              oItemData["fileextension"] = this.fileExtension;
+              aSelectedData.push(oItemData);
+            }
+          } else {
+            // For tablets/desktops, get selected rows from the table
+            var oTable = this.byId("orderTable");
+            var aSelectedItems = oTable.getSelectedItems();
+
+            aSelectedItems.forEach(
+              function (oItem) {
+                var oItemData = {};
+                var aCells = oItem.getCells();
+
+                // Extract values from each selected row
+                oItemData["MaterialDocument"] = "";
+                oItemData["PurchaseOrder"] = this.sPurchaseOrderNumber;
+                oItemData["PurchaseOrderItem"] = aCells[0].getValue();
+                oItemData["Material"] = aCells[1].getValue();
+                oItemData["MaterialDescription"] = aCells[2].getValue();
+                oItemData["QuantitySuggest"] = parseFloat(
+                  aCells[4].getValue()
+                ).toFixed(3);
+                oItemData["QuantityReceive"] = parseFloat(
+                  aCells[5].getValue()
+                ).toFixed(3);
+                oItemData["QuantityUnit"] = aCells[6].getValue();
+                oItemData["Plant"] = aCells[7].getValue();
+                oItemData["StorageLocation"] = aCells[8].getValue();
+                oItemData["ConfirmStatus"] = aCells[10].getPressed();
+                oItemData["filename"] = this.fileName;
+                oItemData["filecontent"] = this.fileContent;
+                oItemData["mimetype"] = this.mimeType;
+                oItemData["fileextension"] = this.fileExtension;
+                aSelectedData.push(oItemData);
+              }.bind(this)
+            );
+          }
+
+          console.log(aSelectedData);
+          if (aSelectedData.length === 0) {
+            // No selection — show message
+            MessageToast.show("Please select items");
+            return;
+          }
+          console.log("Selected Data for Upload:", aSelectedData);
+          // console.log("Selected Data for Upload:", aSelectedData[0].MaterialDocument);
+
           // * Prepare OData action bound to the upload service
           const oModel = this.getView().getModel();
           const oContext = this.getView().getBindingContext();
           console.log("Binding Context:", oContext);
 
           const oAction = oModel.bindContext(
-            "/ZC_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.uploadFile(...)",
+            "/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.uploadFile(...)",
             oContext
           );
 
-          // // * Set required parameters on the action
-          oAction.setParameter("fileName", this.fileName);
-          oAction.setParameter("fileContent", this.fileContent);
-          oAction.setParameter("mimeType", this.mimeType);
-          oAction.setParameter("fileExtension", this.fileExtension);
+          // * Set required parameters on the action
+          oAction.setParameter(
+            "material_document",
+            aSelectedData[0].MaterialDocument
+          );
+          oAction.setParameter(
+            "purchase_order",
+            aSelectedData[0].PurchaseOrder
+          );
+          oAction.setParameter(
+            "purchase_order_item",
+            aSelectedData[0].PurchaseOrderItem
+          );
+          oAction.setParameter("fileName", aSelectedData[0].filename);
+          oAction.setParameter("fileContent", aSelectedData[0].filecontent);
+          oAction.setParameter("mimeType", aSelectedData[0].mimetype);
+          oAction.setParameter("fileExtension", aSelectedData[0].fileextension);
 
-          // // * Invoke the service call
+          // * Invoke the service call
           oAction.execute();
-
-          // // * On success: notify user & clean up
-          MessageToast.show("Upload Success");
+          MessageToast.show("File uploaded successfully");
           this.dialog.close();
           this.dialog.destroy();
+          oModel.refresh();
         } catch (error) {
           // ! Upload failed: log error & inform user
           console.error("Upload failed:", error);
