@@ -254,7 +254,15 @@ buttons.
             pageChanged=".onCarouselPageChanged"
         >
             <pages>
-                <VBox class="sapUiSmallMargin">
+                <ScrollContainer
+                    vertical="true"
+                    horizontal="false"
+                    height="70vh"
+                    class="currentOrderSection"
+                    width="100%"
+                    focusable="true"
+                >
+                <VBox class="sapUiSmallMargin centeredContainer" width ="100%">
                     <items>
                         <!-- Line No -->
                         <VBox class="sapUiSmallMargin">
@@ -378,6 +386,7 @@ buttons.
                         </HBox>
                     </items>
                 </VBox>
+                </ScrollContainer>
             </pages>
         </Carousel>
 

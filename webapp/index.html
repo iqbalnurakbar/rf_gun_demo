@@ -6,8 +6,27 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>RF Gun Demo</title>
     <style>
+        Make sure body and containers fill viewport and no scrolling on body
         html, body, body > div, #container, #container-uiarea {
             height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* prevent body scroll */
+        }
+
+        /* Make SAPUI5 view container scrollable */
+        .sapUiView {
+            max-height: 100vh;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
+        }
+
+        /* Add this new class for scrolling only current order section */
+        .currentOrderSection {
+            max-height: 70vh; /* or suitable height */
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 1rem;
         }
     </style>
     <script
