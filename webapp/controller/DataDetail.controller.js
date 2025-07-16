@@ -501,14 +501,19 @@ sap.ui.define(
         this._currentPlantInput = oInput;
 
         if (!this._plantVHDialog) {
-          this._plantVHDialog = Fragment.load({
+          // Fragment.load returns a Promise - handle it properly
+          Fragment.load({
             name: "rfgundemo.view.fragments.PlantVHDialog",
             controller: this,
+          }).then((oDialog) => {
+            this._plantVHDialog = oDialog;
+            this.getView().addDependent(this._plantVHDialog);
+            this._plantVHDialog.open();
           });
-          this.getView().addDependent(this._plantVHDialog);
+        } else {
+          // Dialog already exists, just open it
+          this._plantVHDialog.open();
         }
-
-        this._plantVHDialog.open();
       },
 
       onPlantVHConfirm: function (oEvent) {
@@ -527,14 +532,21 @@ sap.ui.define(
       onStrLocVHRequest: function (oEvent) {
         const oInput = oEvent.getSource();
         this._currentStrLocInput = oInput;
+
         if (!this._strLocVHDialog) {
-          this._strLocVHDialog = Fragment.load({
+          // Fragment.load returns a Promise - handle it properly
+          Fragment.load({
             name: "rfgundemo.view.fragments.StrLocVHDialog",
             controller: this,
+          }).then((oDialog) => {
+            this._strLocVHDialog = oDialog;
+            this.getView().addDependent(this._strLocVHDialog);
+            this._strLocVHDialog.open();
           });
-          this.getView().addDependent(this._strLocVHDialog);
+        } else {
+          // Dialog already exists, just open it
+          this._strLocVHDialog.open();
         }
-        this._strLocVHDialog.open();
       },
 
       onStrLocVHConfirm: function (oEvent) {
