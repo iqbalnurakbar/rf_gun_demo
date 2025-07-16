@@ -94,6 +94,11 @@ sap.ui.define(
         var oContext = oButton.getBindingContext();
         var oRowData = oContext.getObject();
 
+        if (oRowData.filename === "") {
+          MessageToast.show("No attachment file");
+          return;
+        }
+
         var fileContent = "";
         var mimeType = "";
         var fileName = "";
