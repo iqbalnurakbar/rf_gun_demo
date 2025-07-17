@@ -474,6 +474,18 @@ sap.ui.define(
         var oTable = this.byId("orderTable");
         // @ts-ignore
         var oTableItem = oButton.getParent(); // Get table row where the button is located
+        var aCells = oTableItem.getCells();
+        var oRowData = {
+          quantityReceive: aCells[5], // Quantity Receive column
+          plant: aCells[7],           // Plant column  
+          storageLocation: aCells[8]  // Storage Location column
+        };
+
+        if (!this._validateRequiredFields(oRowData)) {
+          this._handleToggleButtonState(oButton, true); // Change visual state
+          return;
+        }
+
         // @ts-ignore
         oTable.setSelectedItem(oTableItem, oButton.getPressed()); // Select or deselect row
       },
@@ -990,8 +1002,15 @@ sap.ui.define(
        * @param {sap.m.ToggleButton} oToggleButton
        * @private
        */
-      _handleToggleButtonState: function (oToggleButton) {
-        var bPressed = oToggleButton.getPressed();
+      _handleToggleButtonState: function (oToggleButton, bForceUnpressed) {
+        var bPressed = null;
+        // force button to be unpressed
+        if (!bForceUnpressed) {
+          bPressed = oToggleButton.getPressed();
+        } else {
+          bPressed = false;
+          oToggleButton.setPressed(false);
+        }
         // @ts-ignore
         oToggleButton.setType(bPressed ? "Success" : "Emphasized");
       },
@@ -1021,7 +1040,7 @@ sap.ui.define(
                     subItem.getText() === "OK"
                   ) {
                     subItem.setPressed(!subItem.getPressed());
-                    this._handleToggleButtonState(subItem);
+                    this._handleToggleButtonState(subItem, false);
                   }
                 });
               }
@@ -1041,10 +1060,55 @@ sap.ui.define(
 
             if (oOkButtonTable) {
               oOkButtonTable.setPressed(!oOkButtonTable.getPressed());
-              this._handleToggleButtonState(oOkButtonTable);
+              this._handleToggleButtonState(oOkButtonTable, false);
             }
           }
         }
+      },
+
+      /**
+    * Validates required fields before OK button action
+    * @param {Object} oRowData - Contains the input controls for the row
+    * @returns {boolean} - true if valid, false if validation fails
+    */
+      _validateRequiredFields: function (oRowData) {
+        var bValid = true;
+
+        // Validate Quantity Receive
+        if (!oRowData.quantityReceive || oRowData.quantityReceive.getValue() === "") {
+          oRowData.quantityReceive.setValueState('Error');
+          oRowData.quantityReceive.setValueStateText('This field cannot be blank');
+          bValid = false;
+          oRowData.quantityReceive.focus();
+        } else {
+          oRowData.quantityReceive.setValueState('None');
+          oRowData.quantityReceive.setValueStateText('');
+        }
+
+        // Validate Plant
+        if (!oRowData.plant || oRowData.plant.getValue() === "") {
+          oRowData.plant.setValueState('Error');
+          oRowData.plant.setValueStateText('This field cannot be blank');
+          bValid = false;
+          oRowData.plant.focus();
+        } else {
+          oRowData.plant.setValueState('None');
+          oRowData.plant.setValueStateText('');
+        }
+
+        // Validate Storage Location
+        if (!oRowData.storageLocation || oRowData.storageLocation.getValue() === "") {
+          oRowData.storageLocation.setValueState('Error');
+          oRowData.storageLocation.setValueStateText('This field cannot be blank');
+          bValid = false;
+          oRowData.storageLocation.focus();
+        } else {
+          oRowData.storageLocation.setValueState('None');
+          oRowData.storageLocation.setValueStateText('');
+        }
+
+
+        return bValid;
       },
     });
   }
