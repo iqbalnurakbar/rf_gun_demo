@@ -87,86 +87,74 @@ sap.ui.define(
         }
       },
 
-      onDownload: function () {
+      onDownload: function (oEvent) {
         var oModel = this.getView().getModel();
-        var oTable = this.byId("orderTable");
-        var aSelectedItems = oTable.getSelectedItems();
 
-        var aPurchaseOrderNumber = aSelectedItems.map((item) => {
-          const context = item.getBindingContext();
-          return context.getProperty("PurchaseOrderNo");
-        });
+        var oButton = oEvent.getSource();
+        var oContext = oButton.getBindingContext();
+        var oRowData = oContext.getObject();
 
-        var aPurchaseOrderNumberItem = aSelectedItems.map((item) => {
-          const context = item.getBindingContext();
-          return context.getProperty("PurchaseOrderItemNo");
-        });
+        if (oRowData.filename === "") {
+          MessageToast.show("No attachment file");
+          return;
+        }
+
+        var fileContent = "";
+        var mimeType = "";
+        var fileName = "";
 
         var oAction = oModel.bindContext(
           "/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.downloadFile(...)"
         );
 
-        oAction.setParameter("purchase_order", aPurchaseOrderNumber[0]);
-        oAction.setParameter("purchase_order_item", aPurchaseOrderNumberItem[0]);
+        oAction.setParameter("purchase_order", oRowData.PurchaseOrderNo);
+        oAction.setParameter("purchase_order_item", oRowData.PurchaseOrderItemNo);
 
         oAction
           .execute()
           .then(function () {
             // Handle success
-            var oActionContext = oAction.getBoundContext();   
+            var oActionContext = oAction.getBoundContext();
             var oResult = oActionContext ? oActionContext.getObject() : null;
 
+            // Download process
+            fileContent = oResult.fileContent
+            mimeType = oResult.mimeType
+            fileName = oResult.fileName;
+
+            fileContent = fileContent.replace(/\s/g, "");
+
+            // Handle URL-safe base64 if needed
+            fileContent = fileContent.replace(/-/g, "+").replace(/_/g, "/");
+
+            var sBase64Content = atob(fileContent);
+
+            var aBinaryData = new Uint8Array(sBase64Content.length);
+
+            for (var i = 0; i < sBase64Content.length; i++) {
+              aBinaryData[i] = sBase64Content.charCodeAt(i);
+            }
+
+            var oBlob = new Blob([aBinaryData], { type: mimeType });
+
+            // Utilize FileSaver.js or similar if needed, else create download link
+            var sFileUrl = URL.createObjectURL(oBlob);
+
+            // Open the downloaded file in a new tab
+            var oDownloadLink = document.createElement("a");
+            oDownloadLink.href = sFileUrl;
+            oDownloadLink.download = fileName;
+            oDownloadLink.style.display = "none";
+
+            oDownloadLink.click();
+
             MessageToast.show("Download initiated successfully");
-            console.log("Action result:", oResult);
-          })
+          }.bind(this))
           .catch(function (oError) {
             // Handle error
             console.error("Download action failed:", oError);
           });
-        // var fileContent = "";
-        // var mimeType = "";
-        // var fileName = "";
-        // if (oContexts && oContexts.length) {
-        //   oContexts.forEach((oContext) => {
-        //     // Decode the base64 file content
-        //     fileName = oContext.getProperty("filename");
-        //     fileContent = oContext.getProperty("filecontent");
-        //     mimeType = oContext.getProperty("mimetype");
-        //   });
-        // }
-        // // Decode the base64 file content
-        // console.log("ocontext: ", fileContent);
-        // console.log("this: ", this.fileContent);
-
-        // // Remove any whitespace, newlines
-        // fileContent = fileContent.replace(/\s/g, "");
-
-        // // Handle URL-safe base64 if needed
-        // fileContent = fileContent.replace(/-/g, "+").replace(/_/g, "/");
-
-        // var sBase64Content = atob(fileContent);
-
-        // console.log("atob: ", this.fileContent);
-        // var aBinaryData = new Uint8Array(sBase64Content.length);
-
-        // for (var i = 0; i < sBase64Content.length; i++) {
-        //   aBinaryData[i] = sBase64Content.charCodeAt(i);
-        // }
-
-        // var oBlob = new Blob([aBinaryData], { type: mimeType });
-
-        // // Utilize FileSaver.js or similar if needed, else create download link
-        // var sFileUrl = URL.createObjectURL(oBlob);
-
-        // // Open the downloaded file in a new tab
-        // var oDownloadLink = document.createElement("a");
-        // oDownloadLink.href = sFileUrl;
-        // oDownloadLink.download = fileName;
-        // oDownloadLink.style.display = "none";
-
-        // oDownloadLink.click();
-
-        // MessageToast.show("Download has been initiated for " + fileName);
+        MessageToast.show("Download has been initiated for " + fileName);
       },
 
       onUpload: function () {
@@ -185,7 +173,7 @@ sap.ui.define(
         this.dialog.destroy();
       },
 
-      onUploadPress: async function () {
+      onUploadPress: function () {
         if (!this.fileContent || !this.fileName) {
           MessageToast.show("Please select a file to upload.");
           return;
@@ -428,6 +416,8 @@ sap.ui.define(
             oItemData["ConfirmStatus"] = aItems[7].getItems()[0].getPressed();
 
             aSelectedData.push(oItemData);
+
+            aItems[2].getItems()[0].getItems()[1].setValue("");
           }
         } else {
           // For tablets/desktops, get selected rows from the table
@@ -457,6 +447,8 @@ sap.ui.define(
               oItemData["ConfirmStatus"] = aCells[10].getPressed();
 
               aSelectedData.push(oItemData);
+
+              aCells[5].setValue("");
             }.bind(this)
           );
         }
@@ -483,7 +475,6 @@ sap.ui.define(
         // @ts-ignore
         var oTableItem = oButton.getParent(); // Get table row where the button is located
         // @ts-ignore
-        // @ts-ignore
         oTable.setSelectedItem(oTableItem, oButton.getPressed()); // Select or deselect row
       },
 
@@ -505,19 +496,24 @@ sap.ui.define(
         }
       },
 
-      onPlantVHRequest: async function (oEvent) {
+      onPlantVHRequest: function (oEvent) {
         const oInput = oEvent.getSource();
         this._currentPlantInput = oInput;
 
         if (!this._plantVHDialog) {
-          this._plantVHDialog = await Fragment.load({
+          // Fragment.load returns a Promise - handle it properly
+          Fragment.load({
             name: "rfgundemo.view.fragments.PlantVHDialog",
             controller: this,
+          }).then((oDialog) => {
+            this._plantVHDialog = oDialog;
+            this.getView().addDependent(this._plantVHDialog);
+            this._plantVHDialog.open();
           });
-          this.getView().addDependent(this._plantVHDialog);
+        } else {
+          // Dialog already exists, just open it
+          this._plantVHDialog.open();
         }
-
-        this._plantVHDialog.open();
       },
 
       onPlantVHConfirm: function (oEvent) {
@@ -533,17 +529,24 @@ sap.ui.define(
         oEvent.getSource().close();
       },
 
-      onStrLocVHRequest: async function (oEvent) {
+      onStrLocVHRequest: function (oEvent) {
         const oInput = oEvent.getSource();
         this._currentStrLocInput = oInput;
+
         if (!this._strLocVHDialog) {
-          this._strLocVHDialog = await Fragment.load({
+          // Fragment.load returns a Promise - handle it properly
+          Fragment.load({
             name: "rfgundemo.view.fragments.StrLocVHDialog",
             controller: this,
+          }).then((oDialog) => {
+            this._strLocVHDialog = oDialog;
+            this.getView().addDependent(this._strLocVHDialog);
+            this._strLocVHDialog.open();
           });
-          this.getView().addDependent(this._strLocVHDialog);
+        } else {
+          // Dialog already exists, just open it
+          this._strLocVHDialog.open();
         }
-        this._strLocVHDialog.open();
       },
 
       onStrLocVHConfirm: function (oEvent) {
@@ -688,6 +691,8 @@ sap.ui.define(
           oConfirmButton.setIcon("");
           oConfirmButton.setType("Default");
         });
+
+
       },
 
       /**
@@ -748,7 +753,7 @@ sap.ui.define(
        */
       _setFocusOnFirstQuantityReceivedInCarousel: function () {
         var oFirstPage = this.byId("orderCarousel").getPages()[0];
-        var oInput = oFirstPage?.getItems()[2].getItems()[1].getItems()[1];
+        var oInput = oFirstPage.getItems()[2].getItems()[1].getItems()[1];
         if (oInput) {
           setTimeout(() => {
             oInput.focus();
@@ -850,6 +855,9 @@ sap.ui.define(
               // Refresh the data
               if (bIsPhone) {
                 that.byId('orderCarousel').getBinding('pages').refresh();
+
+                MessageToast.show("Data posted successfully");
+
               } else {
                 that.byId('orderTable').getBinding('items').refresh();
               }

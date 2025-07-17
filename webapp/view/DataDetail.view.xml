@@ -252,7 +252,9 @@ buttons.
             pageChanged=".onCarouselPageChanged"
         >
             <pages>
-                <VBox class="sapUiSmallMargin">
+                <VBox
+                    class="sapUiTinyMargin scrollableVBox"
+                    height="70vh">
                     <items>
                         <!-- Line No -->
                         <VBox class="sapUiSmallMargin">
