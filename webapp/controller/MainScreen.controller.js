@@ -139,7 +139,7 @@ sap.ui.define(
             // Show message if no data was found
             if (aContexts.length === 0) {
               MessageToast.show(
-                'No data found for Purchase Order: ' + sPurchaseOrder
+                'No data found for Purchase Order: ' + sPurchaseOrder + '. It could be deleted or delivered.'
               );
               return;
             }
