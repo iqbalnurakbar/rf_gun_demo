@@ -157,155 +157,106 @@ sap.ui.define(
         MessageToast.show("Download has been initiated for " + fileName);
       },
 
-      onUpload: function () {
-        this.loadFragment({
-          id: "uploadFileDialog",
-          name: "rfgundemo.view.fragments.UploadFileDialog",
-          controller: this,
-        }).then((fragment) => {
-          this.dialog = fragment;
-          this.dialog.open();
-        });
+      onUpload: function (oEvent) {
+        // Get row information
+        var oButton = oEvent.getSource();
+        var oBindingContext = oButton.getBindingContext();
+        var oRowData = oBindingContext.getObject();
+        // Create unique ID based on item
+        var sUniqueId = "uploadDialog_" + oRowData.PurchaseOrderItemNo;
+        // Store current context for this specific dialog
+        this["_uploadContext_" + oRowData.PurchaseOrderItemNo] = oBindingContext;
+        // Check if this specific dialog exists
+        if (!this["_uploadDialog_" + oRowData.PurchaseOrderItemNo]) {
+          // Create new dialog for this specific item
+          this.loadFragment({
+            id: sUniqueId, // Unique ID for each dialog
+            name: "rfgundemo.view.fragments.UploadFileDialog",
+            controller: this,
+          }).then((fragment) => {
+            // Store dialog with unique property name
+            this["_uploadDialog_" + oRowData.PurchaseOrderItemNo] = fragment;
+            this.getView().addDependent(fragment);
+            fragment.open();
+          });
+        } else {
+          // Open existing dialog for this item
+          this["_uploadDialog_" + oRowData.PurchaseOrderItemNo].open();
+        }
       },
 
-      onCancelPress: function () {
-        this.dialog.close();
-        this.dialog.destroy();
+      onCancelPress: function (oEvent) {
+        // Get the dialog that triggered the event
+        var oDialog = oEvent.getSource().getParent().getParent();
+        oDialog.close();
       },
 
-      onUploadPress: function () {
+      onUploadPress: function (oEvent) {
+        var oDeviceModel = this.getView().getModel("device");
+        var bIsPhone = oDeviceModel.getProperty("/system/phone");
+        // Get the dialog that triggered the event
+        var oDialog = oEvent.getSource().getParent().getParent();
+        var sDialogId = oDialog.getId();
+
+        // Extract item number from dialog ID
+        var sItemNo = sDialogId.split("uploadDialog_")[1].split("--")[0];
+
+        // Get the stored context for this specific item
+        var oUploadContext = this["_uploadContext_" + sItemNo];
+
+        if (!oUploadContext) {
+          MessageToast.show("No row context available");
+          return;
+        }
+
         if (!this.fileContent || !this.fileName) {
           MessageToast.show("Please select a file to upload.");
           return;
         }
 
         try {
-          var aSelectedData = []; // Will store all the selected item data
-          var oDeviceModel = this.getView().getModel("device");
-          var bIsPhone = oDeviceModel.getProperty("/system/phone"); // Check if device is phone
+          // Use the stored context data
+          var oRowData = oUploadContext.getObject();
+          var oItemData = {
+            MaterialDocument: "",
+            PurchaseOrder: this.sPurchaseOrderNumber,
+            PurchaseOrderItem: oRowData.PurchaseOrderItemNo,
+            filename: this.fileName,
+            filecontent: this.fileContent,
+            mimetype: this.mimeType,
+            fileextension: this.fileExtension,
+          };
 
-          if (bIsPhone) {
-            // For phones, get the data from the active carousel page
-            var oCarousel = this.byId("orderCarousel");
-            var sActivePageId = oCarousel.getActivePage();
-            var oActivePage = oCarousel
-              .getPages()
-              .find((page) => page.getId() === sActivePageId);
-
-            if (oActivePage) {
-              var oItemData = {};
-              var aItems = oActivePage.getItems();
-
-              // Extract field values from carousel layout (nested structure)
-              oItemData["MaterialDocument"] = "";
-              oItemData["PurchaseOrder"] = this.sPurchaseOrderNumber;
-              oItemData["PurchaseOrderItem"] = aItems[0]
-                .getItems()[1]
-                .getValue();
-              oItemData["Material"] = aItems[1]
-                .getItems()[0]
-                .getItems()[1]
-                .getValue();
-              oItemData["MaterialDescription"] = aItems[1]
-                .getItems()[1]
-                .getItems()[1]
-                .getValue();
-              oItemData["QuantitySuggest"] = parseFloat(
-                aItems[2].getItems()[0].getItems()[1].getValue()
-              ).toFixed(3);
-              oItemData["QuantityReceive"] = parseFloat(
-                aItems[2].getItems()[1].getItems()[1].getValue()
-              ).toFixed(3);
-              oItemData["QuantityUnit"] = aItems[3].getItems()[1].getValue();
-              oItemData["Plant"] = aItems[4].getItems()[1].getValue();
-              oItemData["StorageLocation"] = aItems[5].getItems()[1].getValue();
-              oItemData["ConfirmStatus"] = aItems[7].getItems()[0].getPressed();
-              oItemData["filename"] = this.fileName;
-              oItemData["filecontent"] = this.fileContent;
-              oItemData["mimetype"] = this.mimeType;
-              oItemData["fileextension"] = this.fileExtension;
-              aSelectedData.push(oItemData);
-            }
-          } else {
-            // For tablets/desktops, get selected rows from the table
-            var oTable = this.byId("orderTable");
-            var aSelectedItems = oTable.getSelectedItems();
-
-            aSelectedItems.forEach(
-              function (oItem) {
-                var oItemData = {};
-                var aCells = oItem.getCells();
-
-                // Extract values from each selected row
-                oItemData["MaterialDocument"] = "";
-                oItemData["PurchaseOrder"] = this.sPurchaseOrderNumber;
-                oItemData["PurchaseOrderItem"] = aCells[0].getValue();
-                oItemData["Material"] = aCells[1].getValue();
-                oItemData["MaterialDescription"] = aCells[2].getValue();
-                oItemData["QuantitySuggest"] = parseFloat(
-                  aCells[4].getValue()
-                ).toFixed(3);
-                oItemData["QuantityReceive"] = parseFloat(
-                  aCells[5].getValue()
-                ).toFixed(3);
-                oItemData["QuantityUnit"] = aCells[6].getValue();
-                oItemData["Plant"] = aCells[7].getValue();
-                oItemData["StorageLocation"] = aCells[8].getValue();
-                oItemData["ConfirmStatus"] = aCells[10].getPressed();
-                oItemData["filename"] = this.fileName;
-                oItemData["filecontent"] = this.fileContent;
-                oItemData["mimetype"] = this.mimeType;
-                oItemData["fileextension"] = this.fileExtension;
-                aSelectedData.push(oItemData);
-              }.bind(this)
-            );
-          }
-
-          console.log(aSelectedData);
-          if (aSelectedData.length === 0) {
-            // No selection — show message
-            MessageToast.show("Please select items");
-            return;
-          }
-          console.log("Selected Data for Upload:", aSelectedData);
-          // console.log("Selected Data for Upload:", aSelectedData[0].MaterialDocument);
-
-          // * Prepare OData action bound to the upload service
+          // Upload logic
           const oModel = this.getView().getModel();
-          const oContext = this.getView().getBindingContext();
-          console.log("Binding Context:", oContext);
-
           const oAction = oModel.bindContext(
-            "/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.uploadFile(...)",
-            oContext
+            "/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.uploadFile(...)"
           );
 
-          // * Set required parameters on the action
-          oAction.setParameter(
-            "material_document",
-            aSelectedData[0].MaterialDocument
-          );
-          oAction.setParameter(
-            "purchase_order",
-            aSelectedData[0].PurchaseOrder
-          );
-          oAction.setParameter(
-            "purchase_order_item",
-            aSelectedData[0].PurchaseOrderItem
-          );
-          oAction.setParameter("fileName", aSelectedData[0].filename);
-          oAction.setParameter("fileContent", aSelectedData[0].filecontent);
-          oAction.setParameter("mimeType", aSelectedData[0].mimetype);
-          oAction.setParameter("fileExtension", aSelectedData[0].fileextension);
+          // Set parameters
+          oAction.setParameter("material_document", oItemData.MaterialDocument);
+          oAction.setParameter("purchase_order", oItemData.PurchaseOrder);
+          oAction.setParameter("purchase_order_item", oItemData.PurchaseOrderItem);
+          oAction.setParameter("fileName", oItemData.filename);
+          oAction.setParameter("fileContent", oItemData.filecontent);
+          oAction.setParameter("mimeType", oItemData.mimetype);
+          oAction.setParameter("fileExtension", oItemData.fileextension);
 
-          // * Invoke the service call
-          oAction.execute();
-          MessageToast.show("File uploaded successfully");
-          this.dialog.close();
-          this.dialog.destroy();
-          oModel.refresh();
+          // Execute upload
+          oAction.execute().then(() => {
+            MessageToast.show("File uploaded successfully for item " + sItemNo);
+            oDialog.close();
+            if (bIsPhone) {
+              this.byId('orderCarousel').getBinding('pages').refresh();
+            } else {
+              this.byId('orderTable').getBinding('items').refresh();
+            }
+          }).catch((error) => {
+            console.error("Upload failed:", error);
+            MessageToast.show("Upload Failed");
+          });
+
         } catch (error) {
-          // ! Upload failed: log error & inform user
           console.error("Upload failed:", error);
           MessageToast.show("Upload Failed");
         }
@@ -366,7 +317,6 @@ sap.ui.define(
         var sValidatedValue = sValue.replace(/[^0-9]/g, "");
 
         // Set back only numeric value
-        // @ts-ignore
         // @ts-ignore
         oInput.setValue(sValidatedValue);
       },
@@ -470,7 +420,6 @@ sap.ui.define(
       onOkButtonPress: function (oEvent) {
         var oButton = oEvent.getSource(); // The button that was pressed
         this._handleToggleButtonState(oButton); // Change visual state
-
         var oTable = this.byId("orderTable");
         // @ts-ignore
         var oTableItem = oButton.getParent(); // Get table row where the button is located
@@ -481,13 +430,25 @@ sap.ui.define(
           storageLocation: aCells[8]  // Storage Location column
         };
 
-        if (!this._validateRequiredFields(oRowData)) {
-          this._handleToggleButtonState(oButton, true); // Change visual state
-          return;
-        }
 
+        // Check if button is being unpressed (deselecting row)
         // @ts-ignore
-        oTable.setSelectedItem(oTableItem, oButton.getPressed()); // Select or deselect row
+        if (!oButton.getPressed()) {
+          // No validation needed when deselecting - just update table selection
+          // @ts-ignore
+          oTable.setSelectedItem(oTableItem, oButton.getPressed()); // Deselect row
+          return;
+        } else {
+          // Button is being pressed (selecting row) - validate required fields first
+          if (!this._validateRequiredFields(oRowData)) {
+            // Validation failed - keep button in pressed state to show error
+            this._handleToggleButtonState(oButton, true); // Mark as selected/error state
+            return;
+          }
+          // Validation passed - update table selection to match button state
+          // @ts-ignore
+          oTable.setSelectedItem(oTableItem, oButton.getPressed()); // Select row
+        }
       },
 
       /**
@@ -889,9 +850,6 @@ sap.ui.define(
                 sHttpStatusText || "Processing Error",
                 sErrorMessage || "An unexpected error occurred during processing."
               );
-
-              // Refresh model on error
-              oModel.refresh();
             }).finally(() => { that._resetAfterSuccessfulPost(); });
 
         } catch (oError) {
@@ -1067,13 +1025,10 @@ sap.ui.define(
       },
 
       /**
-    * Validates required fields before OK button action
-    * @param {Object} oRowData - Contains the input controls for the row
-    * @returns {boolean} - true if valid, false if validation fails
-    */
+      * Validates required fields before OK button action
+      */
       _validateRequiredFields: function (oRowData) {
         var bValid = true;
-
         // Validate Quantity Receive
         if (!oRowData.quantityReceive || oRowData.quantityReceive.getValue() === "") {
           oRowData.quantityReceive.setValueState('Error');
@@ -1084,7 +1039,6 @@ sap.ui.define(
           oRowData.quantityReceive.setValueState('None');
           oRowData.quantityReceive.setValueStateText('');
         }
-
         // Validate Plant
         if (!oRowData.plant || oRowData.plant.getValue() === "") {
           oRowData.plant.setValueState('Error');
@@ -1095,7 +1049,6 @@ sap.ui.define(
           oRowData.plant.setValueState('None');
           oRowData.plant.setValueStateText('');
         }
-
         // Validate Storage Location
         if (!oRowData.storageLocation || oRowData.storageLocation.getValue() === "") {
           oRowData.storageLocation.setValueState('Error');
@@ -1106,8 +1059,6 @@ sap.ui.define(
           oRowData.storageLocation.setValueState('None');
           oRowData.storageLocation.setValueStateText('');
         }
-
-
         return bValid;
       },
     });
