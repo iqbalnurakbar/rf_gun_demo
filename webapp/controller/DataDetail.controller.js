@@ -828,9 +828,7 @@ sap.ui.define(
               // Refresh the data
               if (bIsPhone) {
                 that.byId('orderCarousel').getBinding('pages').refresh();
-
                 MessageToast.show("Data posted successfully");
-
               } else {
                 that.byId('orderTable').getBinding('items').refresh();
               }
