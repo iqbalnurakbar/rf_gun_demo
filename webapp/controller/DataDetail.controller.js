@@ -108,48 +108,53 @@ sap.ui.define(
         );
 
         oAction.setParameter("purchase_order", oRowData.PurchaseOrderNo);
-        oAction.setParameter("purchase_order_item", oRowData.PurchaseOrderItemNo);
+        oAction.setParameter(
+          "purchase_order_item",
+          oRowData.PurchaseOrderItemNo
+        );
 
         oAction
           .execute()
-          .then(function () {
-            // Handle success
-            var oActionContext = oAction.getBoundContext();
-            var oResult = oActionContext ? oActionContext.getObject() : null;
+          .then(
+            function () {
+              // Handle success
+              var oActionContext = oAction.getBoundContext();
+              var oResult = oActionContext ? oActionContext.getObject() : null;
 
-            // Download process
-            fileContent = oResult.fileContent
-            mimeType = oResult.mimeType
-            fileName = oResult.fileName;
+              // Download process
+              fileContent = oResult.fileContent;
+              mimeType = oResult.mimeType;
+              fileName = oResult.fileName;
 
-            fileContent = fileContent.replace(/\s/g, "");
+              fileContent = fileContent.replace(/\s/g, "");
 
-            // Handle URL-safe base64 if needed
-            fileContent = fileContent.replace(/-/g, "+").replace(/_/g, "/");
+              // Handle URL-safe base64 if needed
+              fileContent = fileContent.replace(/-/g, "+").replace(/_/g, "/");
 
-            var sBase64Content = atob(fileContent);
+              var sBase64Content = atob(fileContent);
 
-            var aBinaryData = new Uint8Array(sBase64Content.length);
+              var aBinaryData = new Uint8Array(sBase64Content.length);
 
-            for (var i = 0; i < sBase64Content.length; i++) {
-              aBinaryData[i] = sBase64Content.charCodeAt(i);
-            }
+              for (var i = 0; i < sBase64Content.length; i++) {
+                aBinaryData[i] = sBase64Content.charCodeAt(i);
+              }
 
-            var oBlob = new Blob([aBinaryData], { type: mimeType });
+              var oBlob = new Blob([aBinaryData], { type: mimeType });
 
-            // Utilize FileSaver.js or similar if needed, else create download link
-            var sFileUrl = URL.createObjectURL(oBlob);
+              // Utilize FileSaver.js or similar if needed, else create download link
+              var sFileUrl = URL.createObjectURL(oBlob);
 
-            // Open the downloaded file in a new tab
-            var oDownloadLink = document.createElement("a");
-            oDownloadLink.href = sFileUrl;
-            oDownloadLink.download = fileName;
-            oDownloadLink.style.display = "none";
+              // Open the downloaded file in a new tab
+              var oDownloadLink = document.createElement("a");
+              oDownloadLink.href = sFileUrl;
+              oDownloadLink.download = fileName;
+              oDownloadLink.style.display = "none";
 
-            oDownloadLink.click();
+              oDownloadLink.click();
 
-            MessageToast.show("Download initiated successfully");
-          }.bind(this))
+              MessageToast.show("Download initiated successfully");
+            }.bind(this)
+          )
           .catch(function (oError) {
             // Handle error
             console.error("Download action failed:", oError);
@@ -165,7 +170,8 @@ sap.ui.define(
         // Create unique ID based on item
         var sUniqueId = "uploadDialog_" + oRowData.PurchaseOrderItemNo;
         // Store current context for this specific dialog
-        this["_uploadContext_" + oRowData.PurchaseOrderItemNo] = oBindingContext;
+        this["_uploadContext_" + oRowData.PurchaseOrderItemNo] =
+          oBindingContext;
         // Check if this specific dialog exists
         if (!this["_uploadDialog_" + oRowData.PurchaseOrderItemNo]) {
           // Create new dialog for this specific item
@@ -208,7 +214,7 @@ sap.ui.define(
           MessageToast.show("No row context available");
           return;
         }
-      
+
         if (!this.fileContent || !this.fileName) {
           MessageToast.show("Please select a file to upload.");
           return;
@@ -236,26 +242,33 @@ sap.ui.define(
           // Set parameters
           oAction.setParameter("material_document", oItemData.MaterialDocument);
           oAction.setParameter("purchase_order", oItemData.PurchaseOrder);
-          oAction.setParameter("purchase_order_item", oItemData.PurchaseOrderItem);
+          oAction.setParameter(
+            "purchase_order_item",
+            oItemData.PurchaseOrderItem
+          );
           oAction.setParameter("fileName", oItemData.filename);
           oAction.setParameter("fileContent", oItemData.filecontent);
           oAction.setParameter("mimeType", oItemData.mimetype);
           oAction.setParameter("fileExtension", oItemData.fileextension);
 
           // Execute upload
-          oAction.execute().then(() => {
-            MessageToast.show("File uploaded successfully for item " + sItemNo);
-            oDialog.close();
-            if (bIsPhone) {
-              this.byId('orderCarousel').getBinding('pages').refresh();
-            } else {
-              this.byId('orderTable').getBinding('items').refresh();
-            }
-          }).catch((error) => {
-            console.error("Upload failed:", error);
-            MessageToast.show("Upload Failed");
-          });
-
+          oAction
+            .execute()
+            .then(() => {
+              MessageToast.show(
+                "File uploaded successfully for item " + sItemNo
+              );
+              oDialog.close();
+              if (bIsPhone) {
+                this.byId("orderCarousel").getBinding("pages").refresh();
+              } else {
+                this.byId("orderTable").getBinding("items").refresh();
+              }
+            })
+            .catch((error) => {
+              console.error("Upload failed:", error);
+              MessageToast.show("Upload Failed");
+            });
         } catch (error) {
           console.error("Upload failed:", error);
           MessageToast.show("Upload Failed");
@@ -426,10 +439,9 @@ sap.ui.define(
         var aCells = oTableItem.getCells();
         var oRowData = {
           quantityReceive: aCells[5], // Quantity Receive column
-          plant: aCells[7],           // Plant column  
-          storageLocation: aCells[8]  // Storage Location column
+          plant: aCells[7], // Plant column
+          storageLocation: aCells[8], // Storage Location column
         };
-
 
         // Check if button is being unpressed (deselecting row)
         // @ts-ignore
@@ -602,7 +614,6 @@ sap.ui.define(
        * @private
        */
 
-
       _attachInputEventDelegates: function () {
         var oDataDetailPage = this.byId("dataDetailPage");
         if (oDataDetailPage) {
@@ -664,8 +675,6 @@ sap.ui.define(
           oConfirmButton.setIcon("");
           oConfirmButton.setType("Default");
         });
-
-
       },
 
       /**
@@ -688,15 +697,14 @@ sap.ui.define(
         if (bIsPhone) {
           var oCarousel = this.byId("orderCarousel");
           var oBinding = oCarousel.getBinding("pages");
-          oBinding.filter(aFilters);
           oBinding.attachEventOnce("dataReceived", function () {
             that.getView().setBusy(false);
             that._setFocusOnFirstQuantityReceivedInCarousel();
           });
+          oBinding.filter(aFilters);
         } else {
           var oTable = this.byId("orderTable");
           var oBinding = oTable.getBinding("items");
-          oBinding.filter(aFilters);
           oTable.attachEventOnce(
             "updateFinished",
             function () {
@@ -705,6 +713,7 @@ sap.ui.define(
             },
             this
           );
+          oBinding.filter(aFilters);
         }
       },
 
@@ -725,7 +734,16 @@ sap.ui.define(
        * @private
        */
       _setFocusOnFirstQuantityReceivedInCarousel: function () {
-        var oFirstPage = this.byId("orderCarousel").getPages()[0];
+        var aPages = this.byId("orderCarousel").getPages();
+        if (!aPages || aPages.length === 0) {
+          // Try to load again if the page still not rendered
+          setTimeout(
+            () => this._setFocusOnFirstQuantityReceivedInCarousel(),
+            0
+          );
+          return;
+        }
+        var oFirstPage = aPages[0];
         var oInput = oFirstPage.getItems()[2].getItems()[1].getItems()[1];
         if (oInput) {
           setTimeout(() => {
@@ -786,7 +804,7 @@ sap.ui.define(
         // Your existing body structure works perfectly!
         var body = {
           PurchaseOrder: aBAPIData[0].PurchaseOrder,
-          item: [...aBAPIData],  // This is already an array of objects
+          item: [...aBAPIData], // This is already an array of objects
         };
 
         // Clear previous messages before new API call
@@ -813,7 +831,8 @@ sap.ui.define(
           oAction.setParameter("item", JSON.stringify(body.item)); // Pass the array directly
 
           // Execute the action
-          oAction.execute()
+          oAction
+            .execute()
             .then(function () {
               that.getView().setBusy(false);
 
@@ -822,17 +841,18 @@ sap.ui.define(
                 "Data posted successfully",
                 MessageType.Success,
                 "Document Created",
-                "Purchase Order " + body.PurchaseOrder + " has been processed successfully."
+                "Purchase Order " +
+                  body.PurchaseOrder +
+                  " has been processed successfully."
               );
 
               // Refresh the data
               if (bIsPhone) {
-                that.byId('orderCarousel').getBinding('pages').refresh();
+                that.byId("orderCarousel").getBinding("pages").refresh();
                 MessageToast.show("Data posted successfully");
               } else {
-                that.byId('orderTable').getBinding('items').refresh();
+                that.byId("orderTable").getBinding("items").refresh();
               }
-
             })
             .catch(function (oError) {
               that.getView().setBusy(false);
@@ -846,10 +866,13 @@ sap.ui.define(
                 "Error posting data",
                 MessageType.Error,
                 sHttpStatusText || "Processing Error",
-                sErrorMessage || "An unexpected error occurred during processing."
+                sErrorMessage ||
+                  "An unexpected error occurred during processing."
               );
-            }).finally(() => { that._resetAfterSuccessfulPost(); });
-
+            })
+            .finally(() => {
+              that._resetAfterSuccessfulPost();
+            });
         } catch (oError) {
           this.getView().setBusy(false);
           this._addMessage(
@@ -915,7 +938,6 @@ sap.ui.define(
 
         return mStatusTexts[iStatusCode] || "HTTP " + iStatusCode;
       },
-
 
       /**
        * Navigates to the next carousel page if available.
@@ -1023,39 +1045,49 @@ sap.ui.define(
       },
 
       /**
-      * Validates required fields before OK button action
-      */
+       * Validates required fields before OK button action
+       */
       _validateRequiredFields: function (oRowData) {
         var bValid = true;
         // Validate Quantity Receive
-        if (!oRowData.quantityReceive || oRowData.quantityReceive.getValue() === "") {
-          oRowData.quantityReceive.setValueState('Error');
-          oRowData.quantityReceive.setValueStateText('This field cannot be blank');
+        if (
+          !oRowData.quantityReceive ||
+          oRowData.quantityReceive.getValue() === ""
+        ) {
+          oRowData.quantityReceive.setValueState("Error");
+          oRowData.quantityReceive.setValueStateText(
+            "This field cannot be blank"
+          );
           bValid = false;
           oRowData.quantityReceive.focus();
         } else {
-          oRowData.quantityReceive.setValueState('None');
-          oRowData.quantityReceive.setValueStateText('');
+          oRowData.quantityReceive.setValueState("None");
+          oRowData.quantityReceive.setValueStateText("");
         }
         // Validate Plant
         if (!oRowData.plant || oRowData.plant.getValue() === "") {
-          oRowData.plant.setValueState('Error');
-          oRowData.plant.setValueStateText('This field cannot be blank');
+          oRowData.plant.setValueState("Error");
+          oRowData.plant.setValueStateText("This field cannot be blank");
           bValid = false;
           oRowData.plant.focus();
         } else {
-          oRowData.plant.setValueState('None');
-          oRowData.plant.setValueStateText('');
+          oRowData.plant.setValueState("None");
+          oRowData.plant.setValueStateText("");
         }
         // Validate Storage Location
-        if (!oRowData.storageLocation || oRowData.storageLocation.getValue() === "") {
-          oRowData.storageLocation.setValueState('Error');
-          oRowData.storageLocation.setValueStateText('This field cannot be blank');
+        if (
+          !oRowData.storageLocation ||
+          oRowData.storageLocation.getValue() === ""
+        ) {
+          oRowData.storageLocation.setValueState("Error");
+          oRowData.storageLocation.setValueStateText(
+            "This field cannot be blank"
+          );
           bValid = false;
           oRowData.storageLocation.focus();
         } else {
-          oRowData.storageLocation.setValueState('None');
-          oRowData.storageLocation.setValueStateText('');
+          oRowData.storageLocation.setValueState("None");
+          oRowData.storageLocation.setValueStateText("");
         }
         return bValid;
       },
