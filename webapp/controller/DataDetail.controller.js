@@ -154,7 +154,18 @@ sap.ui.define(
         console.log("Selected Data for Download:", aSelectedData);
       },
 
-      onUpload: async function () {
+      onUpload: async function (oEvent) {
+        // // Get the row (ListItem) that triggered the event
+        // var oListItem = oEvent.getSource().getParent().getParent();
+
+        // // Get the table
+        // var oTable = this.byId("orderTable");
+
+        // // Select this row in the table
+        // var oSelectedItem = oTable.setSelectedItem(oListItem);
+
+        // // Continue with your upload logic here
+        // // MessageToast.show("Row selected for upload.");
         this.loadFragment({
           id: "uploadFileDialog",
           name: "rfgundemo.view.fragments.UploadFileDialog",
