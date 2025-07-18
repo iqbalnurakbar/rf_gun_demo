@@ -125,6 +125,9 @@ sap.ui.define(
         const sErrorMessage =
           oEvent.getParameter('message') || 'Barcode scan failed.';
         MessageToast.show(sErrorMessage);
+
+        const oInput = this.byId('purchaseOrderNumber');
+        oInput.focus(); // Focus input field
       },
 
       /**
@@ -190,9 +193,13 @@ sap.ui.define(
           function () {
             // Handle request failure
             this.getView().setBusy(false);
+
             MessageToast.show(
               'Error retrieving data for Purchase Order: ' + sPurchaseOrder
             );
+
+            const oInput = this.byId('purchaseOrderNumber');
+            oInput.focus(); // Focus input field
           }.bind(this)
         );
       },
