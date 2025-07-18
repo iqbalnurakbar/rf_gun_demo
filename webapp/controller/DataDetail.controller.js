@@ -134,7 +134,7 @@ sap.ui.define(
               var sBase64Content = atob(fileContent);
 
               var aBinaryData = new Uint8Array(sBase64Content.length);
-
+              
               for (var i = 0; i < sBase64Content.length; i++) {
                 aBinaryData[i] = sBase64Content.charCodeAt(i);
               }
@@ -145,6 +145,7 @@ sap.ui.define(
               var sFileUrl = URL.createObjectURL(oBlob);
 
               // Open the downloaded file in a new tab
+
               var oDownloadLink = document.createElement('a');
               oDownloadLink.href = sFileUrl;
               oDownloadLink.download = fileName;
@@ -168,7 +169,9 @@ sap.ui.define(
         // Create unique ID based on item
         var sUniqueId = 'uploadDialog_' + oRowData.PurchaseOrderItemNo;
         // Store current context for this specific dialog
+
         this['_uploadContext_' + oRowData.PurchaseOrderItemNo] =
+
           oBindingContext;
         // Check if this specific dialog exists
         if (!this['_uploadDialog_' + oRowData.PurchaseOrderItemNo]) {
@@ -328,9 +331,9 @@ sap.ui.define(
         var sValidatedValue = sValue.replace(/[^0-9.]/g, '');
 
         // Ensure only one decimal point
-        var aParts = sValidatedValue.split('.');
+        var aParts = sValidatedValue.split(".");
         if (aParts.length > 2) {
-          sValidatedValue = aParts[0] + '.' + aParts.slice(1).join('');
+          sValidatedValue = aParts[0] + "." + aParts.slice(1).join("");
         }
 
         // Set back only numeric value
@@ -457,7 +460,7 @@ sap.ui.define(
           var oActivePage = oCarousel
             .getPages()
             .find(page => page.getId() === sActivePageId);
-
+          
           if (oActivePage) {
             var aItems = oActivePage.getItems();
             // Get the input fields based on carousel structure from your XML
@@ -881,7 +884,7 @@ sap.ui.define(
                 that.byId('orderCarousel').getBinding('pages').refresh();
                 MessageToast.show('Data posted successfully');
               } else {
-                that.byId('orderTable').getBinding('items').refresh();
+                that.byId("orderTable").getBinding("items").refresh();
               }
             })
             .catch(function (oError) {
@@ -1088,8 +1091,8 @@ sap.ui.define(
           bValid = false;
           oRowData.quantityReceive.focus();
         } else {
-          oRowData.quantityReceive.setValueState('None');
-          oRowData.quantityReceive.setValueStateText('');
+          oRowData.quantityReceive.setValueState("None");
+          oRowData.quantityReceive.setValueStateText("");
         }
         // Validate Plant
         if (!oRowData.plant || oRowData.plant.getValue() === '') {
@@ -1098,8 +1101,8 @@ sap.ui.define(
           bValid = false;
           oRowData.plant.focus();
         } else {
-          oRowData.plant.setValueState('None');
-          oRowData.plant.setValueStateText('');
+          oRowData.plant.setValueState("None");
+          oRowData.plant.setValueStateText("");
         }
         // Validate Storage Location
         if (
@@ -1113,8 +1116,8 @@ sap.ui.define(
           bValid = false;
           oRowData.storageLocation.focus();
         } else {
-          oRowData.storageLocation.setValueState('None');
-          oRowData.storageLocation.setValueStateText('');
+          oRowData.storageLocation.setValueState("None");
+          oRowData.storageLocation.setValueStateText("");
         }
         return bValid;
       },
