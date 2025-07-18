@@ -147,6 +147,13 @@ buttons.
                 <Column
                     demandPopin="true"
                     minScreenWidth="Tablet"
+                    hAlign="Center"
+                >
+                    <Text text="Upload/Download" />
+                </Column>
+                <Column
+                    demandPopin="true"
+                    minScreenWidth="Tablet"
                     width="5rem"
                     hAlign="Center"
                 >
@@ -209,8 +216,14 @@ buttons.
                             showValueHelp="true"
                             valueHelpRequest="onStrLocVHRequest"
                         />
+                        <Link
+                            text="{filename}"
+
+                            emphasized="true"
+                        />
                         <HBox
                             width="100%"
+                            justifyContent="Center"
                             wrap="Wrap"
                         >
                             <Button
@@ -222,11 +235,6 @@ buttons.
                                 icon="sap-icon://download"
                                 class="sapUiTinyMarginEnd"
                                 press="onDownload"
-                            />
-                            <Button
-                                text="{filename}"
-                                type="Transparent"
-                                visible="{= !!${filename} }"
                             />
                         </HBox>
 
@@ -255,7 +263,8 @@ buttons.
             <pages>
                 <VBox
                     class="sapUiTinyMargin scrollableVBox"
-                    height="70vh">
+                    height="70vh"
+                >
                     <items>
                         <!-- Line No -->
                         <VBox class="sapUiSmallMargin">
@@ -386,8 +395,12 @@ buttons.
         -->
         <footer>
             <OverflowToolbar>
-                <HBox visible="{= !${device>/system/phone} }" class="sapUiContentPadding">
-                    <Button id="messagePopoverBtn"
+                <HBox
+                    visible="{= !${device>/system/phone} }"
+                    class="sapUiContentPadding"
+                >
+                    <Button
+                        id="messagePopoverBtn"
                         visible="{=!!${message>/}.length}"
                         icon="{
                         parts: ['message>/'],
@@ -402,7 +415,8 @@ buttons.
                         formatter: '.getMessageCount'
                     }"
                         press="onShowMessagePopover"
-                        ariaHasPopup="Dialog" />
+                        ariaHasPopup="Dialog"
+                    />
                 </HBox>
                 <!-- Phone keyboard shortcuts - only visible on phone devices -->
                 <HBox
