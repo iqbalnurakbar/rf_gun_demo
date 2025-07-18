@@ -208,7 +208,7 @@ sap.ui.define(
           MessageToast.show("No row context available");
           return;
         }
-      
+
         if (!this.fileContent || !this.fileName) {
           MessageToast.show("Please select a file to upload.");
           return;
@@ -420,34 +420,60 @@ sap.ui.define(
       onOkButtonPress: function (oEvent) {
         var oButton = oEvent.getSource(); // The button that was pressed
         this._handleToggleButtonState(oButton); // Change visual state
-        var oTable = this.byId("orderTable");
-        // @ts-ignore
-        var oTableItem = oButton.getParent(); // Get table row where the button is located
-        var aCells = oTableItem.getCells();
-        var oRowData = {
-          quantityReceive: aCells[5], // Quantity Receive column
-          plant: aCells[7],           // Plant column  
-          storageLocation: aCells[8]  // Storage Location column
-        };
+        var oDeviceModel = this.getView().getModel("device");
+        var bIsPhone = oDeviceModel.getProperty("/system/phone");
+        var oFields = null;
+        var oTableItem = null;
 
+        // Check if phone or desktop
+        if (bIsPhone) {
+          // For phone - get data from carousel page structure
+          var oCarousel = this.byId("orderCarousel");
+          var sActivePageId = oCarousel.getActivePage();
+          var oActivePage = oCarousel.getPages().find((page) => page.getId() === sActivePageId);
+
+          if (oActivePage) {
+            var aItems = oActivePage.getItems();
+            // Get the input fields based on carousel structure from your XML
+            oFields = {
+              quantityReceive: aItems[2].getItems()[1].getItems()[1], // Quantity Receive input
+              plant: aItems[4].getItems()[1],                        // Plant input  
+              storageLocation: aItems[5].getItems()[1]               // Storage Location input
+            };
+          }
+        } else {
+          // For desktop - get data from table row
+          oTableItem = oButton.getParent(); // Get table row where the button is located
+          var aCells = oTableItem.getCells();
+          oFields = {
+            quantityReceive: aCells[5], // Quantity Receive column
+            plant: aCells[7],           // Plant column  
+            storageLocation: aCells[8]  // Storage Location column
+          };
+        }
 
         // Check if button is being unpressed (deselecting row)
-        // @ts-ignore
         if (!oButton.getPressed()) {
-          // No validation needed when deselecting - just update table selection
-          // @ts-ignore
-          oTable.setSelectedItem(oTableItem, oButton.getPressed()); // Deselect row
+          // No validation needed when deselecting
+          if (!bIsPhone) {
+            // Only table has setSelectedItem method
+            var oTable = this.byId("orderTable");
+            oTable.setSelectedItem(oTableItem, oButton.getPressed()); // Deselect row
+          }
           return;
         } else {
           // Button is being pressed (selecting row) - validate required fields first
-          if (!this._validateRequiredFields(oRowData)) {
+          if (!this._validateRequiredFields(oFields)) {
             // Validation failed - keep button in pressed state to show error
             this._handleToggleButtonState(oButton, true); // Mark as selected/error state
             return;
           }
-          // Validation passed - update table selection to match button state
-          // @ts-ignore
-          oTable.setSelectedItem(oTableItem, oButton.getPressed()); // Select row
+          // Validation passed - update table selection to match button state (desktop only)
+          if (!bIsPhone) {
+            var oTable = this.byId("orderTable");
+            oTable.setSelectedItem(oTableItem, oButton.getPressed()); // Select row
+          }
+          // For phone, no table selection needed since carousel doesn't have that concept
         }
       },
 
@@ -499,7 +525,7 @@ sap.ui.define(
       },
 
       onPlantVHCancel: function (oEvent) {
-        oEvent.getSource().close();
+        //oEvent.getSource().close();
       },
 
       onStrLocVHRequest: function (oEvent) {
@@ -532,7 +558,7 @@ sap.ui.define(
       },
 
       onStrLocVHCancel: function (oEvent) {
-        oEvent.getSource().close();
+        //oEvent.getSource().close();
       },
 
       // MessagePopover Methods
