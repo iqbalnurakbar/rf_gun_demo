@@ -8,8 +8,8 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     displayBlock="true"
+    xmlns:ndc="sap.ndc"
 >
-
     <!--
         Main page container with title and ID.
         Acts as the root page of the screen and provides a structured layout.
@@ -18,7 +18,6 @@
         title="SMR Demo Apps"
         id="mainScreenPage"
     >
-
         <!--
             VBox layout centers the form content vertically and horizontally.
             Provides margin and full height/width to ensure responsive behavior.
@@ -30,7 +29,6 @@
             height="100%"
             width="100%"
         >
-
             <!--
                 Label for the Purchase Order input field.
                 Improves accessibility and UX clarity.
@@ -44,15 +42,25 @@
                 Input field for entering or scanning the Purchase Order number.
                 Supports keyboard "Enter" (or scanner trigger) via 'submit' event.
             -->
-            <Input
-                placeholder="Purchase Order"
-                id="purchaseOrderNumber"
-                required="true"
-                submit=".onPurchaseOrderSubmit"
-                maxLength="10"
-                value="4500000254"
-                liveChange=".onLiveChangeCheckNumber"
-            />
+            <HBox>
+                <Input
+                    placeholder="Purchase Order"
+                    id="purchaseOrderNumber"
+                    required="true"
+                    submit=".onPurchaseOrderSubmit"
+                    maxLength="10"
+                    value="4500000254"
+                    liveChange=".onLiveChangeCheckNumber"
+                />
+                <ndc:BarcodeScannerButton
+                    id="purchaseOrderNumberScan"
+                    scanSuccess=".onBarcodeScanSuccess"
+                    scanFail=".onBarcodeScanFail"
+                    disableBarcodeInputDialog="true"
+                    provideFallback="false"
+                    class="sapUiTinyMarginBegin"
+                />
+            </HBox>
         </VBox>
 
         <!--
@@ -73,6 +81,5 @@
                 </contentMiddle>
             </Bar>
         </footer>
-
     </Page>
 </mvc:View>

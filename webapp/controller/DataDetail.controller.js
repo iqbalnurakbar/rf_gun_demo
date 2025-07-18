@@ -1,17 +1,17 @@
 sap.ui.define(
   [
-    "sap/ui/core/mvc/Controller",
-    "sap/m/MessageToast",
-    "sap/ui/core/routing/History",
-    "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator",
-    "rfgundemo/util/Utility",
-    "sap/ui/core/Fragment",
-    "sap/m/MessagePopover",
-    "sap/m/MessageItem",
-    "sap/ui/core/Messaging",
-    "sap/ui/core/message/Message",
-    "sap/ui/core/message/MessageType",
+    'sap/ui/core/mvc/Controller',
+    'sap/m/MessageToast',
+    'sap/ui/core/routing/History',
+    'sap/ui/model/Filter',
+    'sap/ui/model/FilterOperator',
+    'rfgundemo/util/Utility',
+    'sap/ui/core/Fragment',
+    'sap/m/MessagePopover',
+    'sap/m/MessageItem',
+    'sap/ui/core/Messaging',
+    'sap/ui/core/message/Message',
+    'sap/ui/core/message/MessageType',
   ],
   function (
     Controller,
@@ -27,9 +27,9 @@ sap.ui.define(
     Message,
     MessageType
   ) {
-    "use strict";
+    'use strict';
 
-    return Controller.extend("rfgundemo.controller.DataDetail", {
+    return Controller.extend('rfgundemo.controller.DataDetail', {
       /**
        * Called when the controller is initialized.
        * Attaches route matched handler, sets up debounced carousel navigation, and keyboard shortcuts.
@@ -37,12 +37,12 @@ sap.ui.define(
       onInit: function () {
         var that = this;
         var oRouter = this.getOwnerComponent().getRouter();
-        this.sPurchaseOrderNumber = "";
+        this.sPurchaseOrderNumber = '';
         that.getView().setBusy(true);
 
         // When the route is matched, load data based on purchase order number
         oRouter.attachRouteMatched(function (oEvent) {
-          var oArgs = oEvent.getParameter("arguments");
+          var oArgs = oEvent.getParameter('arguments');
           if (oArgs && oArgs.purchaseOrderNumber) {
             that.sPurchaseOrderNumber = oArgs.purchaseOrderNumber;
             that._loadPurchaseOrderData();
@@ -68,7 +68,7 @@ sap.ui.define(
         this._MessageManager.removeAllMessages();
         this.getView().setModel(
           this._MessageManager.getMessageModel(),
-          "message"
+          'message'
         );
       },
 
@@ -83,7 +83,7 @@ sap.ui.define(
           window.history.go(-1); // Go back one step in browser history
         } else {
           var oRouter = this.getOwnerComponent().getRouter();
-          oRouter.navTo("RouteMainScreen", {}, true); // If no history, navigate to default screen
+          oRouter.navTo('RouteMainScreen', {}, true); // If no history, navigate to default screen
         }
       },
 
@@ -94,22 +94,22 @@ sap.ui.define(
         var oContext = oButton.getBindingContext();
         var oRowData = oContext.getObject();
 
-        if (oRowData.filename === "") {
-          MessageToast.show("No attachment file");
+        if (oRowData.filename === '') {
+          MessageToast.show('No attachment file');
           return;
         }
 
-        var fileContent = "";
-        var mimeType = "";
-        var fileName = "";
+        var fileContent = '';
+        var mimeType = '';
+        var fileName = '';
 
         var oAction = oModel.bindContext(
-          "/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.downloadFile(...)"
+          '/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.downloadFile(...)'
         );
 
-        oAction.setParameter("purchase_order", oRowData.PurchaseOrderNo);
+        oAction.setParameter('purchase_order', oRowData.PurchaseOrderNo);
         oAction.setParameter(
-          "purchase_order_item",
+          'purchase_order_item',
           oRowData.PurchaseOrderItemNo
         );
 
@@ -126,10 +126,10 @@ sap.ui.define(
               mimeType = oResult.mimeType;
               fileName = oResult.fileName;
 
-              fileContent = fileContent.replace(/\s/g, "");
+              fileContent = fileContent.replace(/\s/g, '');
 
               // Handle URL-safe base64 if needed
-              fileContent = fileContent.replace(/-/g, "+").replace(/_/g, "/");
+              fileContent = fileContent.replace(/-/g, '+').replace(/_/g, '/');
 
               var sBase64Content = atob(fileContent);
 
@@ -145,18 +145,18 @@ sap.ui.define(
               var sFileUrl = URL.createObjectURL(oBlob);
 
               // Open the downloaded file in a new tab
-              var oDownloadLink = document.createElement("a");
+              var oDownloadLink = document.createElement('a');
               oDownloadLink.href = sFileUrl;
               oDownloadLink.download = fileName;
-              oDownloadLink.style.display = "none";
+              oDownloadLink.style.display = 'none';
 
               oDownloadLink.click();
-              MessageToast.show("Download has been initiated for " + fileName);
+              MessageToast.show('Download has been initiated for ' + fileName);
             }.bind(this)
           )
           .catch(function (oError) {
             // Handle error
-            console.error("Download action failed:", oError);
+            console.error('Download action failed:', oError);
           });
       },
 
@@ -166,26 +166,26 @@ sap.ui.define(
         var oBindingContext = oButton.getBindingContext();
         var oRowData = oBindingContext.getObject();
         // Create unique ID based on item
-        var sUniqueId = "uploadDialog_" + oRowData.PurchaseOrderItemNo;
+        var sUniqueId = 'uploadDialog_' + oRowData.PurchaseOrderItemNo;
         // Store current context for this specific dialog
-        this["_uploadContext_" + oRowData.PurchaseOrderItemNo] =
+        this['_uploadContext_' + oRowData.PurchaseOrderItemNo] =
           oBindingContext;
         // Check if this specific dialog exists
-        if (!this["_uploadDialog_" + oRowData.PurchaseOrderItemNo]) {
+        if (!this['_uploadDialog_' + oRowData.PurchaseOrderItemNo]) {
           // Create new dialog for this specific item
           this.loadFragment({
             id: sUniqueId, // Unique ID for each dialog
-            name: "rfgundemo.view.fragments.UploadFileDialog",
+            name: 'rfgundemo.view.fragments.UploadFileDialog',
             controller: this,
-          }).then((fragment) => {
+          }).then(fragment => {
             // Store dialog with unique property name
-            this["_uploadDialog_" + oRowData.PurchaseOrderItemNo] = fragment;
+            this['_uploadDialog_' + oRowData.PurchaseOrderItemNo] = fragment;
             this.getView().addDependent(fragment);
             fragment.open();
           });
         } else {
           // Open existing dialog for this item
-          this["_uploadDialog_" + oRowData.PurchaseOrderItemNo].open();
+          this['_uploadDialog_' + oRowData.PurchaseOrderItemNo].open();
         }
       },
 
@@ -196,25 +196,25 @@ sap.ui.define(
       },
 
       onUploadPress: function (oEvent) {
-        var oDeviceModel = this.getView().getModel("device");
-        var bIsPhone = oDeviceModel.getProperty("/system/phone");
+        var oDeviceModel = this.getView().getModel('device');
+        var bIsPhone = oDeviceModel.getProperty('/system/phone');
         // Get the dialog that triggered the event
         var oDialog = oEvent.getSource().getParent().getParent();
         var sDialogId = oDialog.getId();
 
         // Extract item number from dialog ID
-        var sItemNo = sDialogId.split("uploadDialog_")[1].split("--")[0];
+        var sItemNo = sDialogId.split('uploadDialog_')[1].split('--')[0];
 
         // Get the stored context for this specific item
-        var oUploadContext = this["_uploadContext_" + sItemNo];
+        var oUploadContext = this['_uploadContext_' + sItemNo];
 
         if (!oUploadContext) {
-          MessageToast.show("No row context available");
+          MessageToast.show('No row context available');
           return;
         }
 
         if (!this.fileContent || !this.fileName) {
-          MessageToast.show("Please select a file to upload.");
+          MessageToast.show('Please select a file to upload.');
           return;
         }
 
@@ -222,7 +222,7 @@ sap.ui.define(
           // Use the stored context data
           var oRowData = oUploadContext.getObject();
           var oItemData = {
-            MaterialDocument: "",
+            MaterialDocument: '',
             PurchaseOrder: this.sPurchaseOrderNumber,
             PurchaseOrderItem: oRowData.PurchaseOrderItemNo,
             filename: this.fileName,
@@ -234,50 +234,50 @@ sap.ui.define(
           // Upload logic
           const oModel = this.getView().getModel();
           const oAction = oModel.bindContext(
-            "/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.uploadFile(...)"
+            '/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.uploadFile(...)'
           );
 
           // Set parameters
-          oAction.setParameter("material_document", oItemData.MaterialDocument);
-          oAction.setParameter("purchase_order", oItemData.PurchaseOrder);
+          oAction.setParameter('material_document', oItemData.MaterialDocument);
+          oAction.setParameter('purchase_order', oItemData.PurchaseOrder);
           oAction.setParameter(
-            "purchase_order_item",
+            'purchase_order_item',
             oItemData.PurchaseOrderItem
           );
-          oAction.setParameter("fileName", oItemData.filename);
-          oAction.setParameter("fileContent", oItemData.filecontent);
-          oAction.setParameter("mimeType", oItemData.mimetype);
-          oAction.setParameter("fileExtension", oItemData.fileextension);
+          oAction.setParameter('fileName', oItemData.filename);
+          oAction.setParameter('fileContent', oItemData.filecontent);
+          oAction.setParameter('mimeType', oItemData.mimetype);
+          oAction.setParameter('fileExtension', oItemData.fileextension);
 
           // Execute upload
           oAction
             .execute()
             .then(() => {
               MessageToast.show(
-                "File uploaded successfully for item " + sItemNo
+                'File uploaded successfully for item ' + sItemNo
               );
               oDialog.close();
               if (bIsPhone) {
-                this.byId("orderCarousel").getBinding("pages").refresh();
+                this.byId('orderCarousel').getBinding('pages').refresh();
               } else {
-                this.byId("orderTable").getBinding("items").refresh();
+                this.byId('orderTable').getBinding('items').refresh();
               }
             })
-            .catch((error) => {
-              console.error("Upload failed:", error);
-              MessageToast.show("Upload Failed");
+            .catch(error => {
+              console.error('Upload failed:', error);
+              MessageToast.show('Upload Failed');
             });
         } catch (error) {
-          console.error("Upload failed:", error);
-          MessageToast.show("Upload Failed");
+          console.error('Upload failed:', error);
+          MessageToast.show('Upload Failed');
         }
       },
 
       onFileChange: function (oEvent) {
         // ? Retrieve selected File objects
-        const aFiles = oEvent.getParameter("files");
+        const aFiles = oEvent.getParameter('files');
         if (!aFiles || aFiles.length === 0) {
-          MessageToast.show(this._getText("noFileSelected"));
+          MessageToast.show(this._getText('noFileSelected'));
           this.resetFileData();
           return;
         }
@@ -287,22 +287,22 @@ sap.ui.define(
         this.mimeType = oFile.type;
 
         // * Derive extension from file name
-        const aNameParts = oFile.name.split(".");
+        const aNameParts = oFile.name.split('.');
         this.fileExtension =
-          aNameParts.length > 1 ? aNameParts.pop().toLowerCase() : "";
+          aNameParts.length > 1 ? aNameParts.pop().toLowerCase() : '';
 
         // * Use FileReader to load as DataURL (base64)
         const oReader = new FileReader();
         oReader.onload = function (e) {
           const sDataUrl = e.target.result;
-          this.fileContent = sDataUrl.split(",")[1];
-          MessageToast.show("File loaded successfully: " + oFile.name);
+          this.fileContent = sDataUrl.split(',')[1];
+          MessageToast.show('File loaded successfully: ' + oFile.name);
         }.bind(this);
 
         oReader.onerror = function (error) {
           // ! File read error: log & reset data
-          console.error("File read error:", error);
-          MessageToast.show("Error reading file: " + oFile.name);
+          console.error('File read error:', error);
+          MessageToast.show('Error reading file: ' + oFile.name);
           this.resetFileData();
         }.bind(this);
 
@@ -325,12 +325,12 @@ sap.ui.define(
         var sValue = oInput.getValue();
 
         // Allow numbers and ONE decimal point
-        var sValidatedValue = sValue.replace(/[^0-9.]/g, "");
+        var sValidatedValue = sValue.replace(/[^0-9.]/g, '');
 
         // Ensure only one decimal point
-        var aParts = sValidatedValue.split(".");
+        var aParts = sValidatedValue.split('.');
         if (aParts.length > 2) {
-          sValidatedValue = aParts[0] + "." + aParts.slice(1).join("");
+          sValidatedValue = aParts[0] + '.' + aParts.slice(1).join('');
         }
 
         // Set back only numeric value
@@ -344,51 +344,51 @@ sap.ui.define(
        */
       onSaveAndPostButtonPress: function () {
         var aSelectedData = []; // Will store all the selected item data
-        var oDeviceModel = this.getView().getModel("device");
-        var bIsPhone = oDeviceModel.getProperty("/system/phone"); // Check if device is phone
+        var oDeviceModel = this.getView().getModel('device');
+        var bIsPhone = oDeviceModel.getProperty('/system/phone'); // Check if device is phone
 
         if (bIsPhone) {
           // For phones, get the data from the active carousel page
-          var oCarousel = this.byId("orderCarousel");
+          var oCarousel = this.byId('orderCarousel');
           var sActivePageId = oCarousel.getActivePage();
           var oActivePage = oCarousel
             .getPages()
-            .find((page) => page.getId() === sActivePageId);
+            .find(page => page.getId() === sActivePageId);
 
           if (oActivePage) {
             var oItemData = {};
             var aItems = oActivePage.getItems();
 
             // Extract field values from carousel layout (nested structure)
-            oItemData["MaterialDocument"] = "";
-            oItemData["PurchaseOrder"] = this.sPurchaseOrderNumber;
-            oItemData["PurchaseOrderItem"] = aItems[0].getItems()[1].getValue();
-            oItemData["Material"] = aItems[1]
+            oItemData['MaterialDocument'] = '';
+            oItemData['PurchaseOrder'] = this.sPurchaseOrderNumber;
+            oItemData['PurchaseOrderItem'] = aItems[0].getItems()[1].getValue();
+            oItemData['Material'] = aItems[1]
               .getItems()[0]
               .getItems()[1]
               .getValue();
-            oItemData["MaterialDescription"] = aItems[1]
+            oItemData['MaterialDescription'] = aItems[1]
               .getItems()[1]
               .getItems()[1]
               .getValue();
-            oItemData["QuantitySuggest"] = parseFloat(
+            oItemData['QuantitySuggest'] = parseFloat(
               aItems[2].getItems()[0].getItems()[1].getValue()
             ).toFixed(3);
-            oItemData["QuantityReceive"] = parseFloat(
+            oItemData['QuantityReceive'] = parseFloat(
               aItems[2].getItems()[1].getItems()[1].getValue()
             ).toFixed(3);
-            oItemData["QuantityUnit"] = aItems[3].getItems()[1].getValue();
-            oItemData["Plant"] = aItems[4].getItems()[1].getValue();
-            oItemData["StorageLocation"] = aItems[5].getItems()[1].getValue();
-            oItemData["ConfirmStatus"] = aItems[7].getItems()[0].getPressed();
+            oItemData['QuantityUnit'] = aItems[3].getItems()[1].getValue();
+            oItemData['Plant'] = aItems[4].getItems()[1].getValue();
+            oItemData['StorageLocation'] = aItems[5].getItems()[1].getValue();
+            oItemData['ConfirmStatus'] = aItems[7].getItems()[0].getPressed();
 
             aSelectedData.push(oItemData);
 
-            aItems[2].getItems()[0].getItems()[1].setValue("");
+            aItems[2].getItems()[0].getItems()[1].setValue('');
           }
         } else {
           // For tablets/desktops, get selected rows from the table
-          var oTable = this.byId("orderTable");
+          var oTable = this.byId('orderTable');
           var aSelectedItems = oTable.getSelectedItems();
 
           aSelectedItems.forEach(
@@ -396,31 +396,31 @@ sap.ui.define(
               var oItemData = {};
               var aCells = oItem.getCells();
 
-              var bIsOkButtonPressed = aCells[10].getPressed();
+              var bIsOkButtonPressed = aCells[11].getPressed();
 
-              // User need to press OK Button 
+              // User need to press OK Button
               if (!bIsOkButtonPressed) return;
 
               // Extract values from each selected row
-              oItemData["MaterialDocument"] = "";
-              oItemData["PurchaseOrder"] = this.sPurchaseOrderNumber;
-              oItemData["PurchaseOrderItem"] = aCells[0].getValue();
-              oItemData["Material"] = aCells[1].getValue();
-              oItemData["MaterialDescription"] = aCells[2].getValue();
-              oItemData["QuantitySuggest"] = parseFloat(
+              oItemData['MaterialDocument'] = '';
+              oItemData['PurchaseOrder'] = this.sPurchaseOrderNumber;
+              oItemData['PurchaseOrderItem'] = aCells[0].getValue();
+              oItemData['Material'] = aCells[1].getValue();
+              oItemData['MaterialDescription'] = aCells[2].getValue();
+              oItemData['QuantitySuggest'] = parseFloat(
                 aCells[4].getValue()
               ).toFixed(3);
-              oItemData["QuantityReceive"] = parseFloat(
+              oItemData['QuantityReceive'] = parseFloat(
                 aCells[5].getValue()
               ).toFixed(3);
-              oItemData["QuantityUnit"] = aCells[6].getValue();
-              oItemData["Plant"] = aCells[7].getValue();
-              oItemData["StorageLocation"] = aCells[8].getValue();
-              oItemData["ConfirmStatus"] = aCells[10].getPressed();
+              oItemData['QuantityUnit'] = aCells[6].getValue();
+              oItemData['Plant'] = aCells[7].getValue();
+              oItemData['StorageLocation'] = aCells[8].getValue();
+              oItemData['ConfirmStatus'] = aCells[11].getPressed();
 
               aSelectedData.push(oItemData);
 
-              aCells[5].setValue("");
+              aCells[5].setValue('');
             }.bind(this)
           );
         }
@@ -428,7 +428,7 @@ sap.ui.define(
         if (aSelectedData.length === 0) {
           // No selection — show message
           MessageToast.show(
-            "Please enter valid quantities and press OK button to select the items"
+            'Please enter valid data and press OK button to select the items'
           );
           return;
         }
@@ -444,19 +444,19 @@ sap.ui.define(
       onOkButtonPress: function (oEvent) {
         var oButton = oEvent.getSource(); // The button that was pressed
         this._handleToggleButtonState(oButton); // Change visual state
-        var oDeviceModel = this.getView().getModel("device");
-        var bIsPhone = oDeviceModel.getProperty("/system/phone");
+        var oDeviceModel = this.getView().getModel('device');
+        var bIsPhone = oDeviceModel.getProperty('/system/phone');
         var oFields = null;
         var oTableItem = null;
 
         // Check if phone or desktop
         if (bIsPhone) {
           // For phone - get data from carousel page structure
-          var oCarousel = this.byId("orderCarousel");
+          var oCarousel = this.byId('orderCarousel');
           var sActivePageId = oCarousel.getActivePage();
           var oActivePage = oCarousel
             .getPages()
-            .find((page) => page.getId() === sActivePageId);
+            .find(page => page.getId() === sActivePageId);
 
           if (oActivePage) {
             var aItems = oActivePage.getItems();
@@ -483,7 +483,7 @@ sap.ui.define(
           // No validation needed when deselecting
           if (!bIsPhone) {
             // Only table has setSelectedItem method
-            var oTable = this.byId("orderTable");
+            var oTable = this.byId('orderTable');
             oTable.setSelectedItem(oTableItem, oButton.getPressed()); // Deselect row
           }
           return;
@@ -496,7 +496,7 @@ sap.ui.define(
           }
           // Validation passed - update table selection to match button state (desktop only)
           if (!bIsPhone) {
-            var oTable = this.byId("orderTable");
+            var oTable = this.byId('orderTable');
             oTable.setSelectedItem(oTableItem, oButton.getPressed()); // Select row
           }
           // For phone, no table selection needed since carousel doesn't have that concept
@@ -509,8 +509,8 @@ sap.ui.define(
        */
       onCarouselPageChanged: function (oEvent) {
         // @ts-ignore
-        var aActivePageId = oEvent.getParameter("activePages");
-        var oPage = this.byId("orderCarousel").getPages()[aActivePageId];
+        var aActivePageId = oEvent.getParameter('activePages');
+        var oPage = this.byId('orderCarousel').getPages()[aActivePageId];
         var oInput = oPage.getItems()[2].getItems()[1].getItems()[1];
 
         if (oInput) {
@@ -528,9 +528,9 @@ sap.ui.define(
         if (!this._plantVHDialog) {
           // Fragment.load returns a Promise - handle it properly
           Fragment.load({
-            name: "rfgundemo.view.fragments.PlantVHDialog",
+            name: 'rfgundemo.view.fragments.PlantVHDialog',
             controller: this,
-          }).then((oDialog) => {
+          }).then(oDialog => {
             this._plantVHDialog = oDialog;
             this.getView().addDependent(this._plantVHDialog);
             this._plantVHDialog.open();
@@ -542,7 +542,7 @@ sap.ui.define(
       },
 
       onPlantVHConfirm: function (oEvent) {
-        const oSelectedItem = oEvent.getParameter("selectedItem");
+        const oSelectedItem = oEvent.getParameter('selectedItem');
         if (oSelectedItem && this._currentPlantInput) {
           const sPlantCode = oSelectedItem.getTitle();
           this._currentPlantInput.setValue(sPlantCode);
@@ -561,9 +561,9 @@ sap.ui.define(
         if (!this._strLocVHDialog) {
           // Fragment.load returns a Promise - handle it properly
           Fragment.load({
-            name: "rfgundemo.view.fragments.StrLocVHDialog",
+            name: 'rfgundemo.view.fragments.StrLocVHDialog',
             controller: this,
-          }).then((oDialog) => {
+          }).then(oDialog => {
             this._strLocVHDialog = oDialog;
             this.getView().addDependent(this._strLocVHDialog);
             this._strLocVHDialog.open();
@@ -575,7 +575,7 @@ sap.ui.define(
       },
 
       onStrLocVHConfirm: function (oEvent) {
-        const oSelectedItem = oEvent.getParameter("selectedItem");
+        const oSelectedItem = oEvent.getParameter('selectedItem');
         if (oSelectedItem && this._currentStrLocInput) {
           const sStorageLocationCode = oSelectedItem.getTitle();
           this._currentStrLocInput.setValue(sStorageLocationCode);
@@ -598,35 +598,35 @@ sap.ui.define(
       // Helper methods for button formatting
       getMessageCount: function () {
         var aMessages = this._MessageManager.getMessageModel().getData();
-        return aMessages.length || "";
+        return aMessages.length || '';
       },
 
       getButtonType: function () {
         var aMessages = this._MessageManager.getMessageModel().getData();
         var bHasError = aMessages.some(function (msg) {
-          return msg.type === "Error";
+          return msg.type === 'Error';
         });
         var bHasWarning = aMessages.some(function (msg) {
-          return msg.type === "Warning";
+          return msg.type === 'Warning';
         });
 
-        if (bHasError) return "Negative";
-        if (bHasWarning) return "Critical";
-        return "Neutral";
+        if (bHasError) return 'Negative';
+        if (bHasWarning) return 'Critical';
+        return 'Neutral';
       },
 
       getButtonIcon: function () {
         var aMessages = this._MessageManager.getMessageModel().getData();
         var bHasError = aMessages.some(function (msg) {
-          return msg.type === "Error";
+          return msg.type === 'Error';
         });
         var bHasWarning = aMessages.some(function (msg) {
-          return msg.type === "Warning";
+          return msg.type === 'Warning';
         });
 
-        if (bHasError) return "sap-icon://error";
-        if (bHasWarning) return "sap-icon://alert";
-        return "sap-icon://information";
+        if (bHasError) return 'sap-icon://error';
+        if (bHasWarning) return 'sap-icon://alert';
+        return 'sap-icon://information';
       },
 
       // =====================================================
@@ -636,12 +636,12 @@ sap.ui.define(
       _createMessagePopover: function () {
         this._oMessagePopover = new MessagePopover({
           items: {
-            path: "message>/",
+            path: 'message>/',
             template: new MessageItem({
-              title: "{message>message}",
-              subtitle: "{message>additionalText}",
-              type: "{message>type}",
-              description: "{message>description}",
+              title: '{message>message}',
+              subtitle: '{message>additionalText}',
+              type: '{message>type}',
+              description: '{message>description}',
             }),
           },
         });
@@ -655,36 +655,36 @@ sap.ui.define(
        */
 
       _attachInputEventDelegates: function () {
-        var oDataDetailPage = this.byId("dataDetailPage");
+        var oDataDetailPage = this.byId('dataDetailPage');
         if (oDataDetailPage) {
           oDataDetailPage.addEventDelegate({
             onkeydown: function (oEvent) {
-              var oDeviceModel = this.getView().getModel("device");
-              var bIsPhone = oDeviceModel.getProperty("/system/phone");
+              var oDeviceModel = this.getView().getModel('device');
+              var bIsPhone = oDeviceModel.getProperty('/system/phone');
 
               // Handle different function keys
               switch (oEvent.key) {
-                case "F3": // Back
+                case 'F3': // Back
                   oEvent.preventDefault();
                   this.onNavBack();
                   break;
-                case "F5": // Next (mobile only)
+                case 'F5': // Next (mobile only)
                   if (bIsPhone) {
                     oEvent.preventDefault();
                     this.debounceGoToNextCarouselPage();
                   }
                   break;
-                case "F6": // Previous (mobile only)
+                case 'F6': // Previous (mobile only)
                   if (bIsPhone) {
                     oEvent.preventDefault();
                     this.debounceGoToPreviousCarouselPage();
                   }
                   break;
-                case "F7": // OK
+                case 'F7': // OK
                   oEvent.preventDefault();
                   this._triggerOkButtonPress();
                   break;
-                case "F8": // Post
+                case 'F8': // Post
                   oEvent.preventDefault();
                   this.onSaveAndPostButtonPress();
                   break;
@@ -695,7 +695,7 @@ sap.ui.define(
       },
 
       _resetAfterSuccessfulPost: function () {
-        const oList = this.byId("orderList");
+        const oList = this.byId('orderList');
 
         // Clear all selections
         oList.removeSelections();
@@ -707,13 +707,13 @@ sap.ui.define(
 
           // Reset Quantity Receive input (index 4)
           const oQuantityReceiveInput = aVBoxes[4].getItems()[1];
-          oQuantityReceiveInput.setValue("");
+          oQuantityReceiveInput.setValue('');
 
           // Reset Confirm Status button (index 9)
           const oConfirmButton = aVBoxes[9].getItems()[1];
           oConfirmButton.setPressed(false);
-          oConfirmButton.setIcon("");
-          oConfirmButton.setType("Default");
+          oConfirmButton.setIcon('');
+          oConfirmButton.setType('Default');
         });
       },
 
@@ -723,11 +723,11 @@ sap.ui.define(
        */
       _loadPurchaseOrderData: function () {
         var that = this;
-        var oDeviceModel = this.getView().getModel("device");
-        var bIsPhone = oDeviceModel.getProperty("/system/phone");
+        var oDeviceModel = this.getView().getModel('device');
+        var bIsPhone = oDeviceModel.getProperty('/system/phone');
         var aFilters = [
           new Filter(
-            "PurchaseOrderNo",
+            'PurchaseOrderNo',
             FilterOperator.EQ,
             this.sPurchaseOrderNumber
           ),
@@ -735,18 +735,18 @@ sap.ui.define(
 
         // Bind data to the correct control based on device type
         if (bIsPhone) {
-          var oCarousel = this.byId("orderCarousel");
-          var oBinding = oCarousel.getBinding("pages");
-          oBinding.attachEventOnce("dataReceived", function () {
+          var oCarousel = this.byId('orderCarousel');
+          var oBinding = oCarousel.getBinding('pages');
+          oBinding.attachEventOnce('dataReceived', function () {
             that.getView().setBusy(false);
             that._setFocusOnFirstQuantityReceivedInCarousel();
           });
           oBinding.filter(aFilters);
         } else {
-          var oTable = this.byId("orderTable");
-          var oBinding = oTable.getBinding("items");
+          var oTable = this.byId('orderTable');
+          var oBinding = oTable.getBinding('items');
           oTable.attachEventOnce(
-            "updateFinished",
+            'updateFinished',
             function () {
               this.getView().setBusy(false);
               this._setFocusOnFirstQuantityReceived();
@@ -762,7 +762,7 @@ sap.ui.define(
        * @private
        */
       _setFocusOnFirstQuantityReceived: function () {
-        var oTable = this.byId("orderTable");
+        var oTable = this.byId('orderTable');
         var oFirstItem = oTable.getItems()[0];
         if (oFirstItem) {
           oFirstItem.getCells()[5].focus();
@@ -774,7 +774,7 @@ sap.ui.define(
        * @private
        */
       _setFocusOnFirstQuantityReceivedInCarousel: function () {
-        var aPages = this.byId("orderCarousel").getPages();
+        var aPages = this.byId('orderCarousel').getPages();
         if (!aPages || aPages.length === 0) {
           // Try to load again if the page still not rendered
           setTimeout(
@@ -797,9 +797,9 @@ sap.ui.define(
        * @private
        */
       _setOrderDetailsTitle: function () {
-        var oTitle = this.byId("orderDetailsTitle");
+        var oTitle = this.byId('orderDetailsTitle');
         if (oTitle) {
-          oTitle.setText("Order Details for " + this.sPurchaseOrderNumber);
+          oTitle.setText('Order Details for ' + this.sPurchaseOrderNumber);
         }
       },
 
@@ -837,8 +837,8 @@ sap.ui.define(
 
       _postToGoodsMovementBAPI: function (aBAPIData) {
         var that = this;
-        var oDeviceModel = this.getView().getModel("device");
-        var bIsPhone = oDeviceModel.getProperty("/system/phone");
+        var oDeviceModel = this.getView().getModel('device');
+        var bIsPhone = oDeviceModel.getProperty('/system/phone');
         var oModel = this.getView().getModel();
 
         // Your existing body structure works perfectly!
@@ -862,13 +862,13 @@ sap.ui.define(
         try {
           // Call your postBAPI action
           var oAction = oModel.bindContext(
-            "/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.postBAPI(...)",
+            '/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.postBAPI(...)',
             null // Unbound static action
           );
 
           // Set parameters - pass array directly (no JSON conversion!)
-          oAction.setParameter("PurchaseOrder", body.PurchaseOrder);
-          oAction.setParameter("item", JSON.stringify(body.item)); // Pass the array directly
+          oAction.setParameter('PurchaseOrder', body.PurchaseOrder);
+          oAction.setParameter('item', JSON.stringify(body.item)); // Pass the array directly
 
           // Execute the action
           oAction
@@ -878,10 +878,10 @@ sap.ui.define(
 
               // Refresh the data
               if (bIsPhone) {
-                that.byId("orderCarousel").getBinding("pages").refresh();
-                MessageToast.show("Data posted successfully");
+                that.byId('orderCarousel').getBinding('pages').refresh();
+                MessageToast.show('Data posted successfully');
               } else {
-                that.byId("orderTable").getBinding("items").refresh();
+                that.byId('orderTable').getBinding('items').refresh();
               }
             })
             .catch(function (oError) {
@@ -893,20 +893,20 @@ sap.ui.define(
               var sHttpStatusText = that._getHttpStatusText(iStatusCode);
 
               that._addMessage(
-                "Error posting data",
+                'Error posting data',
                 MessageType.Error,
-                sHttpStatusText || "Processing Error",
+                sHttpStatusText || 'Processing Error',
                 sErrorMessage ||
-                  "An unexpected error occurred during processing."
+                  'An unexpected error occurred during processing.'
               );
             });
         } catch (oError) {
           this.getView().setBusy(false);
           this._addMessage(
-            "Error setting up processing",
+            'Error setting up processing',
             MessageType.Error,
-            "Setup Error",
-            oError.message || "Failed to initialize processing."
+            'Setup Error',
+            oError.message || 'Failed to initialize processing.'
           );
         }
       },
@@ -945,25 +945,25 @@ sap.ui.define(
           }
         }
 
-        return "Unknown error occurred";
+        return 'Unknown error occurred';
       },
 
       // Helper method to get HTTP status text
       _getHttpStatusText: function (iStatusCode) {
         var mStatusTexts = {
-          200: "HTTP 200 - OK",
-          201: "HTTP 201 - Created",
-          400: "HTTP 400 - Bad Request",
-          401: "HTTP 401 - Unauthorized",
-          403: "HTTP 403 - Forbidden",
-          404: "HTTP 404 - Not Found",
-          422: "HTTP 422 - Unprocessable Entity",
-          500: "HTTP 500 - Internal Server Error",
-          502: "HTTP 502 - Bad Gateway",
-          503: "HTTP 503 - Service Unavailable",
+          200: 'HTTP 200 - OK',
+          201: 'HTTP 201 - Created',
+          400: 'HTTP 400 - Bad Request',
+          401: 'HTTP 401 - Unauthorized',
+          403: 'HTTP 403 - Forbidden',
+          404: 'HTTP 404 - Not Found',
+          422: 'HTTP 422 - Unprocessable Entity',
+          500: 'HTTP 500 - Internal Server Error',
+          502: 'HTTP 502 - Bad Gateway',
+          503: 'HTTP 503 - Service Unavailable',
         };
 
-        return mStatusTexts[iStatusCode] || "HTTP " + iStatusCode;
+        return mStatusTexts[iStatusCode] || 'HTTP ' + iStatusCode;
       },
 
       /**
@@ -971,11 +971,11 @@ sap.ui.define(
        * @private
        */
       _goToNextCarouselPage: function () {
-        var oCarousel = this.byId("orderCarousel");
+        var oCarousel = this.byId('orderCarousel');
         var aPages = oCarousel.getPages();
         var sCurrentPageId = oCarousel.getActivePage();
         var iCurrentIndex = aPages.findIndex(
-          (page) => page.getId() === sCurrentPageId
+          page => page.getId() === sCurrentPageId
         );
 
         if (iCurrentIndex < aPages.length - 1) {
@@ -989,11 +989,11 @@ sap.ui.define(
        * @private
        */
       _goToPreviousCarouselPage: function () {
-        var oCarousel = this.byId("orderCarousel");
+        var oCarousel = this.byId('orderCarousel');
         var aPages = oCarousel.getPages();
         var sCurrentPageId = oCarousel.getActivePage();
         var iCurrentIndex = aPages.findIndex(
-          (page) => page.getId() === sCurrentPageId
+          page => page.getId() === sCurrentPageId
         );
 
         if (iCurrentIndex > 0) {
@@ -1017,7 +1017,7 @@ sap.ui.define(
           oToggleButton.setPressed(false);
         }
         // @ts-ignore
-        oToggleButton.setType(bPressed ? "Success" : "Emphasized");
+        oToggleButton.setType(bPressed ? 'Success' : 'Emphasized');
       },
 
       /**
@@ -1025,24 +1025,24 @@ sap.ui.define(
        * @private
        */
       _triggerOkButtonPress: function () {
-        var oDeviceModel = this.getView().getModel("device");
-        var bIsPhone = oDeviceModel.getProperty("/system/phone");
+        var oDeviceModel = this.getView().getModel('device');
+        var bIsPhone = oDeviceModel.getProperty('/system/phone');
 
         if (bIsPhone) {
-          var oCarousel = this.byId("orderCarousel");
+          var oCarousel = this.byId('orderCarousel');
           var sActivePageId = oCarousel.getActivePage();
           var oActivePage = oCarousel
             .getPages()
-            .find((page) => page.getId() === sActivePageId);
+            .find(page => page.getId() === sActivePageId);
 
           if (oActivePage) {
             // Simulate OK press on mobile
-            oActivePage.getItems().forEach((item) => {
+            oActivePage.getItems().forEach(item => {
               if (item.getItems) {
-                item.getItems().forEach((subItem) => {
+                item.getItems().forEach(subItem => {
                   if (
                     subItem instanceof sap.m.ToggleButton &&
-                    subItem.getText() === "OK"
+                    subItem.getText() === 'OK'
                   ) {
                     subItem.setPressed(!subItem.getPressed());
                     this._handleToggleButtonState(subItem, false);
@@ -1052,15 +1052,15 @@ sap.ui.define(
             });
           }
         } else {
-          var oTable = this.byId("orderTable");
+          var oTable = this.byId('orderTable');
           var oSelectedItems = oTable.getSelectedItems();
           if (oSelectedItems.length > 0) {
             var oFirstSelectedItem = oSelectedItems[0];
             var oOkButtonTable = oFirstSelectedItem
               .getCells()
               .find(
-                (cell) =>
-                  cell instanceof sap.m.ToggleButton && cell.getText() === "OK"
+                cell =>
+                  cell instanceof sap.m.ToggleButton && cell.getText() === 'OK'
               );
 
             if (oOkButtonTable) {
@@ -1079,42 +1079,42 @@ sap.ui.define(
         // Validate Quantity Receive
         if (
           !oRowData.quantityReceive ||
-          oRowData.quantityReceive.getValue() === ""
+          oRowData.quantityReceive.getValue() === ''
         ) {
-          oRowData.quantityReceive.setValueState("Error");
+          oRowData.quantityReceive.setValueState('Error');
           oRowData.quantityReceive.setValueStateText(
-            "This field cannot be blank"
+            'This field cannot be blank'
           );
           bValid = false;
           oRowData.quantityReceive.focus();
         } else {
-          oRowData.quantityReceive.setValueState("None");
-          oRowData.quantityReceive.setValueStateText("");
+          oRowData.quantityReceive.setValueState('None');
+          oRowData.quantityReceive.setValueStateText('');
         }
         // Validate Plant
-        if (!oRowData.plant || oRowData.plant.getValue() === "") {
-          oRowData.plant.setValueState("Error");
-          oRowData.plant.setValueStateText("This field cannot be blank");
+        if (!oRowData.plant || oRowData.plant.getValue() === '') {
+          oRowData.plant.setValueState('Error');
+          oRowData.plant.setValueStateText('This field cannot be blank');
           bValid = false;
           oRowData.plant.focus();
         } else {
-          oRowData.plant.setValueState("None");
-          oRowData.plant.setValueStateText("");
+          oRowData.plant.setValueState('None');
+          oRowData.plant.setValueStateText('');
         }
         // Validate Storage Location
         if (
           !oRowData.storageLocation ||
-          oRowData.storageLocation.getValue() === ""
+          oRowData.storageLocation.getValue() === ''
         ) {
-          oRowData.storageLocation.setValueState("Error");
+          oRowData.storageLocation.setValueState('Error');
           oRowData.storageLocation.setValueStateText(
-            "This field cannot be blank"
+            'This field cannot be blank'
           );
           bValid = false;
           oRowData.storageLocation.focus();
         } else {
-          oRowData.storageLocation.setValueState("None");
-          oRowData.storageLocation.setValueStateText("");
+          oRowData.storageLocation.setValueState('None');
+          oRowData.storageLocation.setValueStateText('');
         }
         return bValid;
       },
