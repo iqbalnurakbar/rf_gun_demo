@@ -204,7 +204,7 @@ buttons.
                             valueHelpRequest="onPlantVHRequest"
                         />
                         <Input
-                            value="{StorageLocation}"
+                            value="{path: 'StorageLocation', mode: 'sap.ui.model.BindingMode.OneWay'}"
                             width="100%"
                             showValueHelp="true"
                             valueHelpRequest="onStrLocVHRequest"
@@ -226,6 +226,7 @@ buttons.
                             <Button
                                 text="{filename}"
                                 type="Transparent"
+                                visible="{= !!${filename} }"
                             />
                         </HBox>
 

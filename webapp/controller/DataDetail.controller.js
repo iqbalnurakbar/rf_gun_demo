@@ -313,8 +313,14 @@ sap.ui.define(
         // @ts-ignore
         var sValue = oInput.getValue();
 
-        // Match only numbers
-        var sValidatedValue = sValue.replace(/[^0-9]/g, "");
+        // Allow numbers and ONE decimal point
+        var sValidatedValue = sValue.replace(/[^0-9.]/g, "");
+
+        // Ensure only one decimal point
+        var aParts = sValidatedValue.split('.');
+        if (aParts.length > 2) {
+          sValidatedValue = aParts[0] + '.' + aParts.slice(1).join('');
+        }
 
         // Set back only numeric value
         // @ts-ignore
@@ -874,7 +880,7 @@ sap.ui.define(
                 sHttpStatusText || "Processing Error",
                 sErrorMessage || "An unexpected error occurred during processing."
               );
-            }).finally(() => { that._resetAfterSuccessfulPost(); });
+            });
 
         } catch (oError) {
           this.getView().setBusy(false);
