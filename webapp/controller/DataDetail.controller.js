@@ -151,15 +151,13 @@ sap.ui.define(
               oDownloadLink.style.display = "none";
 
               oDownloadLink.click();
-
-              MessageToast.show("Download initiated successfully");
+              MessageToast.show("Download has been initiated for " + fileName);
             }.bind(this)
           )
           .catch(function (oError) {
             // Handle error
             console.error("Download action failed:", oError);
           });
-        MessageToast.show("Download has been initiated for " + fileName);
       },
 
       onUpload: function (oEvent) {
@@ -330,9 +328,9 @@ sap.ui.define(
         var sValidatedValue = sValue.replace(/[^0-9.]/g, "");
 
         // Ensure only one decimal point
-        var aParts = sValidatedValue.split('.');
+        var aParts = sValidatedValue.split(".");
         if (aParts.length > 2) {
-          sValidatedValue = aParts[0] + '.' + aParts.slice(1).join('');
+          sValidatedValue = aParts[0] + "." + aParts.slice(1).join("");
         }
 
         // Set back only numeric value
@@ -398,6 +396,11 @@ sap.ui.define(
               var oItemData = {};
               var aCells = oItem.getCells();
 
+              var bIsOkButtonPressed = aCells[10].getPressed();
+
+              // User need to press OK Button 
+              if (!bIsOkButtonPressed) return;
+
               // Extract values from each selected row
               oItemData["MaterialDocument"] = "";
               oItemData["PurchaseOrder"] = this.sPurchaseOrderNumber;
@@ -424,7 +427,9 @@ sap.ui.define(
 
         if (aSelectedData.length === 0) {
           // No selection — show message
-          MessageToast.show("Please select items and enter valid quantities");
+          MessageToast.show(
+            "Please enter valid quantities and press OK button to select the items"
+          );
           return;
         }
 
@@ -449,15 +454,17 @@ sap.ui.define(
           // For phone - get data from carousel page structure
           var oCarousel = this.byId("orderCarousel");
           var sActivePageId = oCarousel.getActivePage();
-          var oActivePage = oCarousel.getPages().find((page) => page.getId() === sActivePageId);
+          var oActivePage = oCarousel
+            .getPages()
+            .find((page) => page.getId() === sActivePageId);
 
           if (oActivePage) {
             var aItems = oActivePage.getItems();
             // Get the input fields based on carousel structure from your XML
             oFields = {
               quantityReceive: aItems[2].getItems()[1].getItems()[1], // Quantity Receive input
-              plant: aItems[4].getItems()[1],                        // Plant input  
-              storageLocation: aItems[5].getItems()[1]               // Storage Location input
+              plant: aItems[4].getItems()[1], // Plant input
+              storageLocation: aItems[5].getItems()[1], // Storage Location input
             };
           }
         } else {
@@ -466,8 +473,8 @@ sap.ui.define(
           var aCells = oTableItem.getCells();
           oFields = {
             quantityReceive: aCells[5], // Quantity Receive column
-            plant: aCells[7],           // Plant column  
-            storageLocation: aCells[8]  // Storage Location column
+            plant: aCells[7], // Plant column
+            storageLocation: aCells[8], // Storage Location column
           };
         }
 
@@ -869,16 +876,6 @@ sap.ui.define(
             .then(function () {
               that.getView().setBusy(false);
 
-              // Success
-              that._addMessage(
-                "Data posted successfully",
-                MessageType.Success,
-                "Document Created",
-                "Purchase Order " +
-                  body.PurchaseOrder +
-                  " has been processed successfully."
-              );
-
               // Refresh the data
               if (bIsPhone) {
                 that.byId("orderCarousel").getBinding("pages").refresh();
@@ -903,7 +900,6 @@ sap.ui.define(
                   "An unexpected error occurred during processing."
               );
             });
-
         } catch (oError) {
           this.getView().setBusy(false);
           this._addMessage(
