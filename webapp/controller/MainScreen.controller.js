@@ -89,6 +89,47 @@ sap.ui.define(
         this._checkPurchaseOrder(sPurchaseOrder);
       },
 
+      onBarcodeScanSuccess: function (oEvent) {
+        var sRawValue = oEvent.getParameter('text');
+
+        if (!sRawValue) {
+          MessageToast.show('No value scanned.');
+          return;
+        }
+
+        // Remove all whitespace
+        sRawValue = sRawValue.trim();
+
+        // Check for invalid characters (letters or symbols)
+        if (/[^0-9]/.test(sRawValue)) {
+          MessageToast.show('Invalid barcode: only digits are allowed.');
+          return;
+        }
+
+        // If the scanned string contains only digits but is too long, reject
+        if (sRawValue.length > 10) {
+          MessageToast.show('Invalid barcode: must be 10 digits or fewer.');
+          return;
+        }
+
+        var oInput = this.byId('purchaseOrderNumber');
+        oInput.setValue(sRawValue);
+        oInput.setValueState('None');
+        oInput.setValueStateText('');
+
+        // Submit the PO Number
+        this.onPurchaseOrderSubmit();
+      },
+
+      onBarcodeScanFail: function (oEvent) {
+        const sErrorMessage =
+          oEvent.getParameter('message') || 'Barcode scan failed.';
+        MessageToast.show(sErrorMessage);
+
+        const oInput = this.byId('purchaseOrderNumber');
+        oInput.focus(); // Focus input field
+      },
+
       /**
        * Adds a keyboard event listener for the page.
        * Pressing F4 will trigger PO submission.
@@ -139,7 +180,9 @@ sap.ui.define(
             // Show message if no data was found
             if (aContexts.length === 0) {
               MessageToast.show(
-                'No data found for Purchase Order: ' + sPurchaseOrder + '. It could be deleted or delivered.'
+                'No data found for Purchase Order: ' +
+                  sPurchaseOrder +
+                  '. It could be deleted or delivered.'
               );
               return;
             }
@@ -150,9 +193,13 @@ sap.ui.define(
           function () {
             // Handle request failure
             this.getView().setBusy(false);
+
             MessageToast.show(
               'Error retrieving data for Purchase Order: ' + sPurchaseOrder
             );
+
+            const oInput = this.byId('purchaseOrderNumber');
+            oInput.focus(); // Focus input field
           }.bind(this)
         );
       },
