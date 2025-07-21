@@ -218,7 +218,6 @@ buttons.
                         />
                         <Link
                             text="{filename}"
-
                             emphasized="true"
                         />
                         <HBox
@@ -291,13 +290,6 @@ buttons.
                                 <Label text="Material Desc:" />
                                 <Input
                                     value="{MaterialDescription}"
-                                    editable="false"
-                                />
-                            </VBox>
-                            <VBox width="100%">
-                                <Label text="Material" />
-                                <Input
-                                    value="{Material} {MaterialDescription}"
                                     editable="false"
                                 />
                             </VBox>
