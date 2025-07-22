@@ -110,15 +110,6 @@ sap.ui.define([], function () {
             return true;
         },
 
-        /**
-         * Clears validation state from a field
-         * 
-         * @param {sap.ui.core.Control} field - The field to clear
-         */
-        clearValidation: function (field) {
-            this._clearFieldValidation(field);
-        },
-
         // Private helper methods
         _setFieldError: function (field, message) {
             if (field.setValueState) {

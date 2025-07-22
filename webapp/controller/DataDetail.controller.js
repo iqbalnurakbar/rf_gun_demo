@@ -13,6 +13,7 @@ sap.ui.define(
     'sap/ui/core/Messaging',
     'sap/ui/core/message/Message',
     'sap/ui/core/message/MessageType',
+    'rfgundemo/util/MessageHelper'
   ],
   function (
     Controller,
@@ -27,7 +28,8 @@ sap.ui.define(
     MessageItem,
     Messaging,
     Message,
-    MessageType
+    MessageType,
+    MessageHelper
   ) {
     'use strict';
 
@@ -65,13 +67,8 @@ sap.ui.define(
         // Register keyboard shortcut support
         this._attachInputEventDelegates();
 
-        // Message popover initialization
-        this._MessageManager = Messaging;
-        this._MessageManager.removeAllMessages();
-        this.getView().setModel(
-          this._MessageManager.getMessageModel(),
-          'message'
-        );
+        // Initialize MessageHelper
+        MessageHelper.init(this.getView());
       },
 
       /**
@@ -559,10 +556,6 @@ sap.ui.define(
         oEvent.getSource().close();
       },
 
-      onPlantVHCancel: function (oEvent) {
-        //oEvent.getSource().close();
-      },
-
       onStrLocVHRequest: function (oEvent) {
         const oInput = oEvent.getSource();
         this._currentStrLocInput = oInput;
@@ -592,10 +585,6 @@ sap.ui.define(
         oEvent.getSource().close();
       },
 
-      onStrLocVHCancel: function (oEvent) {
-        //oEvent.getSource().close();
-      },
-
       // MessagePopover Methods
       onShowMessagePopover: function (oEvent) {
         if (!this._oMessagePopover) {
@@ -604,38 +593,18 @@ sap.ui.define(
         this._oMessagePopover.toggle(oEvent.getSource());
       },
 
+      // // Helper methods for button formatting
       // Helper methods for button formatting
       getMessageCount: function () {
-        var aMessages = this._MessageManager.getMessageModel().getData();
-        return aMessages.length || '';
+        return MessageHelper.getMessageCount();
       },
 
       getButtonType: function () {
-        var aMessages = this._MessageManager.getMessageModel().getData();
-        var bHasError = aMessages.some(function (msg) {
-          return msg.type === 'Error';
-        });
-        var bHasWarning = aMessages.some(function (msg) {
-          return msg.type === 'Warning';
-        });
-
-        if (bHasError) return 'Negative';
-        if (bHasWarning) return 'Critical';
-        return 'Neutral';
+        return MessageHelper.getButtonType();
       },
 
       getButtonIcon: function () {
-        var aMessages = this._MessageManager.getMessageModel().getData();
-        var bHasError = aMessages.some(function (msg) {
-          return msg.type === 'Error';
-        });
-        var bHasWarning = aMessages.some(function (msg) {
-          return msg.type === 'Warning';
-        });
-
-        if (bHasError) return 'sap-icon://error';
-        if (bHasWarning) return 'sap-icon://alert';
-        return 'sap-icon://information';
+        return MessageHelper.getButtonIcon();
       },
 
       // =====================================================
@@ -855,13 +824,7 @@ sap.ui.define(
         };
 
         // Clear previous messages before new API call
-        this._MessageManager.removeAllMessages();
-
-        // Show loading indicator
-        this.getView().setBusy(true);
-
-        // Clear previous messages
-        this._MessageManager.removeAllMessages();
+        MessageHelper.clearAll();
 
         // Show loading indicator
         this.getView().setBusy(true);
@@ -883,6 +846,8 @@ sap.ui.define(
             .then(function () {
               that.getView().setBusy(false);
 
+              MessageHelper.convertMessageFromBackend();
+
               // Refresh the data
               if (bIsPhone) {
                 that.byId('orderCarousel').getBinding('pages').refresh();
@@ -890,38 +855,19 @@ sap.ui.define(
               } else {
                 that.byId("orderTable").getBinding("items").refresh();
               }
+
             })
             .catch(function (oError) {
               that.getView().setBusy(false);
-              that._addMessage(
-                'Error posting data',
-                MessageType.Error,
-                'Processing Error',
-                oError.message || 'An unexpected error occurred during processing.'
-              );
+              if (oError.$reported == true) {
+                MessageHelper.convertMessageFromBackend();
+              } else {
+                MessageHelper.addMessage('Error', MessageType.Error, oError.message, oError.stack);
+              }
             });
         } catch (oError) {
           this.getView().setBusy(false);
-          this._addMessage(
-            'Error setting up processing',
-            MessageType.Error,
-            'Setup Error',
-            oError.message || 'Failed to initialize processing.'
-          );
         }
-      },
-
-      // Helper method to add API messages to MessagePopover
-      _addMessage: function (sMessage, sType, sAdditionalText, sDescription) {
-        this._MessageManager.addMessages(
-          new Message({
-            message: sMessage,
-            type: sType,
-            additionalText: sAdditionalText,
-            description: sDescription,
-            processor: this.getView().getModel(),
-          })
-        );
       },
 
       /**
