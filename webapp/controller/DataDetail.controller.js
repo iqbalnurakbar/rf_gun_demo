@@ -465,6 +465,7 @@ sap.ui.define(
             oFields = {
               quantityReceive: aItems[2].getItems()[1].getItems()[1], // Quantity Receive input
               plant: aItems[4].getItems()[1], // Plant input
+              quantityUnit: aItems[3].getItems()[1],
               storageLocation: aItems[5].getItems()[1], // Storage Location input
             };
           }
@@ -474,6 +475,7 @@ sap.ui.define(
           var aCells = oTableItem.getCells();
           oFields = {
             quantityReceive: aCells[5], // Quantity Receive column
+            quantityUnit: aCells[6],
             plant: aCells[7], // Plant column
             storageLocation: aCells[8], // Storage Location column
           };
@@ -972,7 +974,9 @@ sap.ui.define(
       _validateRequiredFields: function (oFields) {
         var bQuantityValid = ValidationHelper.validateField(
           oFields.quantityReceive,
-          [ValidationHelper.VALIDATION_RULES.REQUIRED],
+          [ValidationHelper.VALIDATION_RULES.REQUIRED,
+          (oFields.quantityUnit.getValue() == "PC" || oFields.quantityUnit.getValue() == "EA") ? ValidationHelper.VALIDATION_RULES.INTEGER : ValidationHelper.VALIDATION_RULES.NO_VALIDATION
+          ],
           "Quantity Receive"
         );
 

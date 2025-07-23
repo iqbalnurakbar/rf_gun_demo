@@ -56,6 +56,16 @@ sap.ui.define([], function () {
                 };
             },
 
+            INTEGER: {
+                name: "integer",
+                validate: function (value) {
+                    if (!value) return true; // Allow empty (combine with REQUIRED if needed)
+                    const num = parseFloat(value);
+                    return !isNaN(num) && Number.isInteger(num);
+                },
+                message: "Please enter a whole number (no decimals)"
+            },
+
             REGEX: function (pattern, customMessage) {
                 return {
                     name: "regex",
@@ -64,6 +74,13 @@ sap.ui.define([], function () {
                     },
                     message: customMessage || "Invalid format"
                 };
+            },
+            NO_VALIDATION: {
+                name: "no_validation",
+                validate: function (value) {
+                    return true; // Always passes validation
+                },
+                message: "" // No error message since it never fails
             }
         },
 
