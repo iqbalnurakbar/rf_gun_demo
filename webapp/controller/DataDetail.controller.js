@@ -48,9 +48,12 @@ sap.ui.define(
         oRouter.attachRouteMatched(function (oEvent) {
           var oArgs = oEvent.getParameter('arguments');
           if (oArgs && oArgs.purchaseOrderNumber) {
-            that.sPurchaseOrderNumber = oArgs.purchaseOrderNumber;
-            that._loadPurchaseOrderData();
-            that._setOrderDetailsTitle();
+            var sNewPONumber = oArgs.purchaseOrderNumber;
+            if (that.sPurchaseOrderNumber !== sNewPONumber) {
+              that.sPurchaseOrderNumber = sNewPONumber;
+              that._loadPurchaseOrderData();
+              that._setOrderDetailsTitle();
+            }
           }
         });
 
@@ -673,29 +676,6 @@ sap.ui.define(
         }
       },
 
-      _resetAfterSuccessfulPost: function () {
-        const oList = this.byId('orderList');
-
-        // Clear all selections
-        oList.removeSelections();
-
-        // Reset all confirm buttons and quantity receive fields
-        oList.getItems().forEach(function (oItem) {
-          const oHBox = oItem.getContent()[0];
-          const aVBoxes = oHBox.getItems();
-
-          // Reset Quantity Receive input (index 4)
-          const oQuantityReceiveInput = aVBoxes[4].getItems()[1];
-          oQuantityReceiveInput.setValue('');
-
-          // Reset Confirm Status button (index 9)
-          const oConfirmButton = aVBoxes[9].getItems()[1];
-          oConfirmButton.setPressed(false);
-          oConfirmButton.setIcon('');
-          oConfirmButton.setType('Default');
-        });
-      },
-
       /**
        * Loads purchase order data into the carousel or table.
        * @private
@@ -712,7 +692,7 @@ sap.ui.define(
           ),
         ];
 
-        // Bind data to the correct control based on device type
+        // Bind data to the correct control bas ed on device type
         if (bIsPhone) {
           var oCarousel = this.byId('orderCarousel');
           var oBinding = oCarousel.getBinding('pages');
@@ -723,12 +703,19 @@ sap.ui.define(
           oBinding.filter(aFilters);
         } else {
           var oTable = this.byId('orderTable');
+          // Set no data to Loading...
+          oTable.setNoData("Loading...");
+          // Unselect all item row
+          oTable.removeSelections(true);
+          // Destroy the table
+          oTable.destroyItems();
           var oBinding = oTable.getBinding('items');
           oTable.attachEventOnce(
             'updateFinished',
             function () {
               this.getView().setBusy(false);
               this._setFocusOnFirstQuantityReceived();
+
             },
             this
           );
@@ -993,6 +980,64 @@ sap.ui.define(
         );
 
         return bQuantityValid && bPlantValid && bStorageValid;
+      },
+      _clearFormValues: function () {
+        const bIsPhone = Utility.isPhoneDevice(this.getView());
+        if (bIsPhone) {
+          // Clear carousel values
+          var oCarousel = this.byId('orderCarousel');
+          if (oCarousel) {
+            var aPages = oCarousel.getPages();
+            aPages.forEach(function (oPage) {
+              var aItems = oPage.getItems();
+
+              // Clear quantity receive input (user-entered field)
+              if (aItems[2] && aItems[2].getItems && aItems[2].getItems()[1] &&
+                aItems[2].getItems()[1].getItems && aItems[2].getItems()[1].getItems()[1]) {
+                aItems[2].getItems()[1].getItems()[1].setValue('');
+              }
+
+              // DON'T clear plant field - it's data-bound to {Plant}
+              // DON'T clear storage location field - it's data-bound to {StorageLocation}
+              // Let these fields update naturally from backend data binding
+
+              // Clear OK button (user action)
+              aItems.forEach(function (oItem) {
+                if (oItem.getItems) {
+                  oItem.getItems().forEach(function (oSubItem) {
+                    if (oSubItem instanceof sap.m.ToggleButton && oSubItem.getText() === 'OK') {
+                      oSubItem.setPressed(false);
+                      oSubItem.setType('Emphasized');
+                    }
+                  });
+                }
+              });
+            });
+          }
+        } else {
+          // Clear table values
+          var oTable = this.byId('orderTable');
+          if (oTable) {
+            oTable.removeSelections(true); // Clear selections
+            var aItems = oTable.getItems();
+            aItems.forEach(function (oItem) {
+              var aCells = oItem.getCells();
+
+              // Clear quantity receive (user-entered field)
+              if (aCells[5]) aCells[5].setValue('');
+
+              // DON'T clear plant field (aCells[7]) - it's data-bound to {Plant}
+              // DON'T clear storage location field (aCells[8]) - it's data-bound to {StorageLocation}
+              // Let these fields update naturally from backend data binding
+
+              // Clear OK button (user action)
+              if (aCells[11]) {
+                aCells[11].setPressed(false);
+                aCells[11].setType('Emphasized');
+              }
+            });
+          }
+        }
       },
     });
   }
