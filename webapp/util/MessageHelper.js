@@ -6,7 +6,7 @@ sap.ui.define([
 ], function (Message, MessageType, Messaging, MessageToast) {
     "use strict";
 
-    return {
+    const MessageHelper = {
 
         init: function (oView) {
             Messaging.removeAllMessages();
@@ -26,15 +26,34 @@ sap.ui.define([
 
         convertMessageFromBackend: function () {
             const aMessages = this.getMessages();
+            const aMessagesToRemove = []; // Store messages to remove
+            const aNewMessages = []; // Store new messages to add
+
             for (const oMessage of aMessages) {
                 if (oMessage.code != null) {
-                    oMessage.description = oMessage.message || "";
-                    oMessage.additionalText = (oMessage.type == "Error") ? "Document is not Posted with BAPI" : "Document Posted with BAPI";
-                    oMessage.message = oMessage.type;
+                    // Mark this message for removal
+                    aMessagesToRemove.push(oMessage);
+
+                    // Create new converted message
+                    aNewMessages.push({
+                        message: oMessage.type,
+                        type: oMessage.type,
+                        additionalText: (oMessage.type == "Error") ? "Document is not Posted with BAPI" : "Document Posted with BAPI",
+                        description: oMessage.message || ""
+                    });
                 }
             }
-        },
 
+            // Remove only the backend messages
+            if (aMessagesToRemove.length > 0) {
+                Messaging.removeMessages(aMessagesToRemove);
+            }
+
+            // Add the new converted messages
+            for (const oNewMessage of aNewMessages) {
+                this.addMessage(oNewMessage.message, oNewMessage.type, oNewMessage.additionalText, oNewMessage.description);
+            }
+        },
 
         clearAll: function () {
             Messaging.removeAllMessages();
@@ -85,4 +104,6 @@ sap.ui.define([
             return "sap-icon://information";
         }
     };
+
+    return MessageHelper;
 });

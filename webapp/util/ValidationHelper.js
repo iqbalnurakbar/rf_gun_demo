@@ -90,7 +90,7 @@ sap.ui.define([], function () {
          * @param {sap.ui.core.Control} field - The UI5 control to validate
          * @param {array|object} rules - Validation rules to apply
          * @param {string} fieldName - Custom field name for error messages (optional)
-         * @returns {boolean} True if valid, false if invalid
+         * @returns {string} returns errorMessage if there is an error, and returns nothing when the validation passed
          * 
          * @example
          * // Simple required validation
@@ -120,11 +120,11 @@ sap.ui.define([], function () {
                 if (!rule.validate(value)) {
                     const errorMessage = fieldName ? `${fieldName}: ${rule.message}` : rule.message;
                     this._setFieldError(field, errorMessage);
-                    return false;
+                    return errorMessage;
                 }
             }
 
-            return true;
+            return;
         },
 
         // Private helper methods
