@@ -1,34 +1,28 @@
 sap.ui.define(
   [
     'sap/ui/core/mvc/Controller',
-    'sap/m/MessageToast',
     'sap/ui/core/routing/History',
     'sap/ui/model/Filter',
     'sap/ui/model/FilterOperator',
-    'rfgundemo/util/Utility',
-    'rfgundemo/util/ValidationHelper',
     'sap/ui/core/Fragment',
     'sap/m/MessagePopover',
     'sap/m/MessageItem',
-    'sap/ui/core/Messaging',
-    'sap/ui/core/message/Message',
     'sap/ui/core/message/MessageType',
+    'rfgundemo/util/Utility',
+    'rfgundemo/util/ValidationHelper',
     'rfgundemo/util/MessageHelper'
   ],
   function (
     Controller,
-    MessageToast,
     History,
     Filter,
     FilterOperator,
-    Utility,
-    ValidationHelper,
     Fragment,
     MessagePopover,
     MessageItem,
-    Messaging,
-    Message,
     MessageType,
+    Utility,
+    ValidationHelper,
     MessageHelper
   ) {
     'use strict';
@@ -97,7 +91,7 @@ sap.ui.define(
         var oRowData = oContext.getObject();
 
         if (oRowData.filename === '') {
-          MessageToast.show('No attachment file');
+          MessageHelper.addToastMessage('No attachment file')
           return;
         }
 
@@ -154,7 +148,7 @@ sap.ui.define(
               oDownloadLink.style.display = 'none';
 
               oDownloadLink.click();
-              MessageToast.show('Download has been initiated for ' + fileName);
+              MessageHelper.addToastMessage('Download has been initiated for ' + fileName)
             }.bind(this)
           )
           .catch(function (oError) {
@@ -213,12 +207,12 @@ sap.ui.define(
         var oUploadContext = this['_uploadContext_' + sItemNo];
 
         if (!oUploadContext) {
-          MessageToast.show('No row context available');
+          MessageHelper.addToastMessage('No row context available');
           return;
         }
 
         if (!this.fileContent || !this.fileName) {
-          MessageToast.show('Please select a file to upload.');
+          MessageHelper.addToastMessage('Please select a file to upload.');
           return;
         }
 
@@ -257,7 +251,7 @@ sap.ui.define(
           oAction
             .execute()
             .then(() => {
-              MessageToast.show(
+              MessageHelper.addToastMessage(
                 'File uploaded successfully for item ' + sItemNo
               );
               oDialog.close();
@@ -269,11 +263,11 @@ sap.ui.define(
             })
             .catch(error => {
               console.error('Upload failed:', error);
-              MessageToast.show('Upload Failed');
+              MessageHelper.addToastMessage('Upload Failed');
             });
         } catch (error) {
           console.error('Upload failed:', error);
-          MessageToast.show('Upload Failed');
+          MessageHelper.addToastMessage('Upload Failed');
         }
       },
 
@@ -281,8 +275,7 @@ sap.ui.define(
         // ? Retrieve selected File objects
         const aFiles = oEvent.getParameter('files');
         if (!aFiles || aFiles.length === 0) {
-          MessageToast.show(this._getText('noFileSelected'));
-          this.resetFileData();
+          MessageHelper.addToastMessage(this._getText('noFileSelected'));
           return;
         }
 
@@ -300,14 +293,13 @@ sap.ui.define(
         oReader.onload = function (e) {
           const sDataUrl = e.target.result;
           this.fileContent = sDataUrl.split(',')[1];
-          MessageToast.show('File loaded successfully: ' + oFile.name);
+          MessageHelper.addToastMessage('File loaded successfully: ' + oFile.name);
         }.bind(this);
 
         oReader.onerror = function (error) {
           // ! File read error: log & reset data
           console.error('File read error:', error);
-          MessageToast.show('Error reading file: ' + oFile.name);
-          this.resetFileData();
+          MessageHelper.addToastMessage('Error reading file: ' + oFile.name);
         }.bind(this);
 
         oReader.readAsDataURL(oFile);
@@ -430,7 +422,7 @@ sap.ui.define(
 
         if (aSelectedData.length === 0) {
           // No selection — show message
-          MessageToast.show(
+          MessageHelper.addToastMessage(
             'No item selected!'
           );
           return;
@@ -838,7 +830,6 @@ sap.ui.define(
               // Refresh the data
               if (bIsPhone) {
                 that.byId('orderCarousel').getBinding('pages').refresh();
-                MessageToast.show('Data posted successfully');
               } else {
                 that.byId("orderTable").getBinding("items").refresh();
               }
@@ -850,11 +841,24 @@ sap.ui.define(
               }
             })
             .finally(() => {
-              MessageHelper.convertMessageFromBackend();
+              // Get converted backend's messages
+              const aMessages = MessageHelper.convertMessageFromBackend();
+              // Show all converted messages
+              for (const oMessage of aMessages) {
+                if (bIsPhone) {
+                  MessageHelper.addToastMessage(oMessage.description);
+                } else {
+                  MessageHelper.addMessage(oMessage.message, oMessage.type, oMessage.additionalText, oMessage.description);
+                }
+              }
+              // Show message according to device used
+
             })
             ;
         } catch (oError) {
           this.getView().setBusy(false);
+          MessageHelper.addMessage('Error', MessageType.Error, oError.message, oError.stack);
+          throw new Error("");
         }
       },
 

@@ -2,12 +2,12 @@ sap.ui.define([
     "sap/ui/core/message/Message",
     "sap/ui/core/message/MessageType",
     "sap/ui/core/Messaging",
-    "sap/m/MessageToast"
-], function (Message, MessageType, Messaging, MessageToast) {
+    "sap/m/MessageToast",
+    'rfgundemo/util/Utility',
+], function (Message, MessageType, Messaging, MessageToast, Utility) {
     "use strict";
 
     const MessageHelper = {
-
         init: function (oView) {
             Messaging.removeAllMessages();
             oView.setModel(Messaging.getMessageModel(), "message");
@@ -24,8 +24,12 @@ sap.ui.define([
             Messaging.addMessages(oMessage);
         },
 
+        addToastMessage: function (sMessage) {
+            MessageToast.show(sMessage)
+        },
+
         convertMessageFromBackend: function () {
-            const aMessages = this.getMessages();
+            const aMessages = MessageHelper.getMessages();
             const aMessagesToRemove = []; // Store messages to remove
             const aNewMessages = []; // Store new messages to add
 
@@ -36,7 +40,7 @@ sap.ui.define([
 
                     // Create new converted message
                     aNewMessages.push({
-                        message: (oMessage.code == 'ZMSGRFGUNDEMO/002') ? oMessage.type + ' ' + oMessage.message.substring(0, 7) : oMessage.type,
+                        message: (oMessage.code == 'ZMSGRFGUNDEMO/002' && oMessage.type == 'Error') ? oMessage.type + ' ' + oMessage.message.substring(0, 7) : oMessage.type,
                         type: oMessage.type,
                         additionalText: (oMessage.type == "Error") ? "Document is not Posted with BAPI" : "Document Posted with BAPI",
                         description: oMessage.message || ""
@@ -50,9 +54,7 @@ sap.ui.define([
             }
 
             // Add the new converted messages
-            for (const oNewMessage of aNewMessages) {
-                this.addMessage(oNewMessage.message, oNewMessage.type, oNewMessage.additionalText, oNewMessage.description);
-            }
+            return aNewMessages;
         },
 
         clearAll: function () {
@@ -91,16 +93,16 @@ sap.ui.define([
         },
 
         getButtonType: function () {
-            if (this.hasErrors()) return "Negative";
-            if (this.hasWarnings()) return "Critical";
-            if (this.hasSuccess()) return "Success";
+            if (MessageHelper.hasErrors()) return "Negative";
+            if (MessageHelper.hasWarnings()) return "Critical";
+            if (MessageHelper.hasSuccess()) return "Success";
             return "Neutral";
         },
 
         getButtonIcon: function () {
-            if (this.hasErrors()) return "sap-icon://error";
-            if (this.hasWarnings()) return "sap-icon://alert";
-            if (this.hasSuccess()) return "sap-icon://sys-enter-2";
+            if (MessageHelper.hasErrors()) return "sap-icon://error";
+            if (MessageHelper.hasWarnings()) return "sap-icon://alert";
+            if (MessageHelper.hasSuccess()) return "sap-icon://sys-enter-2";
             return "sap-icon://information";
         }
     };
