@@ -205,7 +205,7 @@ buttons.
                             width="100%"
                         />
                         <Input
-                            value="{Plant}"
+                            value="{path: 'Plant', mode: 'sap.ui.model.BindingMode.OneWay'}"
                             width="100%"
                             showValueHelp="true"
                             valueHelpRequest="onPlantVHRequest"
@@ -334,7 +334,7 @@ buttons.
                         <VBox class="sapUiSmallMargin">
                             <Label text="Plant:" />
                             <Input
-                                value="{Plant}"
+                                value="{path: 'Plant', mode: 'sap.ui.model.BindingMode.OneWay'}"
                                 showValueHelp="true"
                                 valueHelpRequest="onPlantVHRequest"
                             />
@@ -344,7 +344,8 @@ buttons.
                         <VBox class="sapUiSmallMargin">
                             <Label text="Storage Location:" />
                             <Input
-                                value="{StorageLocation}"
+                                value="{path: 'StorageLocation', mode: 'sap.ui.model.BindingMode.OneWay'}"
+                                width="100%"
                                 showValueHelp="true"
                                 valueHelpRequest="onStrLocVHRequest"
                             />

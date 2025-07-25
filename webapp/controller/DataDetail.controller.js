@@ -48,9 +48,12 @@ sap.ui.define(
         oRouter.attachRouteMatched(function (oEvent) {
           var oArgs = oEvent.getParameter('arguments');
           if (oArgs && oArgs.purchaseOrderNumber) {
-            that.sPurchaseOrderNumber = oArgs.purchaseOrderNumber;
-            that._loadPurchaseOrderData();
-            that._setOrderDetailsTitle();
+            var sNewPONumber = oArgs.purchaseOrderNumber;
+            if (that.sPurchaseOrderNumber !== sNewPONumber) {
+              that.sPurchaseOrderNumber = sNewPONumber;
+              that._loadPurchaseOrderData();
+              that._setOrderDetailsTitle();
+            }
           }
         });
 
@@ -428,7 +431,7 @@ sap.ui.define(
         if (aSelectedData.length === 0) {
           // No selection — show message
           MessageToast.show(
-            'Please enter valid data and press OK button to select the items'
+            'No item selected!'
           );
           return;
         }
@@ -465,6 +468,7 @@ sap.ui.define(
             oFields = {
               quantityReceive: aItems[2].getItems()[1].getItems()[1], // Quantity Receive input
               plant: aItems[4].getItems()[1], // Plant input
+              quantityUnit: aItems[3].getItems()[1],
               storageLocation: aItems[5].getItems()[1], // Storage Location input
             };
           }
@@ -474,6 +478,7 @@ sap.ui.define(
           var aCells = oTableItem.getCells();
           oFields = {
             quantityReceive: aCells[5], // Quantity Receive column
+            quantityUnit: aCells[6],
             plant: aCells[7], // Plant column
             storageLocation: aCells[8], // Storage Location column
           };
@@ -493,7 +498,8 @@ sap.ui.define(
         }
 
         // Button is being pressed (selecting row) - validate required fields first
-        if (!this._validateRequiredFields(oFields)) {
+        const oFieldValMsg = this._validateRequiredFields(oFields)
+        if (oFieldValMsg) {
           oButton.setPressed(false); // Force unpress
           this._handleToggleButtonState(oButton); // Update button style
           return;
@@ -671,29 +677,6 @@ sap.ui.define(
         }
       },
 
-      _resetAfterSuccessfulPost: function () {
-        const oList = this.byId('orderList');
-
-        // Clear all selections
-        oList.removeSelections();
-
-        // Reset all confirm buttons and quantity receive fields
-        oList.getItems().forEach(function (oItem) {
-          const oHBox = oItem.getContent()[0];
-          const aVBoxes = oHBox.getItems();
-
-          // Reset Quantity Receive input (index 4)
-          const oQuantityReceiveInput = aVBoxes[4].getItems()[1];
-          oQuantityReceiveInput.setValue('');
-
-          // Reset Confirm Status button (index 9)
-          const oConfirmButton = aVBoxes[9].getItems()[1];
-          oConfirmButton.setPressed(false);
-          oConfirmButton.setIcon('');
-          oConfirmButton.setType('Default');
-        });
-      },
-
       /**
        * Loads purchase order data into the carousel or table.
        * @private
@@ -710,7 +693,7 @@ sap.ui.define(
           ),
         ];
 
-        // Bind data to the correct control based on device type
+        // Bind data to the correct control bas ed on device type
         if (bIsPhone) {
           var oCarousel = this.byId('orderCarousel');
           var oBinding = oCarousel.getBinding('pages');
@@ -721,12 +704,19 @@ sap.ui.define(
           oBinding.filter(aFilters);
         } else {
           var oTable = this.byId('orderTable');
+          // Set no data to Loading...
+          oTable.setNoData("Loading...");
+          // Unselect all item row
+          oTable.removeSelections(true);
+          // Destroy the table
+          oTable.destroyItems();
           var oBinding = oTable.getBinding('items');
           oTable.attachEventOnce(
             'updateFinished',
             function () {
               this.getView().setBusy(false);
               this._setFocusOnFirstQuantityReceived();
+
             },
             this
           );
@@ -845,9 +835,6 @@ sap.ui.define(
             .execute()
             .then(function () {
               that.getView().setBusy(false);
-
-              MessageHelper.convertMessageFromBackend();
-
               // Refresh the data
               if (bIsPhone) {
                 that.byId('orderCarousel').getBinding('pages').refresh();
@@ -855,16 +842,17 @@ sap.ui.define(
               } else {
                 that.byId("orderTable").getBinding("items").refresh();
               }
-
             })
             .catch(function (oError) {
               that.getView().setBusy(false);
-              if (oError.$reported == true) {
-                MessageHelper.convertMessageFromBackend();
-              } else {
+              if (oError.$reported == false) {
                 MessageHelper.addMessage('Error', MessageType.Error, oError.message, oError.stack);
               }
-            });
+            })
+            .finally(() => {
+              MessageHelper.convertMessageFromBackend();
+            })
+            ;
         } catch (oError) {
           this.getView().setBusy(false);
         }
@@ -970,25 +958,34 @@ sap.ui.define(
        * Validates required fields before OK button action
        */
       _validateRequiredFields: function (oFields) {
-        var bQuantityValid = ValidationHelper.validateField(
+        const sQuantityValid = ValidationHelper.validateField(
           oFields.quantityReceive,
-          [ValidationHelper.VALIDATION_RULES.REQUIRED],
+          [ValidationHelper.VALIDATION_RULES.REQUIRED,
+          (oFields.quantityUnit.getValue() == "PC" || oFields.quantityUnit.getValue() == "EA") ? ValidationHelper.VALIDATION_RULES.INTEGER : ValidationHelper.VALIDATION_RULES.NO_VALIDATION
+          ],
           "Quantity Receive"
         );
 
-        var bPlantValid = ValidationHelper.validateField(
+        const sPlantValid = ValidationHelper.validateField(
           oFields.plant,
           [ValidationHelper.VALIDATION_RULES.REQUIRED],
           "Plant"
         );
 
-        var bStorageValid = ValidationHelper.validateField(
+        const sStorageValid = ValidationHelper.validateField(
           oFields.storageLocation,
           [ValidationHelper.VALIDATION_RULES.REQUIRED],
           "Storage Location"
         );
 
-        return bQuantityValid && bPlantValid && bStorageValid;
+        // Return the message if there is an error and return empty when there is no error
+        if (sQuantityValid || sPlantValid || sStorageValid) {
+          // Return an object of validation message
+          return { quantityValMsg: sQuantityValid, plantValMsg: sPlantValid, storageValMsg: sStorageValid };
+        } else {
+          // Return null/empty means the validation is passed
+          return;
+        }
       },
     });
   }
