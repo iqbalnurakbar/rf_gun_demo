@@ -36,7 +36,7 @@ sap.ui.define([
 
                     // Create new converted message
                     aNewMessages.push({
-                        message: oMessage.type,
+                        message: (oMessage.code == 'ZMSGRFGUNDEMO/002') ? oMessage.type + ' ' + oMessage.message.substring(0, 7) : oMessage.type,
                         type: oMessage.type,
                         additionalText: (oMessage.type == "Error") ? "Document is not Posted with BAPI" : "Document Posted with BAPI",
                         description: oMessage.message || ""
