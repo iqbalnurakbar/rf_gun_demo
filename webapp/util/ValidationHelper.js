@@ -135,9 +135,9 @@ sap.ui.define([], function () {
             if (field.setValueStateText) {
                 field.setValueStateText(message);
             }
-            if (field.focus) {
-                field.focus();
-            }
+            // if (field.focus) {
+            //     field.focus();
+            // }
         },
 
         _clearFieldValidation: function (field) {

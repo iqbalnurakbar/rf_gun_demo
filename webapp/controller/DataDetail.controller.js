@@ -497,13 +497,35 @@ sap.ui.define(
           return; // Exit early - no validation needed when unpressing
         }
 
+          // messageHelper.clearAll(); // Clear previous messages
+
         // Button is being pressed (selecting row) - validate required fields first
         const oFieldValMsg = this._validateRequiredFields(oFields)
         if (oFieldValMsg) {
           oButton.setPressed(false); // Force unpress
           this._handleToggleButtonState(oButton); // Update button style
-          return;
-        }
+            // Create a mapping of field keys to user-friendly names
+          const fieldNames = {
+          quantityValMsg: "Quantity Receive",
+          plantValMsg: "Plant",
+          storageValMsg: "Storage Location"
+          };
+          // Use MessageHelper to add validation messages
+
+          for (const key in oFieldValMsg) {
+            if (oFieldValMsg[key] != null) {
+              const fieldName = fieldNames[key] || key; // Use user-friendly name or key 
+              const errorMessage = `${fieldName}: ${oFieldValMsg[key]}`;
+        MessageHelper.addMessage(
+          'Error',
+          MessageType.Error,
+          oFieldValMsg[key],
+          ''
+        );
+            }
+          }
+        return;
+      }
 
         // Validation passed - set button to selected state
         this._handleToggleButtonState(oButton);
