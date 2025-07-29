@@ -205,7 +205,7 @@ buttons.
                             width="100%"
                         />
                         <Input
-                            value="{Plant}"
+                            value="{path: 'Plant', mode: 'sap.ui.model.BindingMode.OneWay'}"
                             width="100%"
                             showValueHelp="true"
                             valueHelpRequest="onPlantVHRequest"
@@ -218,7 +218,6 @@ buttons.
                         />
                         <Link
                             text="{filename}"
-
                             emphasized="true"
                         />
                         <HBox
@@ -301,13 +300,6 @@ buttons.
                                     editable="false"
                                 />
                             </VBox>
-                            <VBox width="100%">
-                                <Label text="Material" />
-                                <Input
-                                    value="{Material} {MaterialDescription}"
-                                    editable="false"
-                                />
-                            </VBox>
                         </HBox>
 
                         <!-- Quantity Suggest and Receive -->
@@ -342,7 +334,7 @@ buttons.
                         <VBox class="sapUiSmallMargin">
                             <Label text="Plant:" />
                             <Input
-                                value="{Plant}"
+                                value="{path: 'Plant', mode: 'sap.ui.model.BindingMode.OneWay'}"
                                 showValueHelp="true"
                                 valueHelpRequest="onPlantVHRequest"
                             />
@@ -352,7 +344,8 @@ buttons.
                         <VBox class="sapUiSmallMargin">
                             <Label text="Storage Location:" />
                             <Input
-                                value="{StorageLocation}"
+                                value="{path: 'StorageLocation', mode: 'sap.ui.model.BindingMode.OneWay'}"
+                                width="100%"
                                 showValueHelp="true"
                                 valueHelpRequest="onStrLocVHRequest"
                             />

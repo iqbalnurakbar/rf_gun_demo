@@ -6,12 +6,14 @@ sap.ui.define(
     'sap/ui/model/Filter',
     'sap/ui/model/FilterOperator',
     'rfgundemo/util/Utility',
+    'rfgundemo/util/ValidationHelper',
     'sap/ui/core/Fragment',
     'sap/m/MessagePopover',
     'sap/m/MessageItem',
     'sap/ui/core/Messaging',
     'sap/ui/core/message/Message',
     'sap/ui/core/message/MessageType',
+    'rfgundemo/util/MessageHelper'
   ],
   function (
     Controller,
@@ -20,12 +22,14 @@ sap.ui.define(
     Filter,
     FilterOperator,
     Utility,
+    ValidationHelper,
     Fragment,
     MessagePopover,
     MessageItem,
     Messaging,
     Message,
-    MessageType
+    MessageType,
+    MessageHelper
   ) {
     'use strict';
 
@@ -44,9 +48,12 @@ sap.ui.define(
         oRouter.attachRouteMatched(function (oEvent) {
           var oArgs = oEvent.getParameter('arguments');
           if (oArgs && oArgs.purchaseOrderNumber) {
-            that.sPurchaseOrderNumber = oArgs.purchaseOrderNumber;
-            that._loadPurchaseOrderData();
-            that._setOrderDetailsTitle();
+            var sNewPONumber = oArgs.purchaseOrderNumber;
+            if (that.sPurchaseOrderNumber !== sNewPONumber) {
+              that.sPurchaseOrderNumber = sNewPONumber;
+              that._loadPurchaseOrderData();
+              that._setOrderDetailsTitle();
+            }
           }
         });
 
@@ -63,13 +70,8 @@ sap.ui.define(
         // Register keyboard shortcut support
         this._attachInputEventDelegates();
 
-        // Message popover initialization
-        this._MessageManager = Messaging;
-        this._MessageManager.removeAllMessages();
-        this.getView().setModel(
-          this._MessageManager.getMessageModel(),
-          'message'
-        );
+        // Initialize MessageHelper
+        MessageHelper.init(this.getView());
       },
 
       /**
@@ -199,8 +201,7 @@ sap.ui.define(
       },
 
       onUploadPress: function (oEvent) {
-        var oDeviceModel = this.getView().getModel('device');
-        var bIsPhone = oDeviceModel.getProperty('/system/phone');
+        const bIsPhone = Utility.isPhoneDevice(this.getView());
         // Get the dialog that triggered the event
         var oDialog = oEvent.getSource().getParent().getParent();
         var sDialogId = oDialog.getId();
@@ -323,8 +324,8 @@ sap.ui.define(
        */
       onLiveChangeCheckNumber: function (oEvent) {
         var oInput = oEvent.getSource();
-        // @ts-ignore
-        // @ts-ignore
+
+
         var sValue = oInput.getValue();
 
         // Allow numbers and ONE decimal point
@@ -337,7 +338,7 @@ sap.ui.define(
         }
 
         // Set back only numeric value
-        // @ts-ignore
+
         oInput.setValue(sValidatedValue);
       },
 
@@ -347,8 +348,7 @@ sap.ui.define(
        */
       onSaveAndPostButtonPress: function () {
         var aSelectedData = []; // Will store all the selected item data
-        var oDeviceModel = this.getView().getModel('device');
-        var bIsPhone = oDeviceModel.getProperty('/system/phone'); // Check if device is phone
+        const bIsPhone = Utility.isPhoneDevice(this.getView());
 
         if (bIsPhone) {
           // For phones, get the data from the active carousel page
@@ -431,7 +431,7 @@ sap.ui.define(
         if (aSelectedData.length === 0) {
           // No selection — show message
           MessageToast.show(
-            'Please enter valid data and press OK button to select the items'
+            'No item selected!'
           );
           return;
         }
@@ -445,11 +445,12 @@ sap.ui.define(
        * @param {sap.ui.base.Event} oEvent - The button press event
        */
       onOkButtonPress: function (oEvent) {
-        var oButton = oEvent.getSource(); // The button that was pressed
-        this._handleToggleButtonState(oButton); // Change visual state
-        var oDeviceModel = this.getView().getModel('device');
-        var bIsPhone = oDeviceModel.getProperty('/system/phone');
-        var oFields = null;
+        // Get button object
+        const oButton = oEvent.getSource();
+        // Get device
+        const bIsPhone = Utility.isPhoneDevice(this.getView());
+
+        var oFields = {};
         var oTableItem = null;
 
         // Check if phone or desktop
@@ -460,13 +461,14 @@ sap.ui.define(
           var oActivePage = oCarousel
             .getPages()
             .find(page => page.getId() === sActivePageId);
-          
+
           if (oActivePage) {
             var aItems = oActivePage.getItems();
             // Get the input fields based on carousel structure from your XML
             oFields = {
               quantityReceive: aItems[2].getItems()[1].getItems()[1], // Quantity Receive input
               plant: aItems[4].getItems()[1], // Plant input
+              quantityUnit: aItems[3].getItems()[1],
               storageLocation: aItems[5].getItems()[1], // Storage Location input
             };
           }
@@ -476,6 +478,7 @@ sap.ui.define(
           var aCells = oTableItem.getCells();
           oFields = {
             quantityReceive: aCells[5], // Quantity Receive column
+            quantityUnit: aCells[6],
             plant: aCells[7], // Plant column
             storageLocation: aCells[8], // Storage Location column
           };
@@ -483,26 +486,54 @@ sap.ui.define(
 
         // Check if button is being unpressed (deselecting row)
         if (!oButton.getPressed()) {
-          // No validation needed when deselecting
-          if (!bIsPhone) {
-            // Only table has setSelectedItem method
-            var oTable = this.byId('orderTable');
-            oTable.setSelectedItem(oTableItem, oButton.getPressed()); // Deselect row
-          }
-          return;
-        } else {
-          // Button is being pressed (selecting row) - validate required fields first
-          if (!this._validateRequiredFields(oFields)) {
-            // Validation failed - keep button in pressed state to show error
-            this._handleToggleButtonState(oButton, true); // Mark as selected/error state
-            return;
-          }
-          // Validation passed - update table selection to match button state (desktop only)
+          // Button was just unpressed - set it to unselected state
+          this._handleToggleButtonState(oButton);
+
+          // Update table selection for desktop only
           if (!bIsPhone) {
             var oTable = this.byId('orderTable');
-            oTable.setSelectedItem(oTableItem, oButton.getPressed()); // Select row
+            oTable.setSelectedItem(oTableItem, false); // Deselect row
           }
-          // For phone, no table selection needed since carousel doesn't have that concept
+          return; // Exit early - no validation needed when unpressing
+        }
+
+          // messageHelper.clearAll(); // Clear previous messages
+
+        // Button is being pressed (selecting row) - validate required fields first
+        const oFieldValMsg = this._validateRequiredFields(oFields)
+        if (oFieldValMsg) {
+          oButton.setPressed(false); // Force unpress
+          this._handleToggleButtonState(oButton); // Update button style
+            // Create a mapping of field keys to user-friendly names
+          const fieldNames = {
+          quantityValMsg: "Quantity Receive",
+          plantValMsg: "Plant",
+          storageValMsg: "Storage Location"
+          };
+          // Use MessageHelper to add validation messages
+
+          for (const key in oFieldValMsg) {
+            if (oFieldValMsg[key] != null) {
+              const fieldName = fieldNames[key] || key; // Use user-friendly name or key 
+              const errorMessage = `${fieldName}: ${oFieldValMsg[key]}`;
+        MessageHelper.addMessage(
+          'Error',
+          MessageType.Error,
+          oFieldValMsg[key],
+          ''
+        );
+            }
+          }
+        return;
+      }
+
+        // Validation passed - set button to selected state
+        this._handleToggleButtonState(oButton);
+
+        // Update table selection to match button state (desktop only)
+        if (!bIsPhone) {
+          var oTable = this.byId('orderTable');
+          oTable.setSelectedItem(oTableItem, true); // Select row
         }
       },
 
@@ -511,7 +542,7 @@ sap.ui.define(
        * @param {sap.ui.base.Event} oEvent
        */
       onCarouselPageChanged: function (oEvent) {
-        // @ts-ignore
+
         var aActivePageId = oEvent.getParameter('activePages');
         var oPage = this.byId('orderCarousel').getPages()[aActivePageId];
         var oInput = oPage.getItems()[2].getItems()[1].getItems()[1];
@@ -553,10 +584,6 @@ sap.ui.define(
         oEvent.getSource().close();
       },
 
-      onPlantVHCancel: function (oEvent) {
-        //oEvent.getSource().close();
-      },
-
       onStrLocVHRequest: function (oEvent) {
         const oInput = oEvent.getSource();
         this._currentStrLocInput = oInput;
@@ -586,10 +613,6 @@ sap.ui.define(
         oEvent.getSource().close();
       },
 
-      onStrLocVHCancel: function (oEvent) {
-        //oEvent.getSource().close();
-      },
-
       // MessagePopover Methods
       onShowMessagePopover: function (oEvent) {
         if (!this._oMessagePopover) {
@@ -598,38 +621,18 @@ sap.ui.define(
         this._oMessagePopover.toggle(oEvent.getSource());
       },
 
+      // // Helper methods for button formatting
       // Helper methods for button formatting
       getMessageCount: function () {
-        var aMessages = this._MessageManager.getMessageModel().getData();
-        return aMessages.length || '';
+        return MessageHelper.getMessageCount();
       },
 
       getButtonType: function () {
-        var aMessages = this._MessageManager.getMessageModel().getData();
-        var bHasError = aMessages.some(function (msg) {
-          return msg.type === 'Error';
-        });
-        var bHasWarning = aMessages.some(function (msg) {
-          return msg.type === 'Warning';
-        });
-
-        if (bHasError) return 'Negative';
-        if (bHasWarning) return 'Critical';
-        return 'Neutral';
+        return MessageHelper.getButtonType();
       },
 
       getButtonIcon: function () {
-        var aMessages = this._MessageManager.getMessageModel().getData();
-        var bHasError = aMessages.some(function (msg) {
-          return msg.type === 'Error';
-        });
-        var bHasWarning = aMessages.some(function (msg) {
-          return msg.type === 'Warning';
-        });
-
-        if (bHasError) return 'sap-icon://error';
-        if (bHasWarning) return 'sap-icon://alert';
-        return 'sap-icon://information';
+        return MessageHelper.getButtonIcon();
       },
 
       // =====================================================
@@ -662,8 +665,7 @@ sap.ui.define(
         if (oDataDetailPage) {
           oDataDetailPage.addEventDelegate({
             onkeydown: function (oEvent) {
-              var oDeviceModel = this.getView().getModel('device');
-              var bIsPhone = oDeviceModel.getProperty('/system/phone');
+              const bIsPhone = Utility.isPhoneDevice(this.getView());
 
               // Handle different function keys
               switch (oEvent.key) {
@@ -697,37 +699,14 @@ sap.ui.define(
         }
       },
 
-      _resetAfterSuccessfulPost: function () {
-        const oList = this.byId('orderList');
-
-        // Clear all selections
-        oList.removeSelections();
-
-        // Reset all confirm buttons and quantity receive fields
-        oList.getItems().forEach(function (oItem) {
-          const oHBox = oItem.getContent()[0];
-          const aVBoxes = oHBox.getItems();
-
-          // Reset Quantity Receive input (index 4)
-          const oQuantityReceiveInput = aVBoxes[4].getItems()[1];
-          oQuantityReceiveInput.setValue('');
-
-          // Reset Confirm Status button (index 9)
-          const oConfirmButton = aVBoxes[9].getItems()[1];
-          oConfirmButton.setPressed(false);
-          oConfirmButton.setIcon('');
-          oConfirmButton.setType('Default');
-        });
-      },
-
       /**
        * Loads purchase order data into the carousel or table.
        * @private
        */
       _loadPurchaseOrderData: function () {
         var that = this;
-        var oDeviceModel = this.getView().getModel('device');
-        var bIsPhone = oDeviceModel.getProperty('/system/phone');
+        const bIsPhone = Utility.isPhoneDevice(this.getView());
+
         var aFilters = [
           new Filter(
             'PurchaseOrderNo',
@@ -736,7 +715,7 @@ sap.ui.define(
           ),
         ];
 
-        // Bind data to the correct control based on device type
+        // Bind data to the correct control bas ed on device type
         if (bIsPhone) {
           var oCarousel = this.byId('orderCarousel');
           var oBinding = oCarousel.getBinding('pages');
@@ -747,12 +726,19 @@ sap.ui.define(
           oBinding.filter(aFilters);
         } else {
           var oTable = this.byId('orderTable');
+          // Set no data to Loading...
+          oTable.setNoData("Loading...");
+          // Unselect all item row
+          oTable.removeSelections(true);
+          // Destroy the table
+          oTable.destroyItems();
           var oBinding = oTable.getBinding('items');
           oTable.attachEventOnce(
             'updateFinished',
             function () {
               this.getView().setBusy(false);
               this._setFocusOnFirstQuantityReceived();
+
             },
             this
           );
@@ -840,8 +826,7 @@ sap.ui.define(
 
       _postToGoodsMovementBAPI: function (aBAPIData) {
         var that = this;
-        var oDeviceModel = this.getView().getModel('device');
-        var bIsPhone = oDeviceModel.getProperty('/system/phone');
+        const bIsPhone = Utility.isPhoneDevice(this.getView());
         var oModel = this.getView().getModel();
 
         // Your existing body structure works perfectly!
@@ -851,13 +836,7 @@ sap.ui.define(
         };
 
         // Clear previous messages before new API call
-        this._MessageManager.removeAllMessages();
-
-        // Show loading indicator
-        this.getView().setBusy(true);
-
-        // Clear previous messages
-        this._MessageManager.removeAllMessages();
+        MessageHelper.clearAll();
 
         // Show loading indicator
         this.getView().setBusy(true);
@@ -878,7 +857,6 @@ sap.ui.define(
             .execute()
             .then(function () {
               that.getView().setBusy(false);
-
               // Refresh the data
               if (bIsPhone) {
                 that.byId('orderCarousel').getBinding('pages').refresh();
@@ -889,84 +867,17 @@ sap.ui.define(
             })
             .catch(function (oError) {
               that.getView().setBusy(false);
-
-              // Error handling
-              var sErrorMessage = that._getErrorMessage(oError);
-              var iStatusCode = that._extractStatusCode(oError);
-              var sHttpStatusText = that._getHttpStatusText(iStatusCode);
-
-              that._addMessage(
-                'Error posting data',
-                MessageType.Error,
-                sHttpStatusText || 'Processing Error',
-                sErrorMessage ||
-                  'An unexpected error occurred during processing.'
-              );
-            });
+              if (oError.$reported == false) {
+                MessageHelper.addMessage('Error', MessageType.Error, oError.message, oError.stack);
+              }
+            })
+            .finally(() => {
+              MessageHelper.convertMessageFromBackend();
+            })
+            ;
         } catch (oError) {
           this.getView().setBusy(false);
-          this._addMessage(
-            'Error setting up processing',
-            MessageType.Error,
-            'Setup Error',
-            oError.message || 'Failed to initialize processing.'
-          );
         }
-      },
-
-      // Helper method to add API messages to MessagePopover
-      _addMessage: function (sMessage, sType, sAdditionalText, sDescription) {
-        this._MessageManager.addMessages(
-          new Message({
-            message: sMessage,
-            type: sType,
-            additionalText: sAdditionalText,
-            description: sDescription,
-            processor: this.getView().getModel(),
-          })
-        );
-      },
-
-      // Helper method to extract error message
-      _getErrorMessage: function (oError) {
-        if (oError && oError.message) {
-          return oError.message;
-        }
-
-        if (oError && oError.error && oError.error.message) {
-          return oError.error.message;
-        }
-
-        if (oError && oError.responseText) {
-          try {
-            var oParsed = JSON.parse(oError.responseText);
-            if (oParsed.error && oParsed.error.message) {
-              return oParsed.error.message;
-            }
-          } catch (e) {
-            return oError.responseText;
-          }
-        }
-
-        return 'Unknown error occurred';
-      },
-
-      // Helper method to get HTTP status text
-      _getHttpStatusText: function (iStatusCode) {
-        var mStatusTexts = {
-          200: 'HTTP 200 - OK',
-          201: 'HTTP 201 - Created',
-          400: 'HTTP 400 - Bad Request',
-          401: 'HTTP 401 - Unauthorized',
-          403: 'HTTP 403 - Forbidden',
-          404: 'HTTP 404 - Not Found',
-          422: 'HTTP 422 - Unprocessable Entity',
-          500: 'HTTP 500 - Internal Server Error',
-          502: 'HTTP 502 - Bad Gateway',
-          503: 'HTTP 503 - Service Unavailable',
-        };
-
-        return mStatusTexts[iStatusCode] || 'HTTP ' + iStatusCode;
       },
 
       /**
@@ -1010,16 +921,8 @@ sap.ui.define(
        * @param {sap.m.ToggleButton} oToggleButton
        * @private
        */
-      _handleToggleButtonState: function (oToggleButton, bForceUnpressed) {
-        var bPressed = null;
-        // force button to be unpressed
-        if (!bForceUnpressed) {
-          bPressed = oToggleButton.getPressed();
-        } else {
-          bPressed = false;
-          oToggleButton.setPressed(false);
-        }
-        // @ts-ignore
+      _handleToggleButtonState: function (oToggleButton) {
+        var bPressed = oToggleButton.getPressed();
         oToggleButton.setType(bPressed ? 'Success' : 'Emphasized');
       },
 
@@ -1028,8 +931,7 @@ sap.ui.define(
        * @private
        */
       _triggerOkButtonPress: function () {
-        var oDeviceModel = this.getView().getModel('device');
-        var bIsPhone = oDeviceModel.getProperty('/system/phone');
+        const bIsPhone = Utility.isPhoneDevice(this.getView());
 
         if (bIsPhone) {
           var oCarousel = this.byId('orderCarousel');
@@ -1077,49 +979,35 @@ sap.ui.define(
       /**
        * Validates required fields before OK button action
        */
-      _validateRequiredFields: function (oRowData) {
-        var bValid = true;
-        // Validate Quantity Receive
-        if (
-          !oRowData.quantityReceive ||
-          oRowData.quantityReceive.getValue() === ''
-        ) {
-          oRowData.quantityReceive.setValueState('Error');
-          oRowData.quantityReceive.setValueStateText(
-            'This field cannot be blank'
-          );
-          bValid = false;
-          oRowData.quantityReceive.focus();
+      _validateRequiredFields: function (oFields) {
+        const sQuantityValid = ValidationHelper.validateField(
+          oFields.quantityReceive,
+          [ValidationHelper.VALIDATION_RULES.REQUIRED,
+          (oFields.quantityUnit.getValue() == "PC" || oFields.quantityUnit.getValue() == "EA") ? ValidationHelper.VALIDATION_RULES.INTEGER : ValidationHelper.VALIDATION_RULES.NO_VALIDATION
+          ],
+          "Quantity Receive"
+        );
+
+        const sPlantValid = ValidationHelper.validateField(
+          oFields.plant,
+          [ValidationHelper.VALIDATION_RULES.REQUIRED],
+          "Plant"
+        );
+
+        const sStorageValid = ValidationHelper.validateField(
+          oFields.storageLocation,
+          [ValidationHelper.VALIDATION_RULES.REQUIRED],
+          "Storage Location"
+        );
+
+        // Return the message if there is an error and return empty when there is no error
+        if (sQuantityValid || sPlantValid || sStorageValid) {
+          // Return an object of validation message
+          return { quantityValMsg: sQuantityValid, plantValMsg: sPlantValid, storageValMsg: sStorageValid };
         } else {
-          oRowData.quantityReceive.setValueState("None");
-          oRowData.quantityReceive.setValueStateText("");
+          // Return null/empty means the validation is passed
+          return;
         }
-        // Validate Plant
-        if (!oRowData.plant || oRowData.plant.getValue() === '') {
-          oRowData.plant.setValueState('Error');
-          oRowData.plant.setValueStateText('This field cannot be blank');
-          bValid = false;
-          oRowData.plant.focus();
-        } else {
-          oRowData.plant.setValueState("None");
-          oRowData.plant.setValueStateText("");
-        }
-        // Validate Storage Location
-        if (
-          !oRowData.storageLocation ||
-          oRowData.storageLocation.getValue() === ''
-        ) {
-          oRowData.storageLocation.setValueState('Error');
-          oRowData.storageLocation.setValueStateText(
-            'This field cannot be blank'
-          );
-          bValid = false;
-          oRowData.storageLocation.focus();
-        } else {
-          oRowData.storageLocation.setValueState("None");
-          oRowData.storageLocation.setValueStateText("");
-        }
-        return bValid;
       },
     });
   }

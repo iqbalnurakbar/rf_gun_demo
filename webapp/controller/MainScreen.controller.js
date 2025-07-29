@@ -28,7 +28,7 @@ sap.ui.define(
 
         // Refresh model data every time this route is matched
         oRouter.attachRouteMatched(
-          // @ts-ignore
+          
           function () {
             oModel.refresh();
           }.bind(this)
@@ -49,14 +49,13 @@ sap.ui.define(
        */
       onLiveChangeCheckNumber: function (oEvent) {
         var oInput = oEvent.getSource();
-        // @ts-ignore
+        
         var sValue = oInput.getValue();
 
         // Match only numbers
         var sValidatedValue = sValue.replace(/[^0-9]/g, '');
 
-        // Set back only numeric value
-        // @ts-ignore
+        // Set back only numeric value        
         oInput.setValue(sValidatedValue);
       },
 
