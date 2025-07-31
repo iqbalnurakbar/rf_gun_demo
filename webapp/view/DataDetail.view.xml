@@ -33,7 +33,6 @@ buttons.
             <Toolbar>
                 <Title
                     id="orderDetailsTitle"
-                    text="Order Details"
                     class="sapUiTinyMarginBegin"
                 />
                 <ToolbarSpacer />
@@ -55,11 +54,19 @@ buttons.
         <Table
             id="orderTable"
             mode="MultiSelect"
-            items="{path: '/ZR_RF_PO_ITEM_MAIN'}"
+            items="{ path: 'POModel>/tableData'}"
             inset="false"
             class="sapUiResponsiveContentPadding"
-            visible="{= !${device>/system/phone} }"
         >
+            <headerToolbar>
+                <Toolbar>
+                    <Title
+                        id="orderListTitle"
+                        level="H2"
+                        text="Total items: {$count}"
+                    />
+                </Toolbar>
+            </headerToolbar>
             <!--
                 Table Columns (Desktop/Tablet view).
                 Each column displays a specific field from the PO line item.
@@ -169,27 +176,27 @@ buttons.
                 <ColumnListItem>
                     <cells>
                         <Input
-                            value="{PurchaseOrderItemNo}"
+                            value="{POModel>PurchaseOrderItemNo}"
                             editable="false"
                             width="100%"
                         />
                         <Input
-                            value="{Material}"
+                            value="{POModel>Material}"
                             editable="false"
                             visible="false"
                         />
                         <Input
-                            value="{MaterialDescription}"
+                            value="{POModel>MaterialDescription}"
                             editable="false"
                             visible="false"
                         />
                         <Input
-                            value="{Material} {MaterialDescription}"
+                            value="{POModel>Material} {POModel>MaterialDescription}"
                             editable="false"
                             width="100%"
                         />
                         <Input
-                            value="{QuantitySuggest}"
+                            value="{POModel>QuantitySuggest}"
                             editable="false"
                             width="100%"
                             liveChange=".onLiveChangeCheckNumber"
@@ -200,24 +207,24 @@ buttons.
                             liveChange=".onLiveChangeCheckNumber"
                         />
                         <Input
-                            value="{PurchaseOrderQuantityUnit}"
+                            value="{POModel>PurchaseOrderQuantityUnit}"
                             editable="false"
                             width="100%"
                         />
                         <Input
-                            value="{path: 'Plant', mode: 'sap.ui.model.BindingMode.OneWay'}"
+                            value="{path: 'POModel>Plant', mode: 'sap.ui.model.BindingMode.OneWay'}"
                             width="100%"
                             showValueHelp="true"
                             valueHelpRequest="onPlantVHRequest"
                         />
                         <Input
-                            value="{path: 'StorageLocation', mode: 'sap.ui.model.BindingMode.OneWay'}"
+                            value="{path: 'POModel>StorageLocation', mode: 'sap.ui.model.BindingMode.OneWay'}"
                             width="100%"
                             showValueHelp="true"
                             valueHelpRequest="onStrLocVHRequest"
                         />
                         <Link
-                            text="{filename}"
+                            text="{POModel>filename}"
                             emphasized="true"
                         />
                         <HBox
@@ -248,166 +255,49 @@ buttons.
             </items>
         </Table>
 
-        <!--
-            Carousel for displaying Purchase Order line items on phones.
-            Uses a card-style layout for small screens.
-        -->
-        <!-- Replace the entire Carousel with this optimized VBox -->
-        <VBox
-            class="sapUiTinyMargin"
-            id="orderCarousel"
-            visible="{device>/system/phone}"
-        >
-            <!-- Content Area - Single item only -->
-            <VBox
-                class="sapUiSmallMargin"
-                visible="{= !${view>/isLoading}}"
-            >
-                <!-- Line No -->
-                <VBox class="sapUiTinyMargin">
-                    <Label text="Line No:" />
-                    <Input
-                        value="{view>/POItem/PurchaseOrderItemNo}"
-                        editable="false"
-                    />
-                </VBox>
-
-                <!-- Material - Combined for mobile optimization -->
-                <VBox class="sapUiTinyMargin">
-                    <Label text="Material" />
-                    <Input
-                        value="{parts: ['view>/POItem/Material', 'view>/POItem/MaterialDescription']}"
-                        editable="false"
-                    />
-                </VBox>
-
-                <!-- Quantity Fields - Critical for focus handling -->
-                <HBox class="sapUiTinyMargin">
-                    <VBox class="sapUiTinyMarginEnd">
-                        <Label text="Qty Suggest:" />
-                        <Input
-                            value="{view>/POItem/QuantitySuggest}"
-                            editable="false"
-                            width="7rem"
-                        />
-                    </VBox>
-                    <VBox>
-                        <Label text="Qty Receive:" />
-                        <Input
-                            id="quantityReceiveInput"
-                            value="{view>/POItem/QuantityReceive}"
-                            liveChange=".onQuantityReceiveChange"
-                            width="7rem"
-                            type="Number"
-                        />
-                    </VBox>
-                </HBox>
-
-                <!-- Unit -->
-                <VBox class="sapUiTinyMargin">
-                    <Label text="Unit:" />
-                    <Input
-                        value="{view>/POItem/PurchaseOrderQuantityUnit}"
-                        editable="false"
-                        width="7rem"
-                    />
-                </VBox>
-
-                <!-- Plant -->
-                <VBox class="sapUiTinyMargin">
-                    <Label text="Plant:" />
-                    <Input
-                        value="{view>/POItem/Plant}"
-                        showValueHelp="true"
-                        valueHelpRequest="onPlantVHRequest"
-                    />
-                </VBox>
-
-                <!-- Storage Location -->
-                <VBox class="sapUiTinyMargin">
-                    <Label text="Storage Location:" />
-                    <Input
-                        value="{view>/POItem/StorageLocation}"
-                        width="100%"
-                        showValueHelp="true"
-                        valueHelpRequest="onStrLocVHRequest"
-                    />
-                </VBox>
-
-                <!-- Attachment Buttons - Smaller for mobile -->
-                <HBox class="sapUiTinyMargin">
-                    <Button
-                        icon="sap-icon://upload"
-                        class="sapUiTinyMarginEnd"
-                        press="onUpload"
-                        width="3rem"
-                    />
-                    <Button
-                        icon="sap-icon://download"
-                        class="sapUiTinyMarginEnd"
-                        press="onDownload"
-                        width="3rem"
-                    />
-                </HBox>
-                <VBox class="sapUiTinyMargin">
-                    <Button
-                        text="{view>/POItem/filename}"
-                        type="Transparent"
-                        visible="{= !!${view>/POItem/filename}}"
-                    />
-                </VBox>
-
-                <!-- Action Buttons -->
-                <HBox class="sapUiTinyMargin">
-                    <ToggleButton
-                        text="Confirm"
-                        press=".onOkButtonPress"
-                        width="100%"
-                        type="Emphasized"
-                    />
-                </HBox>
-            </VBox>
-            <!-- Navigation Header - Compact for mobile -->
-            <HBox
-                class="sapUiTinyMargin"
-                justifyContent="SpaceBetween"
-                alignItems="Center"
-            >
-                <!-- Previous Button -->
-                <Button
-                    icon="sap-icon://navigation-left-arrow"
-                    tooltip="Previous Item"
-                    press=".onPreviousItem"
-                    enabled="{view>/canGoPrevious}"
-                    type="Default"
-                    width="3rem"
-                />
-
-                <!-- Status Text -->
-                <VBox alignItems="Center">
-                    <Text
-                        text="Item {view>/currentIndex} of {view>/totalItems}"
-                        class="sapUiTinyText"
-                    />
-                </VBox>
-
-                <!-- Next Button -->
-                <Button
-                    icon="sap-icon://navigation-right-arrow"
-                    tooltip="Next Item"
-                    press=".onNextItem"
-                    enabled="{view>/canGoNext}"
-                    type="Default"
-                    width="3rem"
-                />
-            </HBox>
-        </VBox>
+        <!-- Pagination Control -->
+        <OverflowToolbar>
+            <ToolbarSpacer />
+            <Button
+                id="BtnFirstPressId"
+                icon="sap-icon://close-command-field"
+                press="onFirstPress"
+                tooltip="First"
+                enabled="{NavModel>/firstPageBtnEnable}"
+            />
+            <Button
+                id="BtnPreviousPressId"
+                icon="sap-icon://navigation-left-arrow"
+                press="onPreviousPress"
+                tooltip="Previous"
+                enabled="{NavModel>/firstPageBtnEnable}"
+            />
+            <Text
+                id="PageTextId"
+                text="page {POModel>/page} of {POModel>/totalPages}"
+            />
+            <Button
+                id="BtnNextPressId"
+                icon="sap-icon://navigation-right-arrow"
+                press="onNextPress"
+                tooltip="Next"
+                enabled="{NavModel>/nextPageBtnEnable}"
+            />
+            <Button
+                id="BtnLastPressId"
+                icon="sap-icon://open-command-field"
+                press="onLastPress"
+                tooltip="Last"
+                enabled="{NavModel>/nextPageBtnEnable}"
+            />
+        </OverflowToolbar>
 
         <!--
             Footer bar with keyboard shortcut hints for phone users.
         -->
         <footer>
             <OverflowToolbar>
+                <VBox />
                 <HBox
                     visible="{= !${device>/system/phone} }"
                     class="sapUiContentPadding"
