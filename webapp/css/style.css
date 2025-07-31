@@ -3,3 +3,13 @@
 	overflow-y: auto;
 	overflow-x: hidden;
 }
+.multiLineButton .sapMBtnContent {
+	white-space: pre-line !important;
+	line-height: 1.2 !important;
+	text-align: center !important;
+}
+
+.multiLineButton .sapMBtnContent::after {
+	content: "\A";
+	white-space: pre;
+}

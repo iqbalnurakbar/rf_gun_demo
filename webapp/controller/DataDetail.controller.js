@@ -44,11 +44,12 @@ sap.ui.define(
         var that = this;
         var oRouter = this.getOwnerComponent().getRouter();
         this.sPurchaseOrderNumber = "";
-        this.getView().setBusy(true);
+        // this.getView().setBusy(true);
 
         // Initialize with minimal memory footprint
         this._currentIndex = 0;
         this._totalItems = 0;
+
 
         // Lightweight view model - only current item data
         this.oViewModel = new sap.ui.model.json.JSONModel({
@@ -72,6 +73,7 @@ sap.ui.define(
 
         this.getView().setModel(this.oViewModel, "view");
 
+
         // When the route is matched, load data based on purchase order number
         oRouter.attachRouteMatched(function (oEvent) {
           var oArgs = oEvent.getParameter("arguments");
@@ -86,7 +88,7 @@ sap.ui.define(
             }
           }
         });
-        
+
         // Register keyboard shortcut support
         this._attachInputEventDelegates();
 
@@ -110,11 +112,27 @@ sap.ui.define(
       },
 
       onDownload: function (oEvent) {
+        const bIsPhone = Utility.isPhoneDevice(this.getView());
         var oModel = this.getView().getModel();
-
         var oButton = oEvent.getSource();
-        var oContext = oButton.getBindingContext();
-        var oRowData = oContext.getObject();
+        var oRowData;
+
+        if (bIsPhone) {
+          // For phone: get data from view model
+          oRowData = this.oViewModel.getProperty("/POItem");
+          if (!oRowData || !oRowData.PurchaseOrderItemNo) {
+            MessageToast.show("No item data available");
+            return;
+          }
+        } else {
+          // For desktop: get data from binding context
+          var oBindingContext = oButton.getBindingContext();
+          if (!oBindingContext) {
+            MessageToast.show("No binding context available");
+            return;
+          }
+          oRowData = oBindingContext.getObject();
+        }
 
         if (oRowData.filename === "") {
           MessageToast.show("No attachment file");
@@ -184,16 +202,35 @@ sap.ui.define(
       },
 
       onUpload: function (oEvent) {
-        // Get row information
+        const bIsPhone = Utility.isPhoneDevice(this.getView());
         var oButton = oEvent.getSource();
-        var oBindingContext = oButton.getBindingContext();
-        var oRowData = oBindingContext.getObject();
+        var oRowData;
+
+        if (bIsPhone) {
+          // For phone: get data from view model
+          oRowData = this.oViewModel.getProperty("/POItem");
+          if (!oRowData || !oRowData.PurchaseOrderItemNo) {
+            MessageToast.show("No item data available");
+            return;
+          }
+        } else {
+          // For desktop: get data from binding context
+          var oBindingContext = oButton.getBindingContext();
+          if (!oBindingContext) {
+            MessageToast.show("No binding context available");
+            return;
+          }
+          oRowData = oBindingContext.getObject();
+        }
+
         // Create unique ID based on item
         var sUniqueId = "uploadDialog_" + oRowData.PurchaseOrderItemNo;
-        // Store current context for this specific dialog
 
-        this["_uploadContext_" + oRowData.PurchaseOrderItemNo] =
-          oBindingContext;
+        // Store current context for this specific dialog
+        this["_uploadContext_" + oRowData.PurchaseOrderItemNo] = bIsPhone ?
+          { getObject: () => oRowData } : // Create mock context for phone
+          oBindingContext; // Use real context for desktop
+
         // Check if this specific dialog exists
         if (!this["_uploadDialog_" + oRowData.PurchaseOrderItemNo]) {
           // Create new dialog for this specific item
@@ -465,6 +502,8 @@ sap.ui.define(
         const oButton = oEvent.getSource();
         // Get device
         const bIsPhone = Utility.isPhoneDevice(this.getView());
+        // Clear previous messages
+        MessageHelper.clearAll();
 
         var oFields = {};
         var oTableItem = null;
@@ -660,7 +699,7 @@ sap.ui.define(
           // Get total count first
           await this._loadTotalCount();
 
-          // Load first item if available
+          // Load first item if availables
           if (this._totalItems > 0) {
             await this._loadSingleItem(0);
           }
@@ -871,7 +910,7 @@ sap.ui.define(
           oTable.attachEventOnce(
             "updateFinished",
             function () {
-              this.getView().setBusy(false);
+              this.getView().setBusy(false); s
               this._setFocusOnFirstQuantityReceived();
             },
             this
@@ -924,38 +963,6 @@ sap.ui.define(
         if (oTitle) {
           oTitle.setText("Order Details for " + this.sPurchaseOrderNumber);
         }
-      },
-
-      // Add the missing _extractStatusCode method first:
-      _extractStatusCode: function (oError) {
-        // Try different ways to extract status code
-        if (oError && oError.status) {
-          return parseInt(oError.status);
-        }
-
-        if (oError && oError.statusCode) {
-          return parseInt(oError.statusCode);
-        }
-
-        // Check in error details
-        if (oError && oError.error && oError.error.status) {
-          return parseInt(oError.error.status);
-        }
-
-        // Check in response
-        if (oError && oError.response && oError.response.status) {
-          return parseInt(oError.response.status);
-        }
-
-        // Check if it's in the message
-        if (oError && oError.message) {
-          var statusMatch = oError.message.match(/(\d{3})/);
-          if (statusMatch) {
-            return parseInt(statusMatch[1]);
-          }
-        }
-
-        return 0; // Unknown status
       },
 
       _postToGoodsMovementBAPI: function (aBAPIData) {
@@ -1123,7 +1130,7 @@ sap.ui.define(
           [
             ValidationHelper.VALIDATION_RULES.REQUIRED,
             oFields.quantityUnit.getValue() == "PC" ||
-            oFields.quantityUnit.getValue() == "EA"
+              oFields.quantityUnit.getValue() == "EA"
               ? ValidationHelper.VALIDATION_RULES.INTEGER
               : ValidationHelper.VALIDATION_RULES.NO_VALIDATION,
           ],

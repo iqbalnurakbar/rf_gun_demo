@@ -258,84 +258,101 @@ buttons.
             id="orderCarousel"
             visible="{device>/system/phone}"
         >
+            <!-- Loading Indicator - Centered on screen -->
+            <VBox
+                visible="{= ${view>/isLoading}}"
+                height="60vh"
+                width="100%"
+                alignItems="Center"
+                justifyContent="Center"
+                class=""
+            >
+                <BusyIndicator />
+            </VBox>
+
             <!-- Content Area - Single item only -->
             <VBox
                 class="sapUiSmallMargin"
                 visible="{= !${view>/isLoading}}"
             >
-                <!-- Line No -->
-                <VBox class="sapUiTinyMargin">
-                    <Label text="Line No:" />
-                    <Input
-                        value="{view>/POItem/PurchaseOrderItemNo}"
-                        editable="false"
-                    />
-                </VBox>
+                <!-- Line No and Material -->
+                <HBox>
+                    <!-- Line No -->
+                    <VBox class="sapUiTinyMargin" width="2.5rem">
+                        <Label text="No:" />
+                        <Input
+                            value="{view>/POItem/PurchaseOrderItemNo}"
+                            editable="false"
+                        />
+                    </VBox>
+                    <!-- Material  -->
+                    <VBox class="sapUiTinyMargin" width="100%">
+                        <Label text="Material" />
+                        <Input
+                            value="{parts: ['view>/POItem/Material', 'view>/POItem/MaterialDescription']}"
+                            editable="false"
+                            width="100%"
+                        />
+                    </VBox>
+                </HBox>
 
-                <!-- Material - Combined for mobile optimization -->
-                <VBox class="sapUiTinyMargin">
-                    <Label text="Material" />
-                    <Input
-                        value="{parts: ['view>/POItem/Material', 'view>/POItem/MaterialDescription']}"
-                        editable="false"
-                    />
-                </VBox>
-
-                <!-- Quantity Fields - Critical for focus handling -->
-                <HBox class="sapUiTinyMargin">
-                    <VBox class="sapUiTinyMarginEnd">
+                <!-- Quantities Fields -->
+                <HBox>
+                    <!-- Quantity Suggest -->
+                    <VBox class="sapUiTinyMargin">
                         <Label text="Qty Suggest:" />
                         <Input
                             value="{view>/POItem/QuantitySuggest}"
                             editable="false"
-                            width="7rem"
                         />
                     </VBox>
-                    <VBox>
+                    <!-- Quantity Receive -->
+                    <VBox class="sapUiTinyMargin">
                         <Label text="Qty Receive:" />
                         <Input
                             id="quantityReceiveInput"
                             value="{view>/POItem/QuantityReceive}"
                             liveChange=".onQuantityReceiveChange"
-                            width="7rem"
                             type="Number"
+                        />
+                    </VBox>
+                    <!-- Unit -->
+                    <VBox class="sapUiTinyMargin" width="4rem">
+                        <Label text="Unit:" />
+                        <Input
+                            value="{view>/POItem/PurchaseOrderQuantityUnit}"
+                            editable="false"
                         />
                     </VBox>
                 </HBox>
 
-                <!-- Unit -->
-                <VBox class="sapUiTinyMargin">
-                    <Label text="Unit:" />
-                    <Input
-                        value="{view>/POItem/PurchaseOrderQuantityUnit}"
-                        editable="false"
-                        width="7rem"
-                    />
-                </VBox>
+                <HBox>
+                    <!-- Plant -->
+                    <VBox class="sapUiTinyMargin">
+                        <Label text="Plant:" />
+                        <Input
+                            value="{view>/POItem/Plant}"
+                            showValueHelp="true"
+                            valueHelpRequest="onPlantVHRequest"
+                        />
+                    </VBox>
+                    <!-- Storage Location -->
+                    <VBox
+                        class="sapUiTinyMargin">
+                        <Label text="Storage Location:" />
+                        <Input
+                            value="{view>/POItem/StorageLocation}"
+                            width="100%"
+                            showValueHelp="true"
+                            valueHelpRequest="onStrLocVHRequest"
+                        />
+                    </VBox>
+                </HBox>
 
-                <!-- Plant -->
-                <VBox class="sapUiTinyMargin">
-                    <Label text="Plant:" />
-                    <Input
-                        value="{view>/POItem/Plant}"
-                        showValueHelp="true"
-                        valueHelpRequest="onPlantVHRequest"
-                    />
-                </VBox>
-
-                <!-- Storage Location -->
-                <VBox class="sapUiTinyMargin">
-                    <Label text="Storage Location:" />
-                    <Input
-                        value="{view>/POItem/StorageLocation}"
-                        width="100%"
-                        showValueHelp="true"
-                        valueHelpRequest="onStrLocVHRequest"
-                    />
-                </VBox>
 
                 <!-- Attachment Buttons - Smaller for mobile -->
-                <HBox class="sapUiTinyMargin">
+                <HBox
+                    class="sapUiTinyMargin">
                     <Button
                         icon="sap-icon://upload"
                         class="sapUiTinyMarginEnd"
@@ -358,7 +375,8 @@ buttons.
                 </VBox>
 
                 <!-- Action Buttons -->
-                <HBox class="sapUiTinyMargin">
+                <HBox
+                    class="sapUiTinyMargin">
                     <ToggleButton
                         text="Confirm"
                         press=".onOkButtonPress"
@@ -367,47 +385,15 @@ buttons.
                     />
                 </HBox>
             </VBox>
-            <!-- Navigation Header - Compact for mobile -->
-            <HBox
-                class="sapUiTinyMargin"
-                justifyContent="SpaceBetween"
-                alignItems="Center"
-            >
-                <!-- Previous Button -->
-                <Button
-                    icon="sap-icon://navigation-left-arrow"
-                    tooltip="Previous Item"
-                    press=".onPreviousItem"
-                    enabled="{view>/canGoPrevious}"
-                    type="Default"
-                    width="3rem"
-                />
 
-                <!-- Status Text -->
-                <VBox alignItems="Center">
-                    <Text
-                        text="Item {view>/currentIndex} of {view>/totalItems}"
-                        class="sapUiTinyText"
-                    />
-                </VBox>
-
-                <!-- Next Button -->
-                <Button
-                    icon="sap-icon://navigation-right-arrow"
-                    tooltip="Next Item"
-                    press=".onNextItem"
-                    enabled="{view>/canGoNext}"
-                    type="Default"
-                    width="3rem"
-                />
-            </HBox>
         </VBox>
 
         <!--
             Footer bar with keyboard shortcut hints for phone users.
         -->
         <footer>
-            <OverflowToolbar>
+            <OverflowToolbar height="{= ${device>/system/phone} ? '6rem' : '' }">
+                <!-- Desktop message button -->
                 <HBox
                     visible="{= !${device>/system/phone} }"
                     class="sapUiContentPadding"
@@ -431,40 +417,72 @@ buttons.
                         ariaHasPopup="Dialog"
                     />
                 </HBox>
-                <!-- Phone keyboard shortcuts - only visible on phone devices -->
-                <HBox
+
+                <!-- Phone navigation and shortcuts -->
+                <VBox
                     visible="{device>/system/phone}"
-                    class="sapUiContentPadding"
                     width="100%"
-                    justifyContent="Center"
                 >
-                    <Text
-                        text="Back (F3)"
-                        class="sapUiSmallMargin"
-                        textAlign="Center"
-                    />
-                    <Text
-                        text="Next (F5)"
-                        class="sapUiSmallMargin"
-                        textAlign="Center"
-                    />
-                    <Text
-                        text="Previous (F6)"
-                        class="sapUiSmallMargin"
-                        textAlign="Center"
-                    />
-                    <Text
-                        text="(un)Confirm (F7)"
-                        class="sapUiSmallMargin"
-                        textAlign="Center"
-                    />
-                    <Text
-                        text="Save (F8)"
-                        class="sapUiSmallMargin"
-                        textAlign="Center"
-                    />
-                </HBox>
-                <ToolbarSpacer />
+                    <!-- Navigation Header - Compact for mobile -->
+                    <HBox
+                        width="100%"
+                        class="sapUiSmallMarginBottom"
+                        justifyContent="SpaceAround"
+                        alignItems="Center"
+                    >
+                        <!-- Previous Button -->
+                        <Button
+                            icon="sap-icon://navigation-left-arrow"
+                            tooltip="Previous Item"
+                            press=".onPreviousItem"
+                            enabled="{view>/canGoPrevious}"
+                            type="Ghost"
+                        />
+                        <!-- Status Text -->
+                        <VBox alignItems="Center">
+                            <Text
+                                text="Item {view>/currentIndex} of {view>/totalItems}"
+                                class="sapUiTinyText"
+                            />
+                        </VBox>
+                        <!-- Next Button -->
+                        <Button
+                            icon="sap-icon://navigation-right-arrow"
+                            tooltip="Next Item"
+                            press=".onNextItem"
+                            enabled="{view>/canGoNext}"
+                            type="Ghost"
+                        />
+                    </HBox>
+
+                    <!-- Keyboard shortcuts -->
+                    <HBox
+                        width="100%"
+                        justifyContent="SpaceAround"
+                        class=""
+                    >
+                        <Text
+                            text="Back&#10;(F3)"
+                            textAlign="Center"
+                        />
+                        <Text
+                            text="Next&#10;(F5)"
+                            textAlign="Center"
+                        />
+                        <Text
+                            text="Previous&#10;(F6)"
+                            textAlign="Center"
+                        />
+                        <Text
+                            text="Confirm&#10;(F7)"
+                            textAlign="Center"
+                        />
+                        <Text
+                            text="Save&#10;(F8)"
+                            textAlign="Center"
+                        />
+                    </HBox>
+                </VBox>
             </OverflowToolbar>
         </footer>
     </Page>
