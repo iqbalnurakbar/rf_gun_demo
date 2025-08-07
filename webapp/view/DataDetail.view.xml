@@ -1,10 +1,7 @@
 <!--
     Data Detail View
     Purpose: Displays detailed line item data for a selected Purchase Order.
-    Includes table layout for desktop and carousel layout for phones, plus a toolbar with action
-buttons.
-    Includes table layout for desktop and carousel layout for phones, plus a toolbar with action
-buttons.
+    Includes table layout for desktop and carousel layout for phones, plus a toolbar with action buttons.
 -->
 <mvc:View
     xmlns:f="sap.f"
@@ -14,11 +11,8 @@ buttons.
     xmlns="sap.m"
     xmlns:l="sap.ui.layout"
     displayBlock="true"
+    xmlns:u="sap.ui.unified"
 >
-    <!--
-        Main page container with title and navigation button.
-        Provides padding and responsive behavior.
-    -->
     <Page
         id="dataDetailPage"
         title="SMR Demo Apps"
@@ -26,9 +20,6 @@ buttons.
         navButtonPress=".onNavBack"
         class="sapUiResponsiveContentPadding"
     >
-        <!--
-            Subheader toolbar with page title and "Save and Post" action button.
-        -->
         <subHeader>
             <Toolbar>
                 <Title
@@ -47,10 +38,6 @@ buttons.
             </Toolbar>
         </subHeader>
 
-        <!--
-            Table to display Purchase Order line items for desktop/tablet users.
-            Uses multi-selection and OData list binding.
-        -->
         <Table
             id="orderTable"
             mode="MultiSelect"
@@ -67,111 +54,46 @@ buttons.
                     />
                 </Toolbar>
             </headerToolbar>
-            <!--
-                Table Columns (Desktop/Tablet view).
-                Each column displays a specific field from the PO line item.
-            -->
+            
             <columns>
-                <Column
-                    demandPopin="true"
-                    minScreenWidth="Tablet"
-                    width="3.5rem"
-                    hAlign="Center"
-                >
+                <Column demandPopin="true" minScreenWidth="Tablet" width="3.5rem" hAlign="Center">
                     <Text text="No" />
                 </Column>
-                <Column
-                    demandPopin="true"
-                    minScreenWidth="Tablet"
-                    visible="false"
-                    hAlign="Center"
-                >
+                <Column demandPopin="true" minScreenWidth="Tablet" visible="false" hAlign="Center">
                     <Text text="Material" />
                 </Column>
-                <Column
-                    demandPopin="true"
-                    minScreenWidth="Tablet"
-                    visible="false"
-                    hAlign="Center"
-                >
+                <Column demandPopin="true" minScreenWidth="Tablet" visible="false" hAlign="Center">
                     <Text text="Material Desc" />
                 </Column>
-                <Column
-                    demandPopin="true"
-                    minScreenWidth="Tablet"
-                    width="17rem"
-                    hAlign="Center"
-                >
+                <Column demandPopin="true" minScreenWidth="Tablet" width="17rem" hAlign="Center">
                     <Text text="Material" />
                 </Column>
-                <Column
-                    demandPopin="true"
-                    minScreenWidth="Tablet"
-                    width="7rem"
-                    hAlign="Center"
-                >
+                <Column demandPopin="true" minScreenWidth="Tablet" width="7rem" hAlign="Center">
                     <Text text="Quantity Suggest" />
                 </Column>
-                <Column
-                    demandPopin="true"
-                    minScreenWidth="Tablet"
-                    width="7rem"
-                    hAlign="Center"
-                >
+                <Column demandPopin="true" minScreenWidth="Tablet" width="7rem" hAlign="Center">
                     <Text text="Quantity Receive" />
                 </Column>
-                <Column
-                    demandPopin="true"
-                    minScreenWidth="Tablet"
-                    width="3.5rem"
-                    hAlign="Center"
-                >
+                <Column demandPopin="true" minScreenWidth="Tablet" width="3.5rem" hAlign="Center">
                     <Text text="Unit" />
                 </Column>
-                <Column
-                    demandPopin="true"
-                    minScreenWidth="Tablet"
-                    width="7rem"
-                    hAlign="Center"
-                >
+                <Column demandPopin="true" minScreenWidth="Tablet" width="7rem" hAlign="Center">
                     <Text text="Plant" />
                 </Column>
-                <Column
-                    demandPopin="true"
-                    minScreenWidth="Tablet"
-                    width="7rem"
-                    hAlign="Center"
-                >
+                <Column demandPopin="true" minScreenWidth="Tablet" width="7rem" hAlign="Center">
                     <Text text="Storage Location" />
                 </Column>
-                <Column
-                    demandPopin="true"
-                    minScreenWidth="Tablet"
-                    hAlign="Center"
-                >
+                <Column demandPopin="true" minScreenWidth="Tablet" hAlign="Center">
                     <Text text="Attachment" />
                 </Column>
-                <Column
-                    demandPopin="true"
-                    minScreenWidth="Tablet"
-                    hAlign="Center"
-                >
+                <Column demandPopin="true" minScreenWidth="Tablet" hAlign="Center">
                     <Text text="Upload/Download" />
                 </Column>
-                <Column
-                    demandPopin="true"
-                    minScreenWidth="Tablet"
-                    width="5rem"
-                    hAlign="Center"
-                >
+                <Column demandPopin="true" minScreenWidth="Tablet" width="5rem" hAlign="Center">
                     <Text text="Confirm" />
                 </Column>
             </columns>
 
-            <!--
-                Table Row Items
-                Each row corresponds to one Purchase Order item.
-            -->
             <items>
                 <ColumnListItem>
                     <cells>
@@ -227,22 +149,76 @@ buttons.
                             text="{POModel>filename}"
                             emphasized="true"
                         />
+                        
+                        <!-- DESKTOP VERSION - Upload/Download without FileUploader -->
                         <HBox
                             width="100%"
                             justifyContent="Center"
                             wrap="Wrap"
+                            
                         >
+                            <HBox visible="{= !${device>/system/phone} }">
+                                <Button 
+                                    icon="sap-icon://upload"
+                                    class="sapUiTinyMarginEnd"
+                                    press="onUpload"
+                                />
+                                <Button
+                                    icon="sap-icon://download"
+                                    class="sapUiTinyMarginEnd"
+                                    press="onDownload"
+                                />                        
+                            </HBox>
+                            <HBox visible="{device>/system/phone}">
+                                <u:FileUploader 
+                                    id="idFileUpload1" 
+                                    name="internalFileUpload"
+                                    change="onFileChange" 
+                                    width="100%" 
+                                    style="Emphasized"
+                                    placeholder="Upload your file" 
+                                    sendXHR="false" 
+                                />
+                                <Button
+                                    icon="sap-icon://upload"
+                                    class="sapUiTinyMarginEnd"
+                                    press="onUploadPress"
+                                />
+                                <Button
+                                    icon="sap-icon://download"
+                                    class="sapUiTinyMarginEnd"
+                                    press="onDownload"
+                                />                       
+                            </HBox>
+                        </HBox>
+
+                        <!-- MOBILE VERSION - Upload/Download with FileUploader -->
+                        <!-- <HBox
+                            width="100%"
+                            justifyContent="Center"
+                            wrap="Wrap"
+                            visible="{device>/system/phone}"
+                        >
+                            <u:FileUploader 
+                                id="idFileUpload1" 
+                                name="internalFileUpload"
+                                change="onFileChange" 
+                                width="100%" 
+                                style="Emphasized"
+                                placeholder="Upload your file" 
+                                sendXHR="false" 
+                            />
                             <Button
                                 icon="sap-icon://upload"
                                 class="sapUiTinyMarginEnd"
-                                press="onUpload"
+                                press="onUploadPress"
                             />
                             <Button
                                 icon="sap-icon://download"
                                 class="sapUiTinyMarginEnd"
                                 press="onDownload"
                             />
-                        </HBox>
+                        </HBox> -->
 
                         <ToggleButton
                             text="OK"
@@ -292,9 +268,6 @@ buttons.
             />
         </OverflowToolbar>
 
-        <!--
-            Footer bar with keyboard shortcut hints for phone users.
-        -->
         <footer>
             <OverflowToolbar>
                 <VBox />

@@ -342,83 +342,308 @@ sap.ui.define(
         }
       },
 
+      //       onUploadDesktop: function (oEvent) {
+      //   // Get row information
+      //   var oButton = oEvent.getSource();
+      //   var oBindingContext = oButton.getBindingContext();
+      //   var oRowData = oBindingContext.getObject();
+      //   // Create unique ID based on item
+      //   var sUniqueId = 'uploadDialog_' + oRowData.PurchaseOrderItemNo;
+      //   // Store current context for this specific dialog
+
+      //   this['_uploadContext_' + oRowData.PurchaseOrderItemNo] =
+
+      //     oBindingContext;
+      //   // Check if this specific dialog exists
+      //   if (!this['_uploadDialog_' + oRowData.PurchaseOrderItemNo]) {
+      //     // Create new dialog for this specific item
+      //     this.loadFragment({
+      //       id: sUniqueId, // Unique ID for each dialog
+      //       name: 'rfgundemo.view.fragments.UploadFileDialog',
+      //       controller: this,
+      //     }).then(fragment => {
+      //       // Store dialog with unique property name
+      //       this['_uploadDialog_' + oRowData.PurchaseOrderItemNo] = fragment;
+      //       this.getView().addDependent(fragment);
+      //       fragment.open();
+      //     });
+      //   } else {
+      //     // Open existing dialog for this item
+      //     this['_uploadDialog_' + oRowData.PurchaseOrderItemNo].open();
+      //   }
+      // },
+
       onCancelPress: function (oEvent) {
         // Get the dialog that triggered the event
         var oDialog = oEvent.getSource().getParent().getParent();
         oDialog.close();
       },
 
-      onUploadPress: function (oEvent) {
-        // Get the dialog that triggered the event
-        var oDialog = oEvent.getSource().getParent().getParent();
-        var sDialogId = oDialog.getId();
+onUploadPress: function (oEvent) {
+  var bIsMobile = sap.ui.Device.system.phone;
+  
+  if (bIsMobile) {
+    this._handleMobileUpload(oEvent);
+  } else {
+    this._handleDesktopUpload(oEvent);
+  }
+},
 
-        // Extract item number from dialog ID
-        var sItemNo = sDialogId.split("uploadDialog_")[1].split("--")[0];
+onUpload: function (oEvent) {
+  // This method is for opening upload dialog (used by desktop version)
+  var bIsMobile = sap.ui.Device.system.phone;
+  
+  if (bIsMobile) {
+    // Mobile doesn't use dialog - direct upload
+    this._handleMobileUpload(oEvent);
+  } else {
+    // Desktop uses dialog
+    this._openUploadDialog(oEvent);
+  }
+},
 
-        // Get the stored context for this specific item
-        var oUploadContext = this["_uploadContext_" + sItemNo];
+// Private method for mobile upload (direct upload without dialog)
+_handleMobileUpload: function (oEvent) {
+  try {
+    // Get row information
+    var oButton = oEvent.getSource();
+    var oBindingContext = oButton.getBindingContext("POModel");
+    
+    if (!oBindingContext) {
+      MessageToast.show('No row context available');
+      return;
+    }
+    
+    var oRowData = oBindingContext.getObject();
+    
+    if (!this.fileContent || !this.fileName) {
+      MessageToast.show('Please select a file to upload.');
+      return;
+    }
+    
+    var oItemData = {
+      MaterialDocument: "",
+      PurchaseOrder: this.sPurchaseOrderNumber,
+      PurchaseOrderItem: oRowData.PurchaseOrderItemNo,
+      filename: this.fileName,
+      filecontent: this.fileContent,
+      mimetype: this.mimeType,
+      fileextension: this.fileExtension,
+    };
+    
+    console.log("Mobile Upload - Item Data:", oItemData);
+    this._executeUpload(oItemData);
+    
+  } catch (error) {
+    console.error("Mobile upload failed:", error);
+    MessageToast.show("Upload Failed");
+  }
+},
 
-        if (!oUploadContext) {
-          MessageToast.show("No row context available");
-          return;
-        }
 
-        if (!this.fileContent || !this.fileName) {
-          MessageToast.show("Please select a file to upload.");
-          return;
-        }
+_handleDesktopUpload: function (oEvent) {
+  try {
+    // Get the dialog that triggered the event
+    var oDialog = oEvent.getSource().getParent().getParent();
+    var sDialogId = oDialog.getId();
 
-        try {
-          // Use the stored context data
-          var oRowData = oUploadContext.getObject();
-          var oItemData = {
-            MaterialDocument: "",
-            PurchaseOrder: this.sPurchaseOrderNumber,
-            PurchaseOrderItem: oRowData.PurchaseOrderItemNo,
-            filename: this.fileName,
-            filecontent: this.fileContent,
-            mimetype: this.mimeType,
-            fileextension: this.fileExtension,
-          };
+    // Extract item number from dialog ID
+    var sItemNo = sDialogId.split('uploadDialog_')[1].split('--')[0];
 
-          // Upload logic
-          const oModel = this.getView().getModel();
-          const oAction = oModel.bindContext(
-            "/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.uploadFile(...)"
+    // Get the stored context for this specific item
+    var oUploadContext = this['_uploadContext_' + sItemNo];
+
+    if (!oUploadContext) {
+      MessageToast.show('No row context available');
+      return;
+    }
+
+    if (!this.fileContent || !this.fileName) {
+      MessageToast.show('Please select a file to upload.');
+      return;
+    }
+
+    // Use the stored context data
+    var oRowData = oUploadContext.getObject();
+    var oItemData = {
+      MaterialDocument: '',
+      PurchaseOrder: this.sPurchaseOrderNumber,
+      PurchaseOrderItem: oRowData.PurchaseOrderItemNo,
+      filename: this.fileName,
+      filecontent: this.fileContent,
+      mimetype: this.mimeType,
+      fileextension: this.fileExtension,
+    };
+
+    console.log("Desktop Upload - Item Data:", oItemData);
+    
+    // Execute upload and close dialog on success
+    this._executeUpload(oItemData).then(() => {
+      oDialog.close();
+      // Refresh table
+      this.byId('orderTable').getBinding('items').refresh();
+    });
+    
+  } catch (error) {
+    console.error("Desktop upload failed:", error);
+    MessageToast.show("Upload Failed");
+  }
+},
+
+// Private method to open upload dialog (desktop only)
+_openUploadDialog: function (oEvent) {
+  // Get row information
+  var oButton = oEvent.getSource();
+  var oBindingContext = oButton.getBindingContext("POModel");
+  
+  if (!oBindingContext) {
+    MessageToast.show('No row context available');
+    return;
+  }
+  
+  var oRowData = oBindingContext.getObject();
+  // Create unique ID based on item
+  var sUniqueId = "uploadDialog_" + oRowData.PurchaseOrderItemNo;
+  // Store current context for this specific dialog
+  this["_uploadContext_" + oRowData.PurchaseOrderItemNo] = oBindingContext;
+  
+  // Check if this specific dialog exists
+  if (!this["_uploadDialog_" + oRowData.PurchaseOrderItemNo]) {
+    // Create new dialog for this specific item
+    this.loadFragment({
+      id: sUniqueId, // Unique ID for each dialog
+      name: "rfgundemo.view.fragments.UploadFileDialog",
+      controller: this,
+    }).then((fragment) => {
+      // Store dialog with unique property name
+      this["_uploadDialog_" + oRowData.PurchaseOrderItemNo] = fragment;
+      this.getView().addDependent(fragment);
+      fragment.open();
+    });
+  } else {
+    // Open existing dialog for this item
+    this["_uploadDialog_" + oRowData.PurchaseOrderItemNo].open();
+  }
+},
+
+// Consolidated upload execution method
+_executeUpload: function (oItemData) {
+  return new Promise((resolve, reject) => {
+    try {
+      // Upload logic
+      const oModel = this.getView().getModel();
+      const oAction = oModel.bindContext(
+        "/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.uploadFile(...)"
+      );
+      
+      // Set parameters
+      oAction.setParameter("material_document", oItemData.MaterialDocument);
+      oAction.setParameter("purchase_order", oItemData.PurchaseOrder);
+      oAction.setParameter("purchase_order_item", oItemData.PurchaseOrderItem);
+      oAction.setParameter("fileName", oItemData.filename);
+      oAction.setParameter("fileContent", oItemData.filecontent);
+      oAction.setParameter("mimeType", oItemData.mimetype);
+      oAction.setParameter("fileExtension", oItemData.fileextension);
+      
+      // Execute upload
+      oAction
+        .execute()
+        .then(() => {
+          MessageToast.show(
+            "File uploaded successfully: " + oItemData.filename
           );
-
-          // Set parameters
-          oAction.setParameter("material_document", oItemData.MaterialDocument);
-          oAction.setParameter("purchase_order", oItemData.PurchaseOrder);
-          oAction.setParameter(
-            "purchase_order_item",
-            oItemData.PurchaseOrderItem
-          );
-          oAction.setParameter("fileName", oItemData.filename);
-          oAction.setParameter("fileContent", oItemData.filecontent);
-          oAction.setParameter("mimeType", oItemData.mimetype);
-          oAction.setParameter("fileExtension", oItemData.fileextension);
-
-          // Execute upload
-          oAction
-            .execute()
-            .then(() => {
-              MessageToast.show(
-                "File uploaded successfully for item " + sItemNo
-              );
-              oDialog.close();
-              this.byId("orderTable").getBinding("items").refresh();
-            })
-            .catch((error) => {
-              console.error("Upload failed:", error);
-              MessageToast.show("Upload Failed");
-            });
-        } catch (error) {
+          resolve();
+        })
+        .catch((error) => {
           console.error("Upload failed:", error);
           MessageToast.show("Upload Failed");
-        }
-      },
+          reject(error);
+        });
+    } catch (error) {
+      console.error("Upload failed:", error);
+      MessageToast.show("Upload Failed");
+      reject(error);
+    }
+  });
+},
+
+      // onUploadPressDesktop: function (oEvent) {
+      //   const bIsPhone = Utility.isPhoneDevice(this.getView());
+      //   // Get the dialog that triggered the event
+      //   var oDialog = oEvent.getSource().getParent().getParent();
+      //   var sDialogId = oDialog.getId();
+
+      //   // Extract item number from dialog ID
+      //   var sItemNo = sDialogId.split('uploadDialog_')[1].split('--')[0];
+
+      //   // Get the stored context for this specific item
+      //   var oUploadContext = this['_uploadContext_' + sItemNo];
+
+      //   if (!oUploadContext) {
+      //     MessageToast.show('No row context available');
+      //     return;
+      //   }
+
+      //   if (!this.fileContent || !this.fileName) {
+      //     MessageToast.show('Please select a file to upload.');
+      //     return;
+      //   }
+
+      //   try {
+      //     // Use the stored context data
+      //     var oRowData = oUploadContext.getObject();
+      //     var oItemData = {
+      //       MaterialDocument: '',
+      //       PurchaseOrder: this.sPurchaseOrderNumber,
+      //       PurchaseOrderItem: oRowData.PurchaseOrderItemNo,
+      //       filename: this.fileName,
+      //       filecontent: this.fileContent,
+      //       mimetype: this.mimeType,
+      //       fileextension: this.fileExtension,
+      //     };
+
+      //     // Upload logic
+      //     const oModel = this.getView().getModel();
+      //     const oAction = oModel.bindContext(
+      //       '/ZR_RFH_MIGO_DEMO/com.sap.gateway.srvd_a2x.zui_rf_po_item.v0001.uploadFile(...)'
+      //     );
+
+      //     // Set parameters
+      //     oAction.setParameter('material_document', oItemData.MaterialDocument);
+      //     oAction.setParameter('purchase_order', oItemData.PurchaseOrder);
+      //     oAction.setParameter(
+      //       'purchase_order_item',
+      //       oItemData.PurchaseOrderItem
+      //     );
+      //     oAction.setParameter('fileName', oItemData.filename);
+      //     oAction.setParameter('fileContent', oItemData.filecontent);
+      //     oAction.setParameter('mimeType', oItemData.mimetype);
+      //     oAction.setParameter('fileExtension', oItemData.fileextension);
+
+      //     // Execute upload
+      //     oAction
+      //       .execute()
+      //       .then(() => {
+      //         MessageToast.show(
+      //           'File uploaded successfully for item ' + sItemNo
+      //         );
+      //         oDialog.close();
+      //         if (bIsPhone) {
+      //           this.byId('orderCarousel').getBinding('pages').refresh();
+      //         } else {
+      //           this.byId('orderTable').getBinding('items').refresh();
+      //         }
+      //       })
+      //       .catch(error => {
+      //         console.error('Upload failed:', error);
+      //         MessageToast.show('Upload Failed');
+      //       });
+      //   } catch (error) {
+      //     console.error('Upload failed:', error);
+      //     MessageToast.show('Upload Failed');
+      //   }
+      // },
+
 
       onFileChange: function (oEvent) {
         // ? Retrieve selected File objects
@@ -428,16 +653,13 @@ sap.ui.define(
           this.resetFileData();
           return;
         }
-
         const oFile = aFiles[0];
         this.fileName = oFile.name;
         this.mimeType = oFile.type;
-
         // * Derive extension from file name
         const aNameParts = oFile.name.split(".");
         this.fileExtension =
           aNameParts.length > 1 ? aNameParts.pop().toLowerCase() : "";
-
         // * Use FileReader to load as DataURL (base64)
         const oReader = new FileReader();
         oReader.onload = function (e) {
@@ -445,14 +667,12 @@ sap.ui.define(
           this.fileContent = sDataUrl.split(",")[1];
           MessageToast.show("File loaded successfully: " + oFile.name);
         }.bind(this);
-
         oReader.onerror = function (error) {
           // ! File read error: log & reset data
           console.error("File read error:", error);
           MessageToast.show("Error reading file: " + oFile.name);
           this.resetFileData();
         }.bind(this);
-
         oReader.readAsDataURL(oFile);
       },
 
