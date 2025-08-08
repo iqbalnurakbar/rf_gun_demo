@@ -11,9 +11,8 @@ sap.ui.define([], function () {
       };
     },
 
-    isPhoneDevice: function (oView) {
-      const oDeviceModel = oView.getModel('device');
-      return oDeviceModel.getProperty('/system/phone');
+    isPhoneDevice: function () {
+      return sap.ui.Device.system.phone;
     }
   };
 });

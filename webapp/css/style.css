@@ -13,3 +13,7 @@
 	content: "\A";
 	white-space: pre;
 }
+
+.sapMText.boldText {
+	font-weight: bold;
+}

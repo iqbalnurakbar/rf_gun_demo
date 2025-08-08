@@ -13,6 +13,7 @@ buttons.
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:l="sap.ui.layout"
+    xmlns:u="sap.ui.unified"
     displayBlock="true"
 >
     <!--
@@ -228,16 +229,17 @@ buttons.
                             <Button
                                 icon="sap-icon://upload"
                                 class="sapUiTinyMarginEnd"
-                                press="onUpload"
+                                press="onButtonUploadPress"
                             />
                             <Button
                                 icon="sap-icon://download"
                                 class="sapUiTinyMarginEnd"
-                                press="onDownload"
+                                press="onButtonDownloadPress"
                             />
                         </HBox>
 
                         <ToggleButton
+                            id="idOKToggleButton"
                             text="OK"
                             press=".onOkButtonPress"
                             width="100%"
@@ -254,12 +256,12 @@ buttons.
         -->
         <!-- Replace the entire Carousel with this optimized VBox -->
         <VBox
-            class="sapUiTinyMargin"
+            class="sapUiTinyMargin sapUiLargeMarginBottom"
             id="orderCarousel"
             visible="{device>/system/phone}"
         >
             <!-- Loading Indicator - Centered on screen -->
-            <VBox
+            <!-- <VBox
                 visible="{= ${view>/isLoading}}"
                 height="60vh"
                 width="100%"
@@ -268,12 +270,13 @@ buttons.
                 class=""
             >
                 <BusyIndicator />
-            </VBox>
+            </VBox> -->
 
             <!-- Content Area - Single item only -->
             <VBox
                 class="sapUiSmallMargin"
-                visible="{= !${view>/isLoading}}"
+                visible="true"
+                busy="{view>/isLoading}"
             >
                 <!-- Line No and Material -->
                 <HBox>
@@ -281,7 +284,8 @@ buttons.
                     <VBox class="sapUiTinyMargin" width="2.5rem">
                         <Label text="No:" />
                         <Input
-                            value="{view>/POItem/PurchaseOrderItemNo}"
+                            id="idPurchaseOrderItemNoInput"
+                            value="{view>/POItemCurrent/PurchaseOrderItemNo}"
                             editable="false"
                         />
                     </VBox>
@@ -289,7 +293,7 @@ buttons.
                     <VBox class="sapUiTinyMargin" width="100%">
                         <Label text="Material" />
                         <Input
-                            value="{parts: ['view>/POItem/Material', 'view>/POItem/MaterialDescription']}"
+                            value="{parts: ['view>/POItemCurrent/Material', 'view>/POItemCurrent/MaterialDescription']}"
                             editable="false"
                             width="100%"
                         />
@@ -302,90 +306,99 @@ buttons.
                     <VBox class="sapUiTinyMargin">
                         <Label text="Qty Suggest:" />
                         <Input
-                            value="{view>/POItem/QuantitySuggest}"
+                            value="{view>/POItemCurrent/QuantitySuggest}"
                             editable="false"
-                        />
-                    </VBox>
-                    <!-- Quantity Receive -->
-                    <VBox class="sapUiTinyMargin">
-                        <Label text="Qty Receive:" />
-                        <Input
-                            id="quantityReceiveInput"
-                            value="{view>/POItem/QuantityReceive}"
-                            liveChange=".onQuantityReceiveChange"
-                            type="Number"
                         />
                     </VBox>
                     <!-- Unit -->
                     <VBox class="sapUiTinyMargin" width="4rem">
                         <Label text="Unit:" />
                         <Input
-                            value="{view>/POItem/PurchaseOrderQuantityUnit}"
+                            value="{view>/POItemCurrent/PurchaseOrderQuantityUnit}"
                             editable="false"
                         />
                     </VBox>
                 </HBox>
 
                 <HBox>
+                    <!-- Quantity Receive -->
+                    <VBox class="sapUiTinyMargin" width="100%">
+                        <Label text="Qty Receive:" />
+                        <Input
+                            id="idQuantityReceiveInput"
+                            value="{path: 'view>/POItemCurrent/QuantityReceive'}"
+                            type="Number"
+                            valueState="{view>/POItemCurrent/QuantityReceiveValidation}"
+                            valueStateText="Quantity Receive is required"
+                        />
+                    </VBox>
+                </HBox>
+                <HBox>
                     <!-- Plant -->
-                    <VBox class="sapUiTinyMargin">
+                    <VBox class="sapUiTinyMargin" width="100%">
                         <Label text="Plant:" />
                         <Input
-                            value="{view>/POItem/Plant}"
+                            id="idPlantInput"
+                            value="{view>/POItemCurrent/Plant}"
                             showValueHelp="true"
                             valueHelpRequest="onPlantVHRequest"
                         />
                     </VBox>
+                </HBox>
+                <HBox>
                     <!-- Storage Location -->
                     <VBox
-                        class="sapUiTinyMargin">
+                        class="sapUiTinyMargin" width="100%">
                         <Label text="Storage Location:" />
                         <Input
-                            value="{view>/POItem/StorageLocation}"
+                            id="idStorageLocationInput"
+                            value="{view>/POItemCurrent/StorageLocation}"
                             width="100%"
                             showValueHelp="true"
                             valueHelpRequest="onStrLocVHRequest"
+                            valueState="{view>/POItemCurrent/StorageLocationValidation}"
+                            valueStateText="Storage Location is required"
                         />
                     </VBox>
                 </HBox>
 
-
-                <!-- Attachment Buttons - Smaller for mobile -->
-                <HBox
-                    class="sapUiTinyMargin">
-                    <Button
-                        icon="sap-icon://upload"
-                        class="sapUiTinyMarginEnd"
-                        press="onUpload"
-                        width="3rem"
-                    />
-                    <Button
-                        icon="sap-icon://download"
-                        class="sapUiTinyMarginEnd"
-                        press="onDownload"
-                        width="3rem"
-                    />
+                <!-- Attachment Buttons -->
+                <HBox>
+                    <VBox class="sapUiTinyMargin" width="100%">
+                        <Label text="Attachment:" />
+                        <HBox justifyContent="SpaceBetween">
+                            <u:FileUploader
+                                id="idFileUpload1"
+                                name="internalFileUpload"
+                                change="onFileChange"
+                                style="Emphasized"
+                                placeholder="No file chosen"
+                                value="{view>/POItemCurrent/filename}"
+                                buttonText="Choose File"
+                            />
+                            <Button
+                                icon="sap-icon://download"
+                                press="onButtonDownloadPress"
+                            />
+                        </HBox>
+                    </VBox>
                 </HBox>
-                <VBox class="sapUiTinyMargin">
-                    <Button
-                        text="{view>/POItem/filename}"
-                        type="Transparent"
-                        visible="{= !!${view>/POItem/filename}}"
-                    />
-                </VBox>
 
-                <!-- Action Buttons -->
-                <HBox
-                    class="sapUiTinyMargin">
-                    <ToggleButton
-                        text="Confirm"
-                        press=".onOkButtonPress"
-                        width="100%"
-                        type="Emphasized"
-                    />
+                <!-- Confirm Buttons -->
+                <HBox>
+                    <VBox class=" sapUiTinyMargin">
+                        <Label text=" Confirm Status:" />
+                        <ToggleButton
+                            id="idConfirmMobileToggleButton"
+                            text="Confirm"
+                            press=".onOkButtonPress"
+                            width="100%"
+                            type="Emphasized"
+                            pressed="{view>/POItemCurrent/ConfirmStatus}"
+                        />
+                    </VBox>
                 </HBox>
             </VBox>
-
         </VBox>
 
         <!--
@@ -437,11 +450,12 @@ buttons.
                             press=".onPreviousItem"
                             enabled="{view>/canGoPrevious}"
                             type="Ghost"
+                            width="3rem"
                         />
                         <!-- Status Text -->
                         <VBox alignItems="Center">
                             <Text
-                                text="Item {view>/currentIndex} of {view>/totalItems}"
+                                text="{= 'Item ' + (${view>/currentIndex} + 1) + ' of ' + ${view>/totalItems}}"
                                 class="sapUiTinyText"
                             />
                         </VBox>
@@ -452,6 +466,7 @@ buttons.
                             press=".onNextItem"
                             enabled="{view>/canGoNext}"
                             type="Ghost"
+                            width="3rem"
                         />
                     </HBox>
 

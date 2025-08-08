@@ -20,7 +20,7 @@
             <Toolbar id="idToolbar">
                 <content>
                     <Button id="idUploadButton" text="Upload" type="Emphasized"
-                        press="onUploadPress" icon="sap-icon://upload-to-cloud" />
+                        press="onUploadButtonPress" icon="sap-icon://upload-to-cloud" />
                     <Button id="idCancelButton" text="Cancel" press="onCancelPress"
                         icon="sap-icon://cancel" />
                 </content>

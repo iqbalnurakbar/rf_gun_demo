@@ -1,0 +1,53 @@
+<!-- fragments/ConfirmationDialog.fragment.xml -->
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <Dialog
+        id="confirmationDialog"
+        title="Confirm Goods Movement"
+        stretch="true">
+
+        <content>
+            <VBox class="sapUiMediumMargin">
+                <!-- Summary Header -->
+                <MessageStrip
+                    text="{= 'You are about to post ' + ${view>/POItemConfirmation}.length + ' items to goods movement. Please review and confirm.'}"
+                    type="Warning"
+                    class="sapUiMediumMarginBottom" />
+
+                <!-- Items List -->
+                <List
+                    id="confirmationList"
+                    items="{view>/POItemConfirmation}"
+                    mode="None"
+                    headerText="Items to be Posted"
+                    class="sapUiResponsiveMargin">
+
+                    <items>
+                        <StandardListItem
+                            title="Item {view>PurchaseOrderItemNo} - {view>Material} {view>MaterialDescription}"
+                            description="{= 'Plant: ' + ${view>Plant} + '&#10;Storage: ' + ${view>StorageLocation} + '&#10;Quantity: ' + ${view>QuantitySuggest}}"
+                            info="{view>QuantityReceive} {view>PurchaseOrderQuantityUnit}"
+                            infoState="Information" />
+                    </items>
+                </List>
+            </VBox>
+        </content>
+
+        <beginButton>
+            <Button
+                text="Proceed"
+                type="Emphasized"
+                icon="sap-icon://save"
+                press="onButtonConfirmationProceedPress" />
+        </beginButton>
+
+        <endButton>
+            <Button
+                text="Cancel"
+                press="onButtonConfirmationCancelPress" />
+        </endButton>
+    </Dialog>
+
+</core:FragmentDefinition>
